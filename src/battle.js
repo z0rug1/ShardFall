@@ -55,7 +55,7 @@ function battleTick(){const B=BT;if(!B)return;const a=B.anim;
   if(a.hitE>0)a.hitE--;if(a.hitP>0)a.hitP--;if(B.flash>0)B.flash--;if(B.odFx>0)B.odFx--;
   if(a.lungeE>0)a.lungeE=Math.max(0,a.lungeE-0.1);if(a.lungeP>0)a.lungeP=Math.max(0,a.lungeP-0.1);}
 
-async function runBattle(o){try{return await runBattleInner(o);}catch(e){recoverFromError(e,'battle');return 'run';}}
+async function runBattle(o){if(BT)return 'run';try{return await runBattleInner(o);}catch(e){recoverFromError(e,'battle');return 'run';}}
 async function runBattleInner(o){
   const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
     part:new Set(),anim:{},runs:0,bg:curMap().theme,eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,odFx:0,trainerShow:!!o.trainer,hideInfo:true};

@@ -50,7 +50,8 @@ function updateMovers(){const spd=held.b&&!G.busy?1/8:1/16;
 function markExplored(){const m=curMap();const e=exploredArr(G.map);const w=m.grid[0].length,h=m.grid.length;const r=m.world?5:20;
   for(let y=G.py-r;y<=G.py+r;y++)for(let x=G.px-r-1;x<=G.px+r+1;x++)if(x>=0&&y>=0&&x<w&&y<h)e[y*w+x]=1;}
 
-async function onStep(){markExplored();const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
+async function onStep(){G.stepLock=true;try{await onStepInner();}finally{G.stepLock=false;}}
+async function onStepInner(){markExplored();const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
   const w=warpAt(G.px,G.py);if(w){await doWarp(w);return;}
   const tr=(m.triggers||[]).find(t=>t.x===G.px&&t.y===G.py);if(tr){await tr.run();if(G.busy)return;}
   if(T(G.px,G.py)==='S'){G.sw^=1;Snd.sfx('switch');}
@@ -176,8 +177,8 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
   if(BT)battleTick();
   if(G.banner>0)G.banner--;if(G.fade>0&&!G.inWarp)G.fade=Math.max(0,G.fade-0.05);if(G.flashOW>0)G.flashOW--;
   if(UI.length){UI[UI.length-1].update();}
-  else if(G.started){updateMovers();
-    if(!G.busy&&!G.mv){if(press('start')){Snd.sfx('ok');startMenu();}
+  else if(G.started&&!BT){updateMovers();
+    if(!G.busy&&!G.mv&&!G.stepLock){if(press('start')){Snd.sfx('ok');startMenu();}
       else if(press('map')){G.busy=true;openWorldMap().then(t=>{if(t)warpTown(t);else G.busy=false;});}
       else if(press('a'))interact();
       else{for(const d of ['up','down','left','right'])if(held[d]||pressed[d]){if(G.pdir!==d&&!G.turnT){G.pdir=d;G.turnT=5;break;}if(G.turnT>0)break;tryMove(d);break;}}}
