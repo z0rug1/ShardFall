@@ -7,7 +7,7 @@ function botRow(b,x,y,w,sel,dim){panel(x,y,w,48,sel?'#fff4c8':dim?'#d8d8d8':'#f8
   const d=BOTS[b.id],s=stats(b);txt(d.name,x+54,y+22,'#303840',20);txt('Lv'+b.lv,x+w-12,y+22,'#606870',18,'right');
   hpBar(x+54,y+30,w-130,b.hp,s.hp);txt(b.hp+'/'+s.hp,x+w-12,y+40,'#303840',18,'right');if(b.st)statusTag(b.st.k,x+w-100,y+8);if(b.hp<=0)txt('DOWN',x+w-70,y+22,'#e04040',18,'right');}
 
-function openParty(o={}){return pushUI({i:0,o,update(){const n=G.party.length;if(rep('up')){this.i=(this.i+n-1)%n;Snd.sfx('blip');}if(rep('down')){this.i=(this.i+1)%n;Snd.sfx('blip');}
+function openParty(o={}){let i0=0;if(o.mode==='switch'){const k=G.party.findIndex((b,i)=>b.hp>0&&!(BT&&i===BT.pi));if(k>=0)i0=k;}return pushUI({i:i0,o,update(){const n=G.party.length;if(rep('up')){this.i=(this.i+n-1)%n;Snd.sfx('blip');}if(rep('down')){this.i=(this.i+1)%n;Snd.sfx('blip');}
   if(press('b')&&!o.forced){popUI(this,-1);return;}
   if(press('a')){Snd.sfx('ok');const b=G.party[this.i];
     if(o.mode==='switch'){if(b.hp<=0){bsayQ('That bot is down!');return;}if(BT&&this.i===BT.pi){bsayQ('It\'s already out there!');return;}popUI(this,this.i);return;}

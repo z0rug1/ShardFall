@@ -160,6 +160,17 @@ function drawMinimap(){const m=curMap();const e=exploredArr(G.map);const w=m.gri
   if(TICK%30<22){ctx.fillStyle='#fff';ctx.fillRect(bx+(G.px-x0)*ps-1,by+(G.py-y0)*ps-1,ps+2,ps+2);}
   txt(m.name,bx,by+vh*ps+12,'#c0d0f0',14,'left',null);}
 
+// ---------- crash recovery ----------
+let lastRecover=0;
+function recoverFromError(e,where){console.error('Shardfall recovered from',where,e);const msg=String(e&&e.message||e).slice(0,60);
+  if(TICK-lastRecover<5)return;lastRecover=TICK;
+  BT=null;UI.length=0;timers.length=0;G.busy=false;G.mv=null;G.fade=0;G.inWarp=false;for(const n of G.npcs){if(n.mv){n.x=n.mv.tx;n.y=n.mv.ty;n.mv=null;}}
+  for(const b of G.party)if(b.hp<0)b.hp=0;
+  if(G.started&&!G.party.some(b=>b.hp>0))healAll();
+  try{Snd.music(curMap().music,true);}catch(_){}
+  G.errToast={t:420,msg:'Glitch recovered ['+where+']: '+msg};}
+addEventListener('unhandledrejection',ev=>{ev.preventDefault&&ev.preventDefault();recoverFromError(ev.reason,'script');});
+addEventListener('error',ev=>{if(G.started)recoverFromError(ev.error||ev.message,'loop');});
 // ---------- main loop ----------
 function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();tickTimers();if(G.started&&!UI.some(u=>u.isTitle))G.time++;
   if(BT)battleTick();
@@ -176,9 +187,10 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
 function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
   for(const u of UI)u.draw();
   if(G.fade>0){ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}
-  if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}}
+  if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}
+  if(G.errToast&&G.errToast.t>0){G.errToast.t--;darkPanel(8,H-40,W-16,32);wtxt(G.errToast.msg,16,H-18,'#ffb0a0',16);}}
 let last=performance.now(),acc=0;
-function loopFrame(now){acc+=Math.min(100,now-last);last=now;while(acc>=1000/60){update();acc-=1000/60;}draw();requestAnimationFrame(loopFrame);}
+function loopFrame(now){requestAnimationFrame(loopFrame);acc+=Math.min(100,now-last);last=now;try{while(acc>=1000/60){update();acc-=1000/60;}draw();}catch(e){acc=0;recoverFromError(e,'loop');}}
 
 // ---------- fullscreen gate (phones, top-level page only) ----------
 const FS={need:false,ok:true};

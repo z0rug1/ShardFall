@@ -999,7 +999,8 @@ function battleTick(){const B=BT;if(!B)return;const a=B.anim;
   if(a.hitE>0)a.hitE--;if(a.hitP>0)a.hitP--;if(B.flash>0)B.flash--;if(B.odFx>0)B.odFx--;
   if(a.lungeE>0)a.lungeE=Math.max(0,a.lungeE-0.1);if(a.lungeP>0)a.lungeP=Math.max(0,a.lungeP-0.1);}
 
-async function runBattle(o){
+async function runBattle(o){try{return await runBattleInner(o);}catch(e){recoverFromError(e,'battle');return 'run';}}
+async function runBattleInner(o){
   const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
     part:new Set(),anim:{},runs:0,bg:curMap().theme,eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,odFx:0,trainerShow:!!o.trainer,hideInfo:true};
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
@@ -1180,11 +1181,11 @@ async function socketMenu(b,fromLevel){const d=BOTS[b.id];
   if(d.legend){await say('This bot\'s sockets are sealed.');return;}
   if(d.stage===0&&b.lv<16){const br=branchList(b);await say('Socket 2 opens at Lv 16. Compatible shards: '+br.map(([s])=>s).join(', ')+'.');return;}
   if(d.stage===0){const br=branchList(b);
-    const opts=br.map(([s,f])=>s+' Shard ('+(G.bag['shard_'+s]||0)+')  → '+(G.seen[f]?BOTS[f].name:'???'));opts.push('Not now');
     const have=br.filter(([s])=>G.bag['shard_'+s]>0);
     if(!have.length){await say('No compatible shard in your bag. '+d.name+' accepts: '+br.map(([s])=>s).join(', ')+'. Fit one later from the BOTS menu.');return;}
-    const i=await ask('Fit which shard into '+d.name+'\'s Socket 2?',opts,{cancel:true});if(i<0||i>=br.length)return;
-    const [s,f]=br[i];if(!G.bag['shard_'+s]){await say('You don\'t have a '+s+' Shard.');return;}
+    const opts=have.map(([s,f])=>s+' Shard (x'+G.bag['shard_'+s]+') → '+(G.seen[f]?BOTS[f].name:'???'));opts.push('Not now');
+    const i=await ask('Fit which shard into '+d.name+'\'s Socket 2?',opts,{cancel:true});if(i<0||i>=have.length)return;
+    const [s,f]=have[i];if(!G.bag['shard_'+s]){await say('You don\'t have a '+s+' Shard.');return;}
     const c=await ask('Fit the '+s+' Shard? '+d.name+' will evolve. (You can swap it once later.)');if(c!==0)return;
     G.bag['shard_'+s]--;if(!G.bag['shard_'+s])delete G.bag['shard_'+s];await evolve(b,f,s);return;}
   if(d.stage===1){const others=branchList(b).filter(([s])=>s!==d.shard);
@@ -1217,7 +1218,7 @@ function botRow(b,x,y,w,sel,dim){panel(x,y,w,48,sel?'#fff4c8':dim?'#d8d8d8':'#f8
   const d=BOTS[b.id],s=stats(b);txt(d.name,x+54,y+22,'#303840',20);txt('Lv'+b.lv,x+w-12,y+22,'#606870',18,'right');
   hpBar(x+54,y+30,w-130,b.hp,s.hp);txt(b.hp+'/'+s.hp,x+w-12,y+40,'#303840',18,'right');if(b.st)statusTag(b.st.k,x+w-100,y+8);if(b.hp<=0)txt('DOWN',x+w-70,y+22,'#e04040',18,'right');}
 
-function openParty(o={}){return pushUI({i:0,o,update(){const n=G.party.length;if(rep('up')){this.i=(this.i+n-1)%n;Snd.sfx('blip');}if(rep('down')){this.i=(this.i+1)%n;Snd.sfx('blip');}
+function openParty(o={}){let i0=0;if(o.mode==='switch'){const k=G.party.findIndex((b,i)=>b.hp>0&&!(BT&&i===BT.pi));if(k>=0)i0=k;}return pushUI({i:i0,o,update(){const n=G.party.length;if(rep('up')){this.i=(this.i+n-1)%n;Snd.sfx('blip');}if(rep('down')){this.i=(this.i+1)%n;Snd.sfx('blip');}
   if(press('b')&&!o.forced){popUI(this,-1);return;}
   if(press('a')){Snd.sfx('ok');const b=G.party[this.i];
     if(o.mode==='switch'){if(b.hp<=0){bsayQ('That bot is down!');return;}if(BT&&this.i===BT.pi){bsayQ('It\'s already out there!');return;}popUI(this,this.i);return;}
@@ -1580,6 +1581,17 @@ function drawMinimap(){const m=curMap();const e=exploredArr(G.map);const w=m.gri
   if(TICK%30<22){ctx.fillStyle='#fff';ctx.fillRect(bx+(G.px-x0)*ps-1,by+(G.py-y0)*ps-1,ps+2,ps+2);}
   txt(m.name,bx,by+vh*ps+12,'#c0d0f0',14,'left',null);}
 
+// ---------- crash recovery ----------
+let lastRecover=0;
+function recoverFromError(e,where){console.error('Shardfall recovered from',where,e);const msg=String(e&&e.message||e).slice(0,60);
+  if(TICK-lastRecover<5)return;lastRecover=TICK;
+  BT=null;UI.length=0;timers.length=0;G.busy=false;G.mv=null;G.fade=0;G.inWarp=false;for(const n of G.npcs){if(n.mv){n.x=n.mv.tx;n.y=n.mv.ty;n.mv=null;}}
+  for(const b of G.party)if(b.hp<0)b.hp=0;
+  if(G.started&&!G.party.some(b=>b.hp>0))healAll();
+  try{Snd.music(curMap().music,true);}catch(_){}
+  G.errToast={t:420,msg:'Glitch recovered ['+where+']: '+msg};}
+addEventListener('unhandledrejection',ev=>{ev.preventDefault&&ev.preventDefault();recoverFromError(ev.reason,'script');});
+addEventListener('error',ev=>{if(G.started)recoverFromError(ev.error||ev.message,'loop');});
 // ---------- main loop ----------
 function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();tickTimers();if(G.started&&!UI.some(u=>u.isTitle))G.time++;
   if(BT)battleTick();
@@ -1596,9 +1608,10 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
 function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
   for(const u of UI)u.draw();
   if(G.fade>0){ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}
-  if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}}
+  if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}
+  if(G.errToast&&G.errToast.t>0){G.errToast.t--;darkPanel(8,H-40,W-16,32);wtxt(G.errToast.msg,16,H-18,'#ffb0a0',16);}}
 let last=performance.now(),acc=0;
-function loopFrame(now){acc+=Math.min(100,now-last);last=now;while(acc>=1000/60){update();acc-=1000/60;}draw();requestAnimationFrame(loopFrame);}
+function loopFrame(now){requestAnimationFrame(loopFrame);acc+=Math.min(100,now-last);last=now;try{while(acc>=1000/60){update();acc-=1000/60;}draw();}catch(e){acc=0;recoverFromError(e,'loop');}}
 
 // ---------- fullscreen gate (phones, top-level page only) ----------
 const FS={need:false,ok:true};

@@ -55,7 +55,8 @@ function battleTick(){const B=BT;if(!B)return;const a=B.anim;
   if(a.hitE>0)a.hitE--;if(a.hitP>0)a.hitP--;if(B.flash>0)B.flash--;if(B.odFx>0)B.odFx--;
   if(a.lungeE>0)a.lungeE=Math.max(0,a.lungeE-0.1);if(a.lungeP>0)a.lungeP=Math.max(0,a.lungeP-0.1);}
 
-async function runBattle(o){
+async function runBattle(o){try{return await runBattleInner(o);}catch(e){recoverFromError(e,'battle');return 'run';}}
+async function runBattleInner(o){
   const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
     part:new Set(),anim:{},runs:0,bg:curMap().theme,eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,odFx:0,trainerShow:!!o.trainer,hideInfo:true};
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
@@ -236,11 +237,11 @@ async function socketMenu(b,fromLevel){const d=BOTS[b.id];
   if(d.legend){await say('This bot\'s sockets are sealed.');return;}
   if(d.stage===0&&b.lv<16){const br=branchList(b);await say('Socket 2 opens at Lv 16. Compatible shards: '+br.map(([s])=>s).join(', ')+'.');return;}
   if(d.stage===0){const br=branchList(b);
-    const opts=br.map(([s,f])=>s+' Shard ('+(G.bag['shard_'+s]||0)+')  → '+(G.seen[f]?BOTS[f].name:'???'));opts.push('Not now');
     const have=br.filter(([s])=>G.bag['shard_'+s]>0);
     if(!have.length){await say('No compatible shard in your bag. '+d.name+' accepts: '+br.map(([s])=>s).join(', ')+'. Fit one later from the BOTS menu.');return;}
-    const i=await ask('Fit which shard into '+d.name+'\'s Socket 2?',opts,{cancel:true});if(i<0||i>=br.length)return;
-    const [s,f]=br[i];if(!G.bag['shard_'+s]){await say('You don\'t have a '+s+' Shard.');return;}
+    const opts=have.map(([s,f])=>s+' Shard (x'+G.bag['shard_'+s]+') → '+(G.seen[f]?BOTS[f].name:'???'));opts.push('Not now');
+    const i=await ask('Fit which shard into '+d.name+'\'s Socket 2?',opts,{cancel:true});if(i<0||i>=have.length)return;
+    const [s,f]=have[i];if(!G.bag['shard_'+s]){await say('You don\'t have a '+s+' Shard.');return;}
     const c=await ask('Fit the '+s+' Shard? '+d.name+' will evolve. (You can swap it once later.)');if(c!==0)return;
     G.bag['shard_'+s]--;if(!G.bag['shard_'+s])delete G.bag['shard_'+s];await evolve(b,f,s);return;}
   if(d.stage===1){const others=branchList(b).filter(([s])=>s!==d.shard);
