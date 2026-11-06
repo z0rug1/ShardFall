@@ -1,6 +1,6 @@
 // ===================== ENGINE =====================
 const W=480,H=320,TS=32;
-const cv=document.getElementById('game');const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+const cv=document.getElementById('game');const ctx=cv.getContext('2d');const RS=Math.min(3,Math.max(2,Math.round(window.devicePixelRatio||1)));cv.width=480*RS;cv.height=320*RS;ctx.imageSmoothingEnabled=false;
 const FONT='VT323, monospace';
 let TICK=0;
 function txt(s,x,y,col='#303840',size=22,align='left',shadow='rgba(0,0,0,.15)'){ctx.font=size+'px '+FONT;ctx.textAlign=align;ctx.textBaseline='alphabetic';if(shadow){ctx.fillStyle=shadow;ctx.fillText(s,x+1,y+1);}ctx.fillStyle=col;ctx.fillText(s,x,y);}
@@ -100,9 +100,9 @@ function pell(g,cx,cy,rx,ry,c){g.fillStyle=c;for(let y=Math.ceil(cy-ry);y<=Math.
 function ptri(g,pts,c){g.fillStyle=c;g.beginPath();g.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)g.lineTo(pts[i],pts[i+1]);g.closePath();g.fill();}
 function shade(hex,amt){let n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;const f=amt<0?0:255;const p=Math.abs(amt);r=Math.round(r+(f-r)*p);g=Math.round(g+(f-g)*p);b=Math.round(b+(f-b)*p);return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);}
 function mix(a,b,t){const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);const c=[16,8,0].map(s=>Math.round(((A>>s)&255)*(1-t)+((B>>s)&255)*t));return '#'+((1<<24)+(c[0]<<16)+(c[1]<<8)+c[2]).toString(16).slice(1);}
-function crisp(c,outlineCol){const g=c.getContext('2d');const d=g.getImageData(0,0,c.width,c.height);const a=d.data,w=c.width,h=c.height;
+function crisp(c,outlineCol,passes=1){const g=c.getContext('2d');const d=g.getImageData(0,0,c.width,c.height);const a=d.data,w=c.width,h=c.height;
   for(let i=3;i<a.length;i+=4)a[i]=a[i]>110?255:0;
-  if(outlineCol){const oc=parseInt(outlineCol.slice(1),16);const mark=[];
+  if(outlineCol)for(let pass=0;pass<passes;pass++){const oc=parseInt(outlineCol.slice(1),16);const mark=[];
     for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;if(a[i+3])continue;
       if((x>0&&a[i-1])||(x<w-1&&a[i+7])||(y>0&&a[i-w*4+3])||(y<h-1&&a[i+w*4+3]))mark.push(i);}
     for(const i of mark){a[i]=oc>>16;a[i+1]=(oc>>8)&255;a[i+2]=oc&255;a[i+3]=255;}}

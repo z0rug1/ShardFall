@@ -173,7 +173,7 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
     if(G.turnT>0&&!['up','down','left','right'].some(d=>held[d]))G.turnT=0;if(G.turnT>0)G.turnT--;}
   if(UI.length&&G.started&&!BT)updateMovers();
   clearPressed();}
-function draw(){if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
+function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
   for(const u of UI)u.draw();
   if(G.fade>0){ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}
   if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}}
