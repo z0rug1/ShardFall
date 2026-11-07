@@ -175,8 +175,10 @@ function say(text,opt={}){const pages=[];const lines=wrap(text,436);for(let i=0;
 function choose(opts,o={}){const w={opts,i:o.def||0,x:o.x,y:o.y,cancel:o.cancel!==false,
    update(){if(rep('up')){this.i=(this.i+this.opts.length-1)%this.opts.length;Snd.sfx('blip');}if(rep('down')){this.i=(this.i+1)%this.opts.length;Snd.sfx('blip');}
      if(press('a')){Snd.sfx('ok');popUI(this,this.i);}else if(press('b')&&this.cancel){popUI(this,-1);}},
-   draw(){const wd=Math.max(...this.opts.map(s=>measure(s)))+50;const h=this.opts.length*26+18;const x=this.x!=null?this.x:476-wd,y=this.y!=null?this.y:228-h;
-     panel(x,y,wd,h);this.opts.forEach((s,i)=>{txt(s,x+30,y+30+i*26);if(i===this.i)ptri(ctx,[x+14,y+18+i*26,x+22,y+24+i*26,x+14,y+30+i*26],'#303840');});}};
+   draw(){const n=this.opts.length;const rows=Math.min(n,Math.floor((H-26)/26));this.top=this.top||0;if(this.i<this.top)this.top=this.i;if(this.i>=this.top+rows)this.top=this.i-rows+1;
+     const wd=Math.max(...this.opts.map(s=>measure(s)))+50;const h=rows*26+18;let x=this.x!=null?this.x:476-wd,y=this.y!=null?this.y:228-h;x=Math.max(4,Math.min(x,W-4-wd));y=Math.max(4,Math.min(y,H-4-h));
+     panel(x,y,wd,h);for(let r=0;r<rows;r++){const i=this.top+r;txt(this.opts[i],x+30,y+30+r*26);if(i===this.i)ptri(ctx,[x+14,y+18+r*26,x+22,y+24+r*26,x+14,y+30+r*26],'#303840');}
+     if(this.top>0)ptri(ctx,[x+wd-22,y+16,x+wd-14,y+16,x+wd-18,y+10],'#606870');if(this.top+rows<n)ptri(ctx,[x+wd-22,y+h-16,x+wd-14,y+h-16,x+wd-18,y+h-10],'#606870');}};
   return pushUI(w);}
 async function ask(text,opts=['Yes','No'],o={}){const w={pages:[wrap(text,436).slice(0,2)],update(){},draw(){panel(4,232,472,84);this.pages[0].forEach((l,i)=>txt(l,22,264+i*28));}};
   UI.push(w);const r=await choose(opts,o);const i=UI.indexOf(w);if(i>=0)UI.splice(i,1);return r;}

@@ -136,7 +136,7 @@ function openWorldMap(){const towns=Object.keys(MAPS).filter(k=>MAPS[k].town&&G.
 
 // ---------- start menu ----------
 async function startMenu(){G.busy=true;
-  while(true){const opts=['BOTS','BAG','PATCH ALL','BESTIARY','QUESTS','MAP','TYPES','CARD','SAVE','OPTIONS','CLOSE'];
+  while(true){const opts=['BOTS','BAG','PATCH ALL','BESTIARY','QUESTS','MAP','TYPES','CARD','SAVE','LOAD','OPTIONS','CLOSE'];
     const i=await choose(opts,{x:356,y:4});const k=opts[i];
     if(k==='BOTS'){if(!G.party.length){await say('You don\'t have any bots yet.');continue;}await openParty({});}
     else if(k==='BAG')await openBag(false);
@@ -147,6 +147,7 @@ async function startMenu(){G.busy=true;
     else if(k==='TYPES')await openTypeChart();
     else if(k==='CARD')await pushUI(cardW());
     else if(k==='SAVE'){await saveMenu();}
+    else if(k==='LOAD'){if(await loadMenu())break;}
     else if(k==='OPTIONS'){const r=await optionsMenu();if(r==='loaded')break;}
     else break;}
   G.busy=false;}
@@ -177,6 +178,12 @@ function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return f
 function serialize(){const ex={};for(const k in G.explored)ex[k]=Array.from(G.explored[k]).join('');
   return JSON.stringify({v:1,layout:2,name:G.name,map:G.map,px:G.px,py:G.py,pdir:G.pdir,party:G.party,storage:G.storage,bag:G.bag,money:G.money,flags:G.flags,seen:G.seen,caught:G.caught,explored:ex,time:G.time,lastHeal:G.lastHeal,visited:G.visited,starter:G.starter,rival:G.rival,minimap:G.minimap,ts:TEXTSPEED,lastOut:G.lastOut,quests:G.quests||{},skins:G.skins||{classic:1},glitchCaught:G.glitchCaught||0,thaw:G.thaw||{},rep:G.rep,kael:G.kael||0,scan:G.scan||{},ws:G.ws,display:G.display,vault:G.vault,vaultRuns:G.vaultRuns||[],vaultBest:G.vaultBest||0,rigNext:G.rigNext||0});}
 function slotInfo(i){const s=lsGet('shardfall_slot'+i)||lsGet('wildbound_slot'+i);if(!s)return null;try{return JSON.parse(s);}catch(e){return null;}}
+async function loadMenu(){let auto=null;try{auto=JSON.parse(lsGet('shardfall_auto')||'null');}catch(e){}
+  const slots=[];if(auto)slots.push(['Autosave: '+auto.name+' · '+(MAPS[auto.map]?MAPS[auto.map].name:'?')+' · '+fmtTime(auto.time),auto]);
+  [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'?')+' · '+fmtTime(s.time):'— empty —'),s]);});
+  const i=await choose(slots.map(x=>x[0]).concat(['Cancel']),{x:30,y:40});const d=i>=0&&i<slots.length?slots[i][1]:null;if(!d){if(i>=0&&i<slots.length)await say('That slot is empty.');return false;}
+  if((await ask('Load this save? Progress since your last save will be lost.',['Load','Cancel']))!==0)return false;
+  G.fade=1;loadSave(d);Snd.sfx('ok');await say('Save loaded!');return true;}
 async function saveMenu(){const opts=[0,1,2].map(i=>{const s=slotInfo(i);return 'Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'')+' · '+fmtTime(s.time):'— empty —');});opts.push('Cancel');
   const i=await choose(opts,{x:40,y:40});if(i<0||i>2)return;if(slotInfo(i)){const c=await ask('Overwrite slot '+(i+1)+'?');if(c!==0)return;}
   if(lsSet('shardfall_slot'+i,serialize())){Snd.sfx('item');await say('Game saved to slot '+(i+1)+'!');}else await say('Saving isn\'t available in this browser.');}
