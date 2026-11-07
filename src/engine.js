@@ -1,6 +1,6 @@
 // ===================== ENGINE =====================
 const W=480,H=320,TS=32;
-const cv=document.getElementById('game');const ctx=cv.getContext('2d');const RS=Math.min(3,Math.max(2,Math.round(window.devicePixelRatio||1)));cv.width=480*RS;cv.height=320*RS;ctx.imageSmoothingEnabled=false;
+const cv=document.getElementById('game');const ctx=cv.getContext('2d');let RS=(matchMedia('(pointer:coarse)').matches?2:Math.min(3,Math.max(2,Math.round(window.devicePixelRatio||1))));cv.width=480*RS;cv.height=320*RS;function setRS(n){RS=n;cv.width=480*RS;cv.height=320*RS;ctx.imageSmoothingEnabled=false;}ctx.imageSmoothingEnabled=false;
 const FONT='VT323, monospace';
 let TICK=0;
 function txt(s,x,y,col='#303840',size=22,align='left',shadow='rgba(0,0,0,.15)'){ctx.font=size+'px '+FONT;ctx.textAlign=align;ctx.textBaseline='alphabetic';if(shadow){ctx.fillStyle=shadow;ctx.fillText(s,x+1,y+1);}ctx.fillStyle=col;ctx.fillText(s,x,y);}

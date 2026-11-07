@@ -20,7 +20,7 @@ function drawBotIdle(b,x,y,sz,flip,alpha,phase){const blink=(TICK+phase)%210<7;c
   if(BT&&sz>=70&&alpha>0.3){botGround(b,x,y,sz,flip);if(BT.reflect)botReflect(sp,x,y+bob,sz,flip,alpha);}
   ctx.save();ctx.globalAlpha=alpha;if(flip){ctx.translate(x+sz,y+bob);ctx.scale(-1,1);ctx.drawImage(sp,0,0,sz,sz);}else ctx.drawImage(sp,x,y+bob,sz,sz);ctx.restore();
   const base=bspr(b);if(base.core&&alpha>0.5){const cx=flip?x+sz-base.core[0]*sz:x+base.core[0]*sz,cy=y+bob+base.core[1]*sz;const pulse=0.35+0.3*Math.sin((TICK+phase)/12);const col=TCOL[BOTS[b.id].types[0]];
-    ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(cx,cy,0,cx,cy,sz*0.16);g.addColorStop(0,col+Math.floor(pulse*255).toString(16).padStart(2,'0'));g.addColorStop(1,col+'00');ctx.fillStyle=g;ctx.fillRect(cx-sz*0.2,cy-sz*0.2,sz*0.4,sz*0.4);ctx.restore();}
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=pulse;const rr_=sz*0.16;ctx.drawImage(glowSpr(col),cx-rr_,cy-rr_,rr_*2,rr_*2);ctx.restore();}
   if(alpha>0.5)drawParts(b,x,y+bob,sz,flip);
   if(b.alpha&&alpha>0.5){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='rgba(255,70,50,'+(0.4+0.3*Math.sin(TICK/6))+')';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x+sz/2,y+sz*0.9,sz*0.45,sz*0.12,0,0,7);ctx.stroke();ctx.restore();}}
 function drawBattle(){const B=BT;const th=B.bg;const wx=B.wx;

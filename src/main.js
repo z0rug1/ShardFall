@@ -199,7 +199,10 @@ function drawSpecial(k,sx,sy){const s=TS;
 function drawMinimap(){const m=curMap();const e=exploredArr(G.map);const w=m.grid[0].length,h=m.grid.length;const ps=3;const bz=weatherKey()==='blizzard';
   const vw=Math.min(w,bz?14:40),vh=Math.min(h,bz?10:26);const x0=clamp(G.px-Math.floor(vw/2),0,w-vw),y0=clamp(G.py-Math.floor(vh/2),0,h-vh);
   const bx=W-vw*ps-12,by=8;ctx.fillStyle='rgba(10,14,24,.8)';rr(bx-4,by-4,Math.max(vw*ps,84)+8,vh*ps+20,4);ctx.fill();
-  for(let y=0;y<vh;y++)for(let x=0;x<vw;x++){const gx=x0+x,gy=y0+y;const seen=e[gy*w+gx];ctx.fillStyle=seen?(MMCOL[m.grid[gy][gx]]||'#555'):'#0b0e16';ctx.fillRect(bx+x*ps,by+y*ps,ps,ps);}
+  {const key=G.map+'|'+x0+'|'+y0+'|'+vw+'|'+vh+'|'+G.stepN;const MC=drawMinimap.c||(drawMinimap.c={cv:null,key:''});
+    if(MC.key!==key){MC.key=key;if(!MC.cv||MC.cv.width!==vw||MC.cv.height!==vh){MC.cv=mkCanvas(vw,vh);}const g=MC.cv.getContext('2d');const img=g.createImageData(vw,vh);
+      for(let y=0;y<vh;y++)for(let x=0;x<vw;x++){const gx=x0+x,gy=y0+y;const col=e[gy*w+gx]?(MMCOL[m.grid[gy][gx]]||'#555'):'#0b0e16';const hx=col.length===4?col[1]+col[1]+col[2]+col[2]+col[3]+col[3]:col.slice(1,7);const n=parseInt(hx,16);const i=(y*vw+x)*4;img.data[i]=n>>16&255;img.data[i+1]=n>>8&255;img.data[i+2]=n&255;img.data[i+3]=255;}g.putImageData(img,0,0);}
+    ctx.drawImage(MC.cv,bx,by,vw*ps,vh*ps);}
   for(const wp of m.warps||[]){if(e[wp.y*w+wp.x]&&wp.x>=x0&&wp.x<x0+vw&&wp.y>=y0&&wp.y<y0+vh){ctx.fillStyle='#ffe040';ctx.fillRect(bx+(wp.x-x0)*ps,by+(wp.y-y0)*ps,ps,ps);}}
   for(const f of G.ferals||[]){if(f.x<x0||f.x>=x0+vw||f.y<y0||f.y>=y0+vh)continue;ctx.fillStyle=f.alpha?'#ff2020':'#ffa040';ctx.fillRect(bx+(f.x-x0)*ps,by+(f.y-y0)*ps,ps,ps);}
   for(const n of G.npcs){if(!npcVisible(n)||!e[n.y*w+n.x])continue;if(n.x<x0||n.x>=x0+vw||n.y<y0||n.y>=y0+vh)continue;ctx.fillStyle=n.trainer&&!flag('t_'+n.id)?'#ff4040':'#80c0ff';ctx.fillRect(bx+(n.x-x0)*ps,by+(n.y-y0)*ps,ps,ps);}
@@ -237,7 +240,7 @@ function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;
   if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}
   if(G.errToast&&G.errToast.t>0){G.errToast.t--;darkPanel(8,H-40,W-16,32);wtxt(G.errToast.msg,16,H-18,'#ffb0a0',16);}}
 let last=performance.now(),acc=0;
-function loopFrame(now){requestAnimationFrame(loopFrame);acc+=Math.min(100,now-last);last=now;try{while(acc>=1000/60){update();acc-=1000/60;}draw();}catch(e){acc=0;recoverFromError(e,'loop');}}
+function loopFrame(now){requestAnimationFrame(loopFrame);acc+=Math.min(100,now-last);last=now;try{const t0=performance.now();let n=0;while(acc>=1000/60&&n<3){update();acc-=1000/60;n++;}if(n>=3)acc=0;draw();drawToast();perfSample(performance.now()-t0);}catch(e){acc=0;recoverFromError(e,'loop');}}
 
 // ---------- fullscreen gate (phones, top-level page only) ----------
 const FS={need:false,ok:true};

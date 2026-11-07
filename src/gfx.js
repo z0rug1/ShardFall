@@ -1,7 +1,7 @@
 // ===================== GFX: baked map layers, shadows, water, soft edges, atmosphere =====================
 // Layers are baked once per map state at 16px per tile (the art's native pixel grid) and drawn scaled 2x.
 let MFX={key:'',under:null,edge:null,over:null},FXID=0;
-const hq=()=>G.fxq!==0;
+let hq=()=>G.fxq!==0;
 const CAST_TREE='T',CAST_BLOCK='RYQUWGNJ0#',CAST_SMALL='ZBl';
 const ROOFS='RYQU';
 const FRANK={'=':6,'H':6,'A':6,'d':5,'.':4,'n':4,',':3,'j':3,'q':3,'y':3,'w':3,'-':2,'~':0,'b':1};
@@ -66,7 +66,7 @@ function bakeMapFX(){const m=curMap();const Wt=m.grid[0].length,Ht=m.grid.length
     if(ch==='l'){const src=tileArt('l',th,0,0);o.drawImage(src,0,0,32,10,x*P,y*P-4,16,5);}
     if(ch==='0'&&up!=='0'){o.fillStyle='#2e3644';o.fillRect(x*P+7,y*P-12,2,12);o.fillStyle='#5a6676';o.fillRect(x*P+7,y*P-12,1,12);o.fillStyle='#2e3644';o.fillRect(x*P+4,y*P-6,8,1);}
     if(ch==='B'){o.fillStyle='#d8d0c0';o.fillRect(x*P+3,y*P-4,2,5);o.fillRect(x*P+11,y*P-4,2,5);o.fillStyle='#f2ece2';o.fillRect(x*P+3,y*P-4,1,4);}}
-  MFX.under=U;MFX.edge=E;MFX.over=O;}
+  e.drawImage(U,0,0);MFX.under=null;MFX.edge=E;MFX.over=O;}
 function drawMapLayer(c,cx,cy,smooth,dy){if(!c)return;const prev=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=!!smooth;const oy=-(dy||0);
   let sx=Math.floor(cx/2)-1,sy=Math.floor(cy/2)+oy-1;let sw=Math.ceil(W/2)+3,sh=Math.ceil(H/2)+3;let dx=sx*2-cx,dyy=(sy-oy)*2-cy;
   if(sx<0){dx-=sx*2;sw+=sx;sx=0;}if(sy<0){dyy-=sy*2;sh+=sy;sy=0;}sw=Math.min(sw,c.width-sx);sh=Math.min(sh,c.height-sy);if(sw>0&&sh>0)ctx.drawImage(c,sx,sy,sw,sh,dx,dyy,sw*2,sh*2);ctx.imageSmoothingEnabled=prev;}

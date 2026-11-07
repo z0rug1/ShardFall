@@ -49,7 +49,7 @@ Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.
 - A day and night cycle on outdoor maps (24 minutes of play), with dusk colours, lamps that show up after dark, and lightning in static storms.
 - At night, characters near lamps get a coloured outline, your follower's core lights the way, and ferals' eyes glow. Snow builds up on you in snowfall and shakes off indoors.
 - Battle skies: aurora up north, factory smoke in the Rustworks, an ember sky around Kilnhaven. Every attack lights up the arena, and rain falls in battle too.
-- Options → Visual effects: Low turns the per-frame effects off on slower phones.
+- Options → Visual effects: Auto (default) switches to Low by itself if frames run slow. High and Low can also be set by hand.
 
 ## Controls
 | Keyboard | Phone | Action |
