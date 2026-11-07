@@ -37,6 +37,14 @@ Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.
 - 6 new shardbots (Frostling, Cogwyrm and Kilnfly lines), 3 new traits, collectible Maker Logs, and a Choir signal that sets up Chapter 3
 - Thawed regions now look like early thaw, with muted greens, leftover snow and light flurries, and night towns stay dark
 
+## Visuals
+- Soft cast shadows from trees, buildings, cliffs and wrecks. Shadow under walls and cliffs, and shadows that stretch away from street lamps.
+- Water that gets darker with depth, has foam along the shore, shimmers, and reflects lamps and anyone standing at the edge. Ice that glints, with spray when you stop sliding.
+- Coloured light that spills from lamps, crystals and engines, snow piled on roofs, footprints that fade, drifting fog, static sparks and passing cloud shadows.
+- Soft edges between terrain types, tree tops and lamp heads you can walk behind, and interiors with shaded walls and a warm vignette.
+- Battle arenas that match the terrain (scrap, crystal, static, fog, ice, shore), with bot shadows, ground glow from each bot's core, and reflections on ice.
+- Options → Visual effects: Low turns the per-frame effects off on slower phones.
+
 ## Controls
 | Keyboard | Phone | Action |
 |---|---|---|

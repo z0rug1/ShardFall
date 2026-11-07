@@ -38,7 +38,7 @@ function spawnOne(far){const m=curMap();const T_=encTiles();if(!T_.length)return
 function spawnFerals(){G.ferals=[];const m=curMap();if(!m.enc)return;const n=m.enc.count||6;for(let i=0;i<n;i++)spawnOne(false);
   if(m.alpha&&!flag('alpha_'+G.map)){const T_=encTiles();const [x,y]=m.alpha.at||pick(T_);G.ferals.push({id:m.alpha.id,lv:m.alpha.lv,x,y,dir:'down',beh:'hunt',mv:null,t:60,cool:0,alpha:1});}}
 function feralCanStep(f,x,y){const ch=T(x,y);if(!encHas(curMap(),ch))return false;if(npcAt(x,y)||objAt(x,y)||crateAt(x,y))return false;if((G.ferals||[]).some(o=>o!==f&&((o.x===x&&o.y===y)||(o.mv&&o.mv.tx===x&&o.mv.ty===y))))return false;return true;}
-function updateFerals(){const m=curMap();if(!m.enc||!G.ferals)return;const blocked=G.busy||UI.length||BT;
+function updateFerals(){const m=curMap();if(!m||!m.enc||!G.ferals)return;const blocked=G.busy||UI.length||BT;
   for(const f of G.ferals){if(f.mv){f.mv.p+=f.beh==='hunt'&&f.chasing?1/10:1/16;if(f.mv.p>=1){f.x=f.mv.tx;f.y=f.mv.ty;f.mv=null;if(f.x===G.px&&f.y===G.py&&!blocked&&!G.mv){contactFeral(f,false);return;}}continue;}
     if(blocked)continue;if(f.cool>0){f.cool--;}
     if(--f.t>0)continue;

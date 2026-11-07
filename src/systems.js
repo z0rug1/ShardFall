@@ -101,10 +101,10 @@ const SKINS={classic:['#2a3242','#8aa0c0','#f8f6ec'],frost:['#183048','#78c0e8',
 // ---- autosave / prefs / save codes ----
 let lastAuto=-999;
 function autosave(){if(!G.started||BT||!G.party.length||TICK-lastAuto<120)return;lastAuto=TICK;lsSet('shardfall_auto',serialize());}
-const PREF_KEYS=['ts','music','minimap','bspeed','skipFx','alwaysRun','skin','bigBtn','padOp','lefty','haptic'];
-function savePrefs(){lsSet('shardfall_prefs',JSON.stringify({ts:TEXTSPEED,music:Snd.on,minimap:G.minimap,bspeed:G.bspeed,skipFx:G.skipFx,alwaysRun:G.alwaysRun,skin:G.skin,bigBtn:G.bigBtn,padOp:G.padOp,lefty:G.lefty,haptic:G.haptic}));}
+const PREF_KEYS=['ts','music','minimap','bspeed','skipFx','alwaysRun','skin','bigBtn','padOp','lefty','haptic','fxq'];
+function savePrefs(){lsSet('shardfall_prefs',JSON.stringify({ts:TEXTSPEED,music:Snd.on,minimap:G.minimap,bspeed:G.bspeed,skipFx:G.skipFx,alwaysRun:G.alwaysRun,skin:G.skin,bigBtn:G.bigBtn,padOp:G.padOp,lefty:G.lefty,haptic:G.haptic,fxq:G.fxq}));}
 function loadPrefs(){try{const p=JSON.parse(lsGet('shardfall_prefs')||'{}');if(p.ts)TEXTSPEED=p.ts;if(p.music===false)Snd.on=false;
-  for(const k of ['minimap','bspeed','skipFx','alwaysRun','skin','bigBtn','padOp','lefty','haptic'])if(p[k]!==undefined)G[k]=p[k];}catch(e){}applyPadPrefs();}
+  for(const k of ['minimap','bspeed','skipFx','alwaysRun','skin','bigBtn','padOp','lefty','haptic','fxq'])if(p[k]!==undefined)G[k]=p[k];}catch(e){}applyPadPrefs();}
 function applyPadPrefs(){const b=document.body;if(!b)return;b.classList.toggle('big',!!G.bigBtn);b.classList.toggle('lefty',!!G.lefty);b.style.setProperty('--padop',G.padOp||1);}
 function encodeSave(){return 'SF1.'+btoa(unescape(encodeURIComponent(serialize())));}
 function decodeSave(s){s=(s||'').trim();if(!s.startsWith('SF1.'))throw new Error('Not a Shardfall save code');return JSON.parse(decodeURIComponent(escape(atob(s.slice(4)))));}

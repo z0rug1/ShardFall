@@ -17,6 +17,7 @@ function typeBadges(types,x,y,small){let cx=x;for(const t of types){ctx.font=(sm
 function hpBar(x,y,w,cur_,max){const r=clamp(cur_/max,0,1);R(ctx,x,y,w,8,'#30343c');R(ctx,x+1,y+1,w-2,6,'#585c64');ctx.fillStyle=r>0.5?'#48d058':r>0.2?'#f0c030':'#e84040';ctx.fillRect(x+1,y+1,Math.round((w-2)*r),6);ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(x+1,y+1,Math.round((w-2)*r),2);}
 
 function drawBotIdle(b,x,y,sz,flip,alpha,phase){const blink=(TICK+phase)%210<7;const sp=bspr(b,{blink});const bob=Math.sin((TICK+phase)/18)*3;
+  if(BT&&sz>=70&&alpha>0.3){botGround(b,x,y,sz,flip);if(BT.reflect)botReflect(sp,x,y+bob,sz,flip,alpha);}
   ctx.save();ctx.globalAlpha=alpha;if(flip){ctx.translate(x+sz,y+bob);ctx.scale(-1,1);ctx.drawImage(sp,0,0,sz,sz);}else ctx.drawImage(sp,x,y+bob,sz,sz);ctx.restore();
   const base=bspr(b);if(base.core&&alpha>0.5){const cx=flip?x+sz-base.core[0]*sz:x+base.core[0]*sz,cy=y+bob+base.core[1]*sz;const pulse=0.35+0.3*Math.sin((TICK+phase)/12);const col=TCOL[BOTS[b.id].types[0]];
     ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(cx,cy,0,cx,cy,sz*0.16);g.addColorStop(0,col+Math.floor(pulse*255).toString(16).padStart(2,'0'));g.addColorStop(1,col+'00');ctx.fillStyle=g;ctx.fillRect(cx-sz*0.2,cy-sz*0.2,sz*0.4,sz*0.4);ctx.restore();}
@@ -32,6 +33,7 @@ function drawBattle(){const B=BT;const th=B.bg;const wx=B.wx;
   if(th!=='cave'&&th!=='gym1'&&th!=='gym2'){ctx.fillStyle=wx==='night'?'#2e3a52':wx==='static'?'#3a3a58':'#8a9cb0';ctx.beginPath();ctx.moveTo(0,150);ctx.lineTo(70,110);ctx.lineTo(150,140);ctx.lineTo(240,90);ctx.lineTo(330,135);ctx.lineTo(420,105);ctx.lineTo(480,130);ctx.lineTo(480,232);ctx.lineTo(0,232);ctx.fill();ctx.fillStyle='#e8eef4';ctx.beginPath();ctx.moveTo(225,99);ctx.lineTo(240,90);ctx.lineTo(256,98);ctx.lineTo(246,102);ctx.lineTo(236,97);ctx.fill();ctx.fillStyle=wx==='night'?'#5a6a84':'#b4c4d2';ctx.fillRect(0,180,W,52);}
   ctx.fillStyle=shade(ground,0.15);ctx.beginPath();ctx.ellipse(360,124,100,22,0,0,7);ctx.fill();ctx.fillStyle=shade(ground,-0.1);ctx.beginPath();ctx.ellipse(360,128,90,16,0,0,7);ctx.fill();
   ctx.fillStyle=shade(ground,0.15);ctx.beginPath();ctx.ellipse(130,226,130,28,0,0,7);ctx.fill();ctx.fillStyle=shade(ground,-0.1);ctx.beginPath();ctx.ellipse(130,230,118,20,0,0,7);ctx.fill();
+  drawArena(B);
   if(th==='gym2'||th==='cave'){for(let i=0;i<6;i++){ctx.fillStyle=th==='gym2'?'rgba(255,220,60,.07)':'rgba(255,255,255,.03)';ctx.fillRect(i*90+((TICK/2)%90),0,30,232);}}
   const sl=B.slide;
   const e=cur('e');const a=B.anim;
@@ -85,7 +87,7 @@ async function runBattle(o){if(BT)return 'run';try{return await runBattleInner(o
 function battleSong(tr){if(!tr)return 'battle';if(tr.warden)return tr.title==='Deacon'?'choir':'boss';if(tr.title==='Hollow')return 'choir';return 'trainer';}
 async function runBattleInner(o){
   const wk=weatherKey();
-  const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
+  const B={arena:arenaOf(),wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
     part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
   if(!curMap().outdoor)B.wx='indoor';
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));

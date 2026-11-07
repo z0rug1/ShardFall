@@ -161,13 +161,13 @@ function fmtTime(t){const s=Math.floor(t/60);return Math.floor(s/3600)+':'+Strin
 async function optionsMenu(){let def=0;while(true){const skins=Object.keys(G.skins||{classic:1});
   const opts=['Text speed: '+['','Slow','Normal','Fast'][TEXTSPEED],'Battle speed: '+(G.bspeed||1)+'x','Battle animations: '+(G.skipFx?'Short':'Full'),'Running: '+(G.alwaysRun?'Always (B walks)':'Hold B'),
     'Music & sound: '+(Snd.on?'On':'Off'),'Minimap: '+(G.minimap?'On':'Off'),'Band skin: '+(G.skin||'classic'),'Phone buttons: '+(G.bigBtn?'Big':'Normal'),'Button opacity: '+Math.round((G.padOp||1)*100)+'%',
-    'Button layout: '+(G.lefty?'Left-handed':'Right-handed'),'Vibration: '+(G.haptic?'On':'Off'),'Export save code','Import save code','Back'];
+    'Button layout: '+(G.lefty?'Left-handed':'Right-handed'),'Vibration: '+(G.haptic?'On':'Off'),'Visual effects: '+(G.fxq===0?'Low (faster)':'High'),'Export save code','Import save code','Back'];
   const i=await choose(opts,{x:150,y:2,def});def=Math.max(0,i);
   if(i===0)TEXTSPEED=TEXTSPEED%3+1;else if(i===1)G.bspeed=(G.bspeed||1)===1?2:1;else if(i===2)G.skipFx=!G.skipFx;else if(i===3)G.alwaysRun=!G.alwaysRun;
   else if(i===4)Snd.toggle();else if(i===5)G.minimap=!G.minimap;else if(i===6){const k=skins.indexOf(G.skin||'classic');G.skin=skins[(k+1)%skins.length];if(skins.length<2)await say('More skins unlock as you fill the Bestiary.');}
-  else if(i===7)G.bigBtn=!G.bigBtn;else if(i===8){const v=[1,0.75,0.5,0.3];G.padOp=v[(v.indexOf(G.padOp||1)+1)%v.length];}else if(i===9)G.lefty=!G.lefty;else if(i===10)G.haptic=!G.haptic;
-  else if(i===11){if(!G.started){await say('Start or load a game first.');continue;}await saveCodeOverlay('export');}
-  else if(i===12){const d=await saveCodeOverlay('import');if(d){loadSave(d);savePrefs();applyPadPrefs();await say('Save code loaded!');return 'loaded';}}
+  else if(i===7)G.bigBtn=!G.bigBtn;else if(i===8){const v=[1,0.75,0.5,0.3];G.padOp=v[(v.indexOf(G.padOp||1)+1)%v.length];}else if(i===9)G.lefty=!G.lefty;else if(i===10)G.haptic=!G.haptic;else if(i===11)G.fxq=G.fxq===0?1:0;
+  else if(i===12){if(!G.started){await say('Start or load a game first.');continue;}await saveCodeOverlay('export');}
+  else if(i===13){const d=await saveCodeOverlay('import');if(d){loadSave(d);savePrefs();applyPadPrefs();await say('Save code loaded!');return 'loaded';}}
   else{savePrefs();applyPadPrefs();return;}
   savePrefs();applyPadPrefs();}}
 
