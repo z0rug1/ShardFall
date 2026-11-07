@@ -17,7 +17,7 @@ function botWithType(t){return G.party.find(b=>b.hp>0&&(BOTS[b.id].types.include
 function lead(){return G.party.find(b=>b.hp>0);}
 
 // ---- FOLLOWER ----
-function resetFollower(){const [dx,dy]=DIRS[G.pdir];let fx=G.px-dx,fy=G.py-dy;const ch=T(fx,fy);if(ch==null||tileSolid(ch)||warpAt(fx,fy))fx=G.px,fy=G.py;G.fol={x:fx,y:fy,fx,fy,dir:G.pdir};}
+function resetFollower(){const order=[OPP[G.pdir],'left','right','down','up'];let fx=G.px,fy=G.py;for(const d of order){const [dx,dy]=DIRS[d];const x=G.px+dx,y=G.py+dy;const ch=T(x,y);if(ch!=null&&!tileSolid(ch)&&!warpAt(x,y)&&!BELT[ch]&&ch!=='V'&&!npcAt(x,y)&&!objAt(x,y)){fx=x;fy=y;break;}}G.fol={x:fx,y:fy,fx,fy,dir:G.pdir};}
 function followerMoved(oldx,oldy){const f=G.fol;if(!f)return resetFollower();f.fx=f.x;f.fy=f.y;f.x=oldx;f.y=oldy;f.dir=oldx<f.fx?'left':oldx>f.fx?'right':oldy<f.fy?'up':'down';}
 function followerPos(){const f=G.fol;if(!f)return null;const p=G.mv?G.mv.p:1;return[(f.fx+(f.x-f.fx)*p)*TS,(f.fy+(f.y-f.fy)*p)*TS];}
 function drawFollower(cx,cy){const b=G.folShow||lead();if(!b||G.surf||!G.fol)return;const [x,y]=followerPos();if(x===G.px*TS&&y===G.py*TS&&!G.mv)return;
@@ -25,7 +25,7 @@ function drawFollower(cx,cy){const b=G.folShow||lead();if(!b||G.surf||!G.fol)ret
   const sp=bspr(b,{blink:TICK%240<6});const flip=G.fol.dir==='right';ctx.save();if(flip){ctx.translate(x-cx+34,y-cy-6+bob);ctx.scale(-1,1);ctx.drawImage(sp,0,0,36,36);}else ctx.drawImage(sp,x-cx-2,y-cy-6+bob,36,36);ctx.restore();}
 
 // ---- FERALS (visible encounters) ----
-const FERAL_BEH={pipsprock:'flee',boltbun:'flee',sporelet:'flee',gearpup:'hunt',scrapmite:'hunt',gloomlamp:'hunt',pebblit:'wander',dripcell:'wander'};
+const FERAL_BEH={pipsprock:'flee',boltbun:'flee',sporelet:'flee',gearpup:'hunt',scrapmite:'hunt',gloomlamp:'hunt',pebblit:'wander',dripcell:'wander',frostling:'wander',cogwyrm:'hunt',kilnfly:'flee'};
 function encTiles(){const m=curMap();if(m._encT)return m._encT;const L=[];m.grid.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]===m.enc.tile)L.push([x,y]);});m._encT=L;return L;}
 function feralAt(x,y){return (G.ferals||[]).find(f=>(f.x===x&&f.y===y)||(f.mv&&f.mv.tx===x&&f.mv.ty===y));}
 function encList(){const m=curMap();let l=m.enc.list.slice();if(thawed(G.map)&&m.thawEnc)l=l.concat(m.thawEnc);return l;}

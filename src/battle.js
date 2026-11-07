@@ -8,7 +8,7 @@ function partnerOf(side){const B=BT;if(!B||!B.link)return null;if(side==='p'){re
 function gear(b,stat){return modMult(b,stat)*partMult(b,stat);}
 function allTypes(b){return [...new Set(BOTS[b.id].types.concat(b.shards||[]))];}
 function linkType(a,c){if(!a||!c)return null;const s=allTypes(a).filter(t=>allTypes(c).includes(t)&&t!=='Core');return s[0]||null;}
-const HEATW={blizzard:0.75,static:1.1,night:0.9,clear:1};
+const HEATW={blizzard:0.75,static:1.1,night:0.9,clear:1,clearnight:0.9,clearstatic:1.1};
 function heatCost(b,mid){const m=MOVES[mid];const t=moveType(b,mid);if(t==='Frost')return 0;let h=m.p?Math.round(m.p/4)+4:8;if(t==='Flame')h*=1.4;if(t==='Tide')h*=0.8;h*=(HEATW[BT&&BT.wx]||1)*partHeat(b);return Math.round(h);}
 function knownMoves(b){return b.moves.map(m=>m.id).concat(partMoves(b));}
 function researched(id){return (G.scan&&G.scan[id]||0)>=1||G.caught[id];}
@@ -83,7 +83,7 @@ function battleSong(tr){if(!tr)return 'battle';if(tr.warden)return tr.title==='D
 async function runBattleInner(o){
   const wk=weatherKey();
   const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
-    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:WMULT[wk]||wk==='night'?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
+    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
   if(!curMap().outdoor)B.wx='indoor';
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
   B.pi=G.party.findIndex(b=>b.hp>0);if(B.pi<0){await healAll();B.pi=0;}
@@ -117,6 +117,7 @@ async function runBattleInner(o){
 
 async function onEnter(side){const B=BT;const b=cur(side);const tr=traitId(b);const os=side==='p'?'e':'p';
   if(tr==='pipsprock'&&B.st[side].spd<6){B.st[side].spd++;arrows(side,'#7fe6d4',true);await bsay(bname(side)+'\'s Quick Launch raised its SPD!');}
+  if(tr==='cogwyrm'&&B.st[side].def<6){B.st[side].def++;arrows(side,'#a0aec0',true);await bsay(bname(side)+'\'s Rail Lock raised its DEF!');}
   if(tr==='gloomlamp'&&B.st[os].atk>-6){B.st[os].atk--;arrows(os,'#9a6ae6',false);await bsay(bname(side)+'\'s Dread Aura lowered '+bname(os)+'\'s ATK!');}}
 async function deployE(first){const B=BT;const e=cur('e');seen(e.id);B.st.e={atk:0,def:0,spd:0};B.heat.e=0;B.over.e=false;B.anim.eIn=0;B.disp.e=e.hp;
   for(let i=0;i<=10;i++){B.anim.eIn=i/10;await wait(1);}B.anim.eIn=null;B.anim.eFaint=0;B.anim.eHide=false;Snd.chirp(BOTS[e.id].frame);
@@ -224,7 +225,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     else if(k==='glitch'){u.st.t--;if(u.st.t<=0){u.st=null;await bsay(bname(side)+'\'s systems stabilized!');}
       else{await bsay(bname(side)+' is glitching!');if(Math.random()<0.33){const dmg=Math.max(1,Math.floor(((2*u.lv/5+2)*40*stats(u).atk/stats(u).def)/50+2));u.hp=Math.max(0,u.hp-dmg);B.anim[side==='p'?'hitP':'hitE']=18;dmgNumber(side,'-'+dmg);Snd.sfx('hit');await bsay('It hit itself in the confusion!');await syncHP();return;}}}}
   const tside=side==='p'?'e':'p';const t=cur(tside);
-  if(a.type==='vent'){B.heat[side]=a.forced?25:Math.max(0,B.heat[side]-55);B.over[side]=false;bfxAdd({max:30,draw(tt){const [x,y]=BPOS[side];ctx.fillStyle='rgba(220,240,255,'+(1-tt)+')';for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(x-40+i*12,y-tt*50-i%3*8,6+tt*6,0,7);ctx.fill();}}});Snd.sfx('push');
+  if(a.type==='vent'){B.heat[side]=traitId(u)==='frostling'?0:a.forced?25:Math.max(0,B.heat[side]-55);B.over[side]=false;bfxAdd({max:30,draw(tt){const [x,y]=BPOS[side];ctx.fillStyle='rgba(220,240,255,'+(1-tt)+')';for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(x-40+i*12,y-tt*50-i%3*8,6+tt*6,0,7);ctx.fill();}}});Snd.sfx('push');
     await bsay(bname(side)+(a.forced?' is overheated and has to vent!':' vents its heat.'));return;}
   let mv,name,mid=null;
   if(a.type==='link'){const pt=partnerOf(side);const lt=linkType(u,pt);if(!pt||!lt){await bsay('The link failed!');return;}B.linkUsed[side]=true;mv={n:'Link Strike',t:lt,p:130,a:0};name=mv.n;
@@ -244,6 +245,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     let m=stab*ef*(crit?1.5:1)*(0.85+Math.random()*0.15)*((WMULT[B.wx]||{})[mv.t]||1);
     if(traitId(u)==='flicker'&&mv.t==='Flame'&&u.hp<stats(u).hp/3)m*=1.5;
     if((u.refined||[]).includes(mv.t))m*=1.1;
+    if(traitId(u)==='kilnfly'&&mv.t==='Gale')m*=1.3;
     if(traitId(t)==='thornbit'&&ef>1)m*=0.75;
     const fullHP=t.hp>=stats(t).hp;if(traitId(t)==='pebblit'&&fullHP)m*=0.5;
     let dmg=Math.max(1,Math.floor((((2*u.lv/5+2)*mv.p*at/df)/50+2)*m));

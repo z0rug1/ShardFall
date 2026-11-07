@@ -24,6 +24,14 @@ On phones the game runs fullscreen in landscape. On iPhone, use Share → Add to
 - The Forge, Refined shards, modules, 3 side quests, glitched variants, rematch board, Bestiary rewards
 - Puzzles, weather, minimap and world map, quest log, type chart, autosave, save codes, phone fullscreen mode
 
+## Chapter 2: The Rustworks
+Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.
+- Route 3 to the Rustworks: a Choir-held factory full of conveyor belts and lever-switched routes, a fight beside (or against) Kael depending on how you treated him, and a Maker archive you can hand to Vesna, hand to the Choir, or keep
+- Ferrow and Warden Hask (Iron Prime): push crates onto moving belts to open the gym
+- Route 4's geyser fields and Kilnhaven's Warden Sora (Flame Prime): time your crossing between steam vents
+- 6 new shardbots (Frostling, Cogwyrm and Kilnfly lines), 3 new traits, collectible Maker Logs, and a Choir signal that sets up Chapter 3
+- Thawed regions now look like early thaw, with muted greens, leftover snow and light flurries, and night towns stay dark
+
 ## Controls
 | Keyboard | Phone | Action |
 |---|---|---|

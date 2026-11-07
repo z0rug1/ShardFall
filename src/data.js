@@ -99,9 +99,18 @@ form('ampjelly','Ampjelly','dripcell','Volt',[[0,'sparkarc'],[20,'staticfield']]
 form('phantide','Phantide','dripcell','Spirit',[[0,'soulpulse']],'Spirit shard fitted. It drifts through walls like mist.');
 form('wispire','Wispire','gloomlamp','Spirit',[[0,'soulpulse']],'Spirit shard fitted. Its eye now holds a tiny star.');
 form('cinderlamp','Cinderlamp','gloomlamp','Flame',[[0,'flamerush']],'Flame shard fitted. Its orbiting shards burn like embers.');
+frame('frostling','Frostling','Frost',[44,46,60,46],'crystal','#7ab8d8',[[1,'tackle'],[1,'frostbite'],[6,'reinforce'],[12,'icelance'],[18,'hexpulse']],{Iron:'hailguard',Shade:'rimeshade'},170,'A floating cluster of ice crystals around a single cold eye. It hums at a pitch only bots can hear.');
+frame('cogwyrm','Cogwyrm','Iron',[46,56,54,48],'serpent','#8a6a50',[[1,'tackle'],[1,'metalclaw'],[8,'rustspray'],[14,'ironbash'],[20,'plating']],{Volt:'railwyrm',Stone:'drillwyrm'},140,'A segmented rail-serpent from the Rustworks. It coils around pipes to listen for vibrations.');
+frame('kilnfly','Kilnfly','Flame',[38,52,38,66],'turbine','#c8603a',[[1,'tackle'],[1,'emberspit'],[7,'gust'],[13,'flamerush'],[19,'airslice']],{Gale:'furnadrone',Brawl:'blastfan'},150,'A turbine-ring drone that circulates furnace heat. Kilnhaven keeps flocks of them for warmth.');
+form('hailguard','Hailguard','frostling','Iron',[[0,'ironbash'],[24,'plating']],'Iron shard fitted. Its crystals fused into a fortress of steel-hard ice.');
+form('rimeshade','Rimeshade','frostling','Shade',[[0,'shadowclaw'],[24,'dreadglare']],'Shade shard fitted. Its eye turned black. It drifts without a sound.');
+form('railwyrm','Railwyrm','cogwyrm','Volt',[[0,'sparkarc'],[26,'thundercoil']],'Volt shard fitted. It rides its own current at frightening speed.');
+form('drillwyrm','Drillwyrm','cogwyrm','Stone',[[0,'rockslam'],[26,'quakehammer']],'Stone shard fitted. Its head became a drill that bores through bedrock.');
+form('furnadrone','Furnadrone','kilnfly','Gale',[[0,'airslice'],[24,'heatwave']],'Gale shard fitted. Its turbine whips furnace air into scorching storms.');
+form('blastfan','Blastfan','kilnfly','Brawl',[[0,'pistonpunch'],[24,'bulkup']],'Brawl shard fitted. Its blades became a battering ram.');
 BOTS.pyrakh={id:'pyrakh',name:'Pyrakh',types:['Flame','Core'],base:[100,110,100,100],shape:'lantern',col:'#ff9040',learn:[],cr:3,exp:300,stage:2,frame:'pyrakh',desc:'The guardian core of the Heartforge. Never seen.',legend:1};
 BOTS.glacivore={id:'glacivore',name:'Glacivore',types:['Frost','Iron'],base:[110,120,110,70],shape:'golem',col:'#9ad8f0',learn:[],cr:3,exp:300,stage:2,frame:'glacivore',desc:'A Maker war-titan, frozen under the mountain.',legend:1};
-const DEX_ORDER=['flicker','arcvix','pyrowing','forgehound','drizzlet','voltrout','rimewyrm','mirelurk','thornbit','bouldershell','lotusurge','hexbriar','pipsprock','skyrivet','thundrone','boltbun','zephbun','jabbit','scrapmite','crushbug','weldrake','sporelet','rotcap','pollenwing','pebblit','ironcrag','magmaw','gearpup','ironpaw','shockhound','dripcell','ampjelly','phantide','gloomlamp','wispire','cinderlamp','pyrakh','glacivore'];
+const DEX_ORDER=['flicker','arcvix','pyrowing','forgehound','drizzlet','voltrout','rimewyrm','mirelurk','thornbit','bouldershell','lotusurge','hexbriar','pipsprock','skyrivet','thundrone','boltbun','zephbun','jabbit','scrapmite','crushbug','weldrake','sporelet','rotcap','pollenwing','pebblit','ironcrag','magmaw','gearpup','ironpaw','shockhound','dripcell','ampjelly','phantide','gloomlamp','wispire','cinderlamp','frostling','hailguard','rimeshade','cogwyrm','railwyrm','drillwyrm','kilnfly','furnadrone','blastfan','pyrakh','glacivore'];
 
 const ITEMS={
 patch:{n:'Patch Kit',d:'Restores 25 HP to one bot.',price:100,heal:25,cat:'med'},

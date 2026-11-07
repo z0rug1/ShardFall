@@ -6,10 +6,12 @@ const WEATHER={
  static:{name:'Static storm',dark:0.4,snow:0.18,wind:0.5,fog:0,static:1},
  cave:{name:'Underground',dark:0.86,snow:0.05,wind:0,fog:0},
  indoor:{name:'Indoors',dark:0,snow:0,wind:0,fog:0},
- clear:{name:'Thawed',dark:0,snow:0,wind:0.3,fog:0,petals:1},
+ clear:{name:'Thawing',dark:0.14,snow:0.07,wind:0.25,fog:0.04},
+ clearnight:{name:'Thawing night',dark:0.5,snow:0.05,wind:0.1,fog:0},
+ clearstatic:{name:'Thawing storm',dark:0.32,snow:0.04,wind:0.4,fog:0,static:1},
  vault:{name:'Maker Vault',dark:0.7,snow:0,wind:0,fog:0},
 };
-function weatherKey(){const m=curMap();if(m.vaultMap)return 'vault';if(m.outdoor&&m.theme==='out'&&thawed(G.map))return 'clear';return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
+function weatherKey(){const m=curMap();if(m.vaultMap)return 'vault';if(m.outdoor&&m.theme==='out'&&thawed(G.map))return m.weather==='night'?'clearnight':m.weather==='static'?'clearstatic':'clear';return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
 function curWeather(){return WEATHER[weatherKey()];}
 
 // ---- lighting ----

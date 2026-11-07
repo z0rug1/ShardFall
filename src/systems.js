@@ -12,6 +12,9 @@ const TRAITS={
  gearpup:{n:'Rally Protocol',d:'ATK rises one stage the first time HP drops below half.'},
  dripcell:{n:'Volt Sink',d:'Volt moves restore 1/4 HP instead of dealing damage.'},
  gloomlamp:{n:'Dread Aura',d:'Lowers the foe\'s ATK one stage on entry.'},
+ frostling:{n:'Cryo Vent',d:'Venting drops its heat all the way to zero.'},
+ cogwyrm:{n:'Rail Lock',d:'DEF rises one stage when it enters battle.'},
+ kilnfly:{n:'Updraft',d:'Its Gale moves deal 30% more damage.'},
  pyrakh:{n:'Heartforge',d:'Unknown.'},glacivore:{n:'Permafrost',d:'Unknown.'},
 };
 function traitId(b){return BOTS[b.id].frame;}

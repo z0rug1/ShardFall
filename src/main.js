@@ -34,19 +34,31 @@ function crateAt(x,y){return G.crates.find(c=>c.x===x&&c.y===y);}
 function isBlocked(x,y,ignorePlayer){const ch=T(x,y);if(tileSolid(ch))return true;if(npcAt(x,y))return true;const o=objAt(x,y);if(o&&o.type!=='cond')return true;if(crateAt(x,y))return true;if(!ignorePlayer&&G.px===x&&G.py===y)return true;return false;}
 function warpAt(x,y){return (curMap().warps||[]).find(w=>w.x===x&&w.y===y);}
 
+// ---------- belts & vents ----------
+const BELT={'6':'right','4':'left','8':'up','2':'down'};const BFLIP={'6':'4','4':'6','8':'2','2':'8'};
+function beltFlipped(){return !!(curMap().leverFlip&&G.beltFlip&&G.beltFlip[G.map]);}
+function beltDir(ch){if(!BELT[ch])return null;return BELT[beltFlipped()?BFLIP[ch]:ch];}
+function ventPhase(x,y){return ((TICK+(x*29+y*47))%140);}
+function ventActive(x,y){return ventPhase(x,y)<55;}
+function ventWarn(x,y){return ventPhase(x,y)>=118;}
+async function scald(){if(G.scalding)return;G.scalding=true;G.busy=true;Snd.sfx('od');burstOW(G.px,G.py,'#ffffff');const r=curMap().ventReset;
+  for(let i=0;i<=8;i++){G.fade=i/8;await wait(1);}if(r){G.px=r[0];G.py=r[1];G.pdir='up';resetFollower();}G.mv=null;for(let i=8;i>=0;i--){G.fade=i/8;await wait(1);}
+  G.errToast={t:120,msg:'Scalded by steam! Watch for the orange glow, then run.'};G.busy=false;G.scalding=false;}
+function slideCrate(c){for(let k=0;k<30;k++){const d=beltDir(T(c.x,c.y));if(!d)return;const [dx,dy]=DIRS[d];const nx=c.x+dx,ny=c.y+dy;
+  if(isBlocked(nx,ny)||crateAt(nx,ny)||(G.px===nx&&G.py===ny)||T(nx,ny)==='e')return;c.x=nx;c.y=ny;}}
 // ---------- movement ----------
 function tryMove(dir,forced){const [dx,dy]=DIRS[dir];G.pdir=dir;const nx=G.px+dx,ny=G.py+dy;
   if(!forced){const f=feralAt(nx,ny);if(f){contactFeral(f,true);return false;}}
   const w=warpAt(nx,ny);
-  const c=crateAt(nx,ny);if(c&&!forced){const bx=nx+dx,by=ny+dy;if(!isBlocked(bx,by)&&!warpAt(bx,by)&&T(bx,by)!=='e'){c.x=bx;c.y=by;c.p=0;Snd.sfx('push');startMove(nx,ny,forced);checkPlates();return true;}Snd.sfx('bump');return false;}
+  const c=crateAt(nx,ny);if(c&&!forced){const bx=nx+dx,by=ny+dy;if(!isBlocked(bx,by)&&!warpAt(bx,by)&&T(bx,by)!=='e'){c.x=bx;c.y=by;c.p=0;Snd.sfx('push');startMove(nx,ny,forced);slideCrate(c);checkPlates();return true;}Snd.sfx('bump');return false;}
   if(isBlocked(nx,ny,true)&&!(w&&!tileSolid(T(nx,ny)))){if(TICK%20===0)Snd.sfx('bump');return false;}
   startMove(nx,ny,forced);return true;}
-function startMove(nx,ny,forced){const ox=G.px,oy=G.py;G.mv={fx:G.px,fy:G.py,tx:nx,ty:ny,p:0,forced};G.px=nx;G.py=ny;G.stepN++;followerMoved(ox,oy);}
+function startMove(nx,ny,forced,belt){const ox=G.px,oy=G.py;G.mv={fx:G.px,fy:G.py,tx:nx,ty:ny,p:0,forced,belt};G.px=nx;G.py=ny;G.stepN++;followerMoved(ox,oy);}
 function stepPlayer(dir){return new Promise(res=>{if(!tryMove(dir,true)){res();return;}G.mv.res=res;});}
 function walkNPC(n,dir,steps){return new Promise(async res=>{for(let i=0;i<steps;i++){n.dir=dir;const [dx,dy]=DIRS[dir];const nx=n.x+dx,ny=n.y+dy;
     if(tileSolid(T(nx,ny))||(G.px===nx&&G.py===ny))break;await new Promise(r=>{n.mv={fx:n.x,fy:n.y,tx:nx,ty:ny,p:0,res:r};});}res();});}
 function updateMovers(){const running=G.alwaysRun?!held.b:held.b;const spd=running&&!G.busy?1/8:1/16;
-  if(G.mv){G.mv.p+=G.mv.forced?1/14:spd;if(G.mv.p>=1){const r=G.mv.res,f=G.mv.forced;G.mv=null;if(r)r();if(!f)onStep();}}
+  if(G.mv){G.mv.p+=G.mv.belt?1/7:G.mv.forced?1/14:spd;if(G.mv.p>=1){const r=G.mv.res,f=G.mv.forced,bl=G.mv.belt;G.mv=null;if(r)r();if(!f||bl)onStep();}}
   for(const n of G.npcs){if(n.mv){n.mv.p+=1/14;if(n.mv.p>=1){n.x=n.mv.tx;n.y=n.mv.ty;const r=n.mv.res;n.mv=null;if(r)r();}}
     else if(n.wander&&!G.busy&&!UI.length&&npcVisible(n)){if(--n.wt<=0){n.wt=90+rnd(150);const d=pick(Object.keys(DIRS));const [dx,dy]=DIRS[d];const nx=n.x+dx,ny=n.y+dy;n.dir=d;
       if(Math.abs(nx-n.hx)<=1&&Math.abs(ny-n.hy)<=1&&!isBlocked(nx,ny)&&!warpAt(nx,ny)&&!(G.mv&&G.mv.tx===nx&&G.mv.ty===ny))n.mv={fx:n.x,fy:n.y,tx:nx,ty:ny,p:0};}}
@@ -59,6 +71,8 @@ async function onStepInner(){markExplored();const m=curMap();if(m.world)G.lastOu
   if(G.surf&&T(G.px,G.py)!=='~'){G.surf=null;resetFollower();}
   const w=warpAt(G.px,G.py);if(w){if(w.req&&!flag(w.req)){G.busy=true;await say(w.locked||'It\'s locked.');await stepPlayer(OPP[G.pdir]);G.busy=false;return;}await doWarp(w);return;}
   const here=T(G.px,G.py);
+  {const bd=beltDir(here);if(bd){const [dx,dy]=DIRS[bd];const nx=G.px+dx,ny=G.py+dy;if(!isBlocked(nx,ny,true)&&!crateAt(nx,ny)){startMove(nx,ny,true,true);Snd.sfx('push');return;}}}
+  if(here==='V'&&ventActive(G.px,G.py)){await scald();return;}
   if(G.map==='vault'&&here==='E'){G.vault.floor++;await enterVaultFloor();return;}
   if(G.map==='vault'&&here==='O'){G.busy=true;const r=await ask('Leave the Vault now and keep your loot?',['Leave','Keep exploring']);G.busy=false;if(r===0){await vaultExit();}return;}
   if(G.map==='workshop'&&here==='O'){G.busy=true;await startVault();G.busy=false;return;}
@@ -126,14 +140,17 @@ function camera(){const m=curMap();const mw=m.grid[0].length*TS,mh=m.grid.length
   if(G.mv){px=(G.mv.fx+(G.mv.tx-G.mv.fx)*G.mv.p)*TS;py=(G.mv.fy+(G.mv.ty-G.mv.fy)*G.mv.p)*TS;}
   if(G.glide){const gl=G.glide;px=(gl.sx+(gl.lx-gl.sx)*gl.p)*TS;py=(gl.sy+(gl.ly-gl.sy)*gl.p)*TS;}
   let cx=px-W/2+TS/2,cy=py-H/2+TS/2;cx=mw<=W?(mw-W)/2:clamp(cx,0,mw-W);cy=mh<=H?(mh-H)/2:clamp(cy,0,mh-H);return{cx:Math.round(cx),cy:Math.round(cy),px,py};}
-function tileKey(ch,x,y){const m=curMap();
+function tileKey(ch,x,y){const m=curMap();if(BELT[ch]&&beltFlipped())return BFLIP[ch];
   if(ch==='g')return flag(m.gate)?'x':'gC';if(ch==='r')return G.sw===0?'rU':'rD';if(ch==='u')return G.sw===1?'uU':'uD';if(ch==='S')return 'S'+G.sw;return ch;}
 function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map)?'outw':m.theme;const {cx,cy,px,py}=camera();ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS);const fr=Math.floor(TICK/40)%2;
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){const ch=T(x,y);if(ch==null)continue;const sx=x*TS-cx,sy=y*TS-cy;const k=tileKey(ch,x,y);
     if(k.length===2){ctx.drawImage(tileArt(th==='cave'?'^':'x',th,(x+y)%2,0),sx,sy,TS,TS);drawSpecial(k,sx,sy);}
-    else{let tf=0;if(ch==='~'||ch==='M')tf=fr;else if(ch==='T')tf=Math.floor(TICK/48+x*0.37+y*0.21)%2;else if(ch==='z'||ch==='i'||ch==='E'||ch==='O'||ch==='a'||ch==='o')tf=Math.floor(TICK/20+x)%2;ctx.drawImage(tileArt(k,th,(x*7+y*3)%4===0?0:(x+y)%2+1,tf),sx,sy,TS,TS);}}
+    else{let tf=0;if(ch==='~'||ch==='M')tf=fr;else if(ch==='T')tf=Math.floor(TICK/48+x*0.37+y*0.21)%2;else if(ch==='z'||ch==='i'||ch==='E'||ch==='O'||ch==='a'||ch==='o')tf=Math.floor(TICK/20+x)%2;else if(BELT[ch])tf=Math.floor(TICK/6)%2;else if(ch==='L')tf=beltFlipped()?1:0;ctx.drawImage(tileArt(k,th,(x*7+y*3)%4===0?0:(x+y)%2+1,tf),sx,sy,TS,TS);}}
   if(m.decor)drawWorkshopDecor(cx,cy);
+  for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){if(T(x,y)!=='V')continue;const sx=x*TS-cx,sy=y*TS-cy;
+    if(ventActive(x,y)){const ph=ventPhase(x,y);for(let i=0;i<6;i++){const t=((ph*2+i*14)%60)/60;ctx.fillStyle='rgba(245,248,252,'+(0.75*(1-t))+')';ctx.beginPath();ctx.arc(sx+16+Math.sin(i*2+ph/6)*5,sy+16-t*44,6+t*10,0,7);ctx.fill();}}
+    else if(ventWarn(x,y)){ctx.fillStyle='rgba(255,120,40,'+(0.3+0.3*Math.sin(TICK/2))+')';ctx.fillRect(sx+4,sy+4,24,24);}}
   // conduits
   if(G.cond){const mc=m.conduits;for(const c of G.cond.cells){const sx=c.x*TS-cx,sy=c.y*TS-cy;const lit=G.cond.lit.has(c);ctx.fillStyle='#2a3240';ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
       const col=lit?(TICK%10<5?'#ffe040':'#fff080'):'#6a7080';for(const d of condConn(c)){const [dx,dy]=DV[d];ctx.fillStyle=col;ctx.fillRect(sx+12+dx*8-(dx?4:0),sy+12+dy*8-(dy?4:0),dx?16:8,dy?16:8);}ctx.fillStyle=col;ctx.fillRect(sx+12,sy+12,8,8);}
@@ -145,6 +162,8 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
       else{ctx.fillStyle='#202028';ctx.beginPath();ctx.arc(sx+16,sy+16+bob,8,0,7);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(sx+16,sy+16+bob,7,Math.PI,0);ctx.fill();ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.arc(sx+16,sy+16+bob,7,0,Math.PI);ctx.fill();R(ctx,sx+9,sy+15+bob,14,2,'#202028');}}
     if(o.type==='pod'){ctx.fillStyle='rgba(160,220,255,.6)';rr(sx+6,sy-6,20,30,8);ctx.fill();ctx.strokeStyle='#e0f4ff';ctx.lineWidth=2;rr(sx+6,sy-6,20,30,8);ctx.stroke();if(!o.taken)ctx.drawImage(botSprite(o.bot),sx+4,sy-6,24,24);}
     if(o.type==='pylon')drawPylon(o,sx,sy);
+    if(o.type==='log')drawLogObj(o,sx,sy);
+    if(o.type==='archive'){const p=0.6+0.4*Math.sin(TICK/8);ctx.fillStyle='#2a3242';ctx.fillRect(sx+6,sy+10,20,18);ctx.fillStyle='rgba(120,230,255,'+p+')';ctx.fillRect(sx+10,sy+4,12,14);ctx.fillStyle='#fff';ctx.fillRect(sx+14,sy+8,4,4);}
     if(o.type==='lostbot'){const bob=Math.sin(TICK/8)*2;ctx.drawImage(botSprite('pipsprock'),sx-2,sy-6+bob,36,36);if(TICK%50<25)wtxt('?',sx+26,sy-4,'#ffe080',16);}
     if(o.type==='stash'){R(ctx,sx+2,sy+6,28,22,'#3a3a48');R(ctx,sx+2,sy+6,28,4,'#5a5a6a');R(ctx,sx+12,sy+12,8,8,'#e8e8f0');R(ctx,sx+13,sy+14,2,2,'#101018');R(ctx,sx+17,sy+14,2,2,'#101018');}
     if(o.type==='cache'){const open=flag('got_'+o.id);R(ctx,sx+3,sy+8,26,20,'#506070');R(ctx,sx+3,sy+8,26,4,open?'#304050':'#7890a8');R(ctx,sx+13,sy+14,6,6,flag(curMap().terminalPuzzle.flag)?'#40e080':'#e04040');}}
@@ -198,6 +217,7 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
   if(G.banner>0)G.banner--;if(G.fade>0&&!G.inWarp)G.fade=Math.max(0,G.fade-0.05);if(G.flashOW>0)G.flashOW--;
   if(UI.length){UI[UI.length-1].update();}
   else if(G.started&&!BT){updateMovers();updateFerals();
+    if(!G.mv&&!G.busy&&!UI.length&&T(G.px,G.py)==='V'&&ventActive(G.px,G.py))scald();
     if(!G.busy&&!G.mv&&!G.stepLock){if(press('start')){Snd.sfx('ok');startMenu();}
       else if(press('map')){G.busy=true;openWorldMap().then(t=>{if(t)warpTown(t);else G.busy=false;});}
       else if(press('a'))interact();

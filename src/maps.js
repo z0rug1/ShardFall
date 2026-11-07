@@ -1,5 +1,5 @@
 // ===================== MAPS & STORY =====================
-const SOLID=new Set(['T','~','f','R','Y','Q','W','s','#','%','X','c','M','t','h','v','l','m','z','i','n','p','a','o']);
+const SOLID=new Set(['T','~','f','R','Y','Q','W','s','#','%','X','c','M','t','h','v','l','m','z','i','n','p','a','o','U','L']);
 const MAPS={};
 const N=()=>G.name;
 
@@ -60,7 +60,15 @@ objs:[{type:'pod',x:4,y:4,bot:'flicker'},{type:'pod',x:5,y:4,bot:'drizzlet'},{ty
 npcs:[{id:'vesna',x:5,y:2,dir:'down',look:'vesna',script:vesnaTalk},
  {id:'kael',x:5,y:7,dir:'up',look:'kael',cond:()=>flag('starter')&&!flag('kael1'),text:'...'},
  {id:'aide2',x:8,y:8,dir:'left',look:'clerk',text:'These monitors track Heartforge output. The line\'s been dropping for weeks.'}]};
+async function eastBlock(){if(flag('ch2start'))return;G.busy=true;await say('The road east to the Rustworks is closed. Iced over and crawling with Choir. Dr. Vesna asked everyone to wait for her word.',{speaker:'Lineman'});await stepPlayer('left');G.busy=false;}
+async function vesnaCh2(){
+ await say(N()+'. You came back. I owe you an explanation.',{speaker:'Vesna'});
+ await say('The readings under Mt. Cinder are a war-titan: Glacivore. The Makers froze it inside the Heartforge. That much I always knew.',{speaker:'Vesna'});
+ await say('But the Choir keeps saying the Heartforge controls the bots. I don\'t know if that\'s true. The answer is in the Makers\' archives, inside the Rustworks factory east of Voltmere.',{speaker:'Vesna'});
+ await say('Find that archive. Then come to your own conclusions. Two more Wardens are out that way: Hask in Ferrow, Sora in Kilnhaven.',{speaker:'Vesna'});
+ setFlag('ch2start');setQ('archive','active');Snd.sfx('ok');await say('CHAPTER 2: THE RUSTWORKS. The road east of Voltmere is open. New quest: THE MAKER ARCHIVE.');}
 async function vesnaTalk(){
+ if(flag('ch1done')&&!flag('ch2start')){await vesnaCh2();return;}
  if(!flag('starter')){await say('Ah, '+N()+'. Good, you came.',{speaker:'Vesna'});
   await say('You\'ve felt the cold coming early. The Heartforge under Mt. Cinder is failing, and every bot in Calderra runs on it.',{speaker:'Vesna'});
   await say('I need someone to travel the peninsula for me. I can\'t leave the lab, and... I trust you.',{speaker:'Vesna'});
@@ -335,7 +343,7 @@ async function deaconFight(n){G.busy=true;
  G.busy=false;}
 
 // ---------- Voltmere ----------
-MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,weather:'static',world:{x:86,y:5},town:1,heal:{map:'repair_v',x:5,y:6},grid:[
+MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,weather:'static',triggers:[{x:22,y:12,run:eastBlock},{x:22,y:13,run:eastBlock}],world:{x:86,y:5},town:1,heal:{map:'repair_v',x:5,y:6},grid:[
 'TTTTTTTTTTTTTTTTTTTTTTTT',
 'T#####......MM......TTTT',
 'T#####.YYYYYYYY.....l.TT',
@@ -348,14 +356,14 @@ MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,weather:'stati
 'TT..........=QQQQ.....TT',
 'TT..MM......=WDWW..MM.TT',
 'TT..MM......==.....MM.TT',
-'TT............FFF.....TT',
-'TT..RRRR......FFF.....TT',
+'TT............FFF.....==',
+'TT..RRRR......FFF.....==',
 'TT..RRRR..............TT',
 'TT..WDWW....l.........TT',
 'TT....................TT',
 'TTTTTTTTTTTTTTTTTTTTTTTT'],
 tileScripts:{'19,10':generatorTile,'20,10':generatorTile,'19,11':generatorTile,'20,11':generatorTile},
-warps:[{x:1,y:8,to:'cave',tx:22,ty:7,dir:'left'},{x:10,y:5,to:'gym2',tx:6,ty:11},{x:14,y:10,to:'repair_v',tx:5,ty:6},{x:18,y:5,to:'house_v1',tx:4,ty:6},{x:5,y:15,to:'house_v2',tx:4,ty:6}],
+warps:[{x:23,y:12,to:'route3',tx:1,ty:6},{x:23,y:13,to:'route3',tx:1,ty:7},{x:1,y:8,to:'cave',tx:22,ty:7,dir:'left'},{x:10,y:5,to:'gym2',tx:6,ty:11},{x:14,y:10,to:'repair_v',tx:5,ty:6},{x:18,y:5,to:'house_v1',tx:4,ty:6},{x:5,y:15,to:'house_v2',tx:4,ty:6}],
 signs:{'13,6':'VOLTMERE WARDEN HALL — Warden Ione. "Stay connected."'},
 npcs:[
  {id:'vm1',x:16,y:12,dir:'left',look:'lineman',script:genQuest},

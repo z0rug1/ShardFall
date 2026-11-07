@@ -119,19 +119,20 @@ function openWorldMap(){const towns=Object.keys(MAPS).filter(k=>MAPS[k].town&&G.
   return pushUI({i:ti,update(){if(towns.length){if(rep('left')||rep('up'))this.i=(this.i+towns.length-1)%towns.length;if(rep('right')||rep('down'))this.i=(this.i+1)%towns.length;}
      if(press('b')||press('map'))popUI(this,null);
      if(press('a')&&towns.length&&!BT){const t=towns[this.i];popUI(this,t);}},
-   draw(){ctx.fillStyle='#0c1424';ctx.fillRect(0,0,W,H);const sc=4,ox=14,oy=24;
+   draw(){ctx.fillStyle='#0c1424';ctx.fillRect(0,0,W,H);let mxX=0,mxY=0;for(const id in MAPS){const m=MAPS[id];if(!m.world)continue;if(!G.visited[id]&&!exploredArr(id).some(v=>v))continue;mxX=Math.max(mxX,m.world.x+m.grid[0].length);mxY=Math.max(mxY,m.world.y+m.grid.length);}
+     const sc=Math.max(1.6,Math.min(4,(W-28)/Math.max(60,mxX),(H-56)/Math.max(40,mxY))),ox=14,oy=26;
      for(let i=0;i<H;i+=20){ctx.fillStyle='rgba(60,100,160,.08)';ctx.fillRect(0,i,W,1);}
      let tot=0,ex=0;
      for(const id in MAPS){const m=MAPS[id];if(!m.world)continue;const e=exploredArr(id);const w=m.grid[0].length;
        for(let y=0;y<m.grid.length;y++)for(let x=0;x<w;x++){const ch=m.grid[y][x];tot++;const seen=e[y*w+x];if(seen)ex++;
          ctx.fillStyle=seen?(thawed(id)&&',.TF'.includes(ch)?{',':'#3a8a30','.':'#7ab84a','T':'#2a6a2a','F':'#e0a060'}[ch]:(MMCOL[ch]||'#555')):'#141c2c';ctx.fillRect(ox+(m.world.x+x)*sc,oy+(m.world.y+y)*sc,sc,sc);}}
-     for(const id in MAPS){const m=MAPS[id];if(!m.world||!G.visited[id])continue;const cx=ox+(m.world.x+m.grid[0].length/2)*sc,cy=oy+(m.world.y)*sc+10;
+     for(const id in MAPS){const m=MAPS[id];if(!m.world||!G.visited[id])continue;const cx=ox+(m.world.x+m.grid[0].length/2)*sc,cy=oy+(m.world.y)*sc+(sc<3?6:10);
        wtxt(m.name,cx,cy+(m.town?0:m.grid.length*sc/2),m.town?'#ffe080':'#c0d0f0',m.town?20:16,'center');}
      const pm=G.lastOut;if(pm&&MAPS[pm.map].world&&TICK%30<20){const m=MAPS[pm.map];ctx.fillStyle='#fff';ctx.fillRect(ox+(m.world.x+pm.x)*sc-2,oy+(m.world.y+pm.y)*sc-2,sc+4,sc+4);ctx.fillStyle='#e04040';ctx.fillRect(ox+(m.world.x+pm.x)*sc,oy+(m.world.y+pm.y)*sc,sc,sc);}
      if(towns.length){const t=MAPS[towns[this.i]];ctx.strokeStyle=TICK%20<10?'#ffe080':'#fff';ctx.lineWidth=2;ctx.strokeRect(ox+t.world.x*sc-2,oy+t.world.y*sc-2,t.grid[0].length*sc+4,t.grid.length*sc+4);}
      darkPanel(0,0,W,22);wtxt('CALDERRA — '+Math.floor(ex/tot*100)+'% explored',8,17,'#fff',20);
      darkPanel(0,H-24,W,24);wtxt(BT?'B: close':towns.length?'◀ ▶ town   A: warp to '+MAPS[towns[this.i]].name+'   B: close':'B: close',8,H-7,'#c0d0f0',18);
-     darkPanel(310,252,166,36);wtxt('Mt. Cinder ▲ north',320,276,'#ff9060',18);}});}
+     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ far south',310,276,'#ff9060',16);}});}
 
 // ---------- start menu ----------
 async function startMenu(){G.busy=true;
@@ -152,10 +153,10 @@ async function startMenu(){G.busy=true;
 function cardW(){return{update(){if(press('a')||press('b'))popUI(this);},draw(){panel(40,30,400,260,'#e8f0ff');txt('NAVI-BAND ID',60,62,'#303840',24);
   ctx.drawImage(charSprite('player','down',0),330,50,64,72);txt('NAME   '+G.name,60,100);txt('CREDITS '+G.money+' Cr',60,128);
   txt('LINKED '+Object.keys(G.caught).length+'   SEEN '+Object.keys(G.seen).length,60,156);txt('TIME   '+fmtTime(G.time),60,184);
-  txt('PRIME SHARDS',60,220,'#606870');['prime1','prime2'].forEach((p,i)=>{const has=G.bag[p];const x=200+i*40;ptri(ctx,[x,206,x+12,218,x,230,x-12,218],has?(i?TCOL.Volt:TCOL.Stone):'#a0a8b8');});
-  for(let i=2;i<8;i++){const x=200+i*40;if(x>420)break;ptri(ctx,[x,206,x+12,218,x,230,x-12,218],'#c8ccd8');}
+  txt('PRIMES',60,220,'#606870');const PC=[TCOL.Stone,TCOL.Volt,TCOL.Iron,TCOL.Flame];for(let i=0;i<8;i++){const x=160+i*32;const has=i<4&&G.bag['prime'+(i+1)];ptri(ctx,[x,208,x+10,218,x,228,x-10,218],has?PC[i]:'#c8ccd8');}
+  txt(flag('ch2start')?'Chapter 2: The Rustworks':'Chapter 1: The Relay Road',60,238,'#a06020',16);
   const rep=G.rep||{w:0,c:0};const lean=rep.w>rep.c?'leaning Warden':rep.c>rep.w?'leaning Choir':'undecided';const k=G.kael||0;
-  txt('Allegiance: '+lean+' ('+rep.w+'W / '+rep.c+'C)',60,250,'#2a5a8a',18);txt('Kael: '+(k>=2?'friend':k>=0?'rival':'bitter rival')+'   Thaw: '+thawCount()+'/6   Vault best: B'+(G.vaultBest||0),60,272,'#606870',16);}};}
+  txt('Allegiance: '+lean+' ('+rep.w+'W / '+rep.c+'C)',60,256,'#2a5a8a',18);txt('Kael: '+(flag('kaelChoir')?'Choir':k>=2?'friend':k>=0?'rival':'bitter rival')+'   Thaw: '+thawCount()+'/10   Vault best: B'+(G.vaultBest||0),60,276,'#606870',16);}};}
 function fmtTime(t){const s=Math.floor(t/60);return Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');}
 async function optionsMenu(){let def=0;while(true){const skins=Object.keys(G.skins||{classic:1});
   const opts=['Text speed: '+['','Slow','Normal','Fast'][TEXTSPEED],'Battle speed: '+(G.bspeed||1)+'x','Battle animations: '+(G.skipFx?'Short':'Full'),'Running: '+(G.alwaysRun?'Always (B walks)':'Hold B'),
@@ -196,7 +197,7 @@ function titleW(){return{t:0,i:0,update(){this.t++;const opts=this.opts();if(rep
     const bots=['flicker','drizzlet','thornbit','boltbun','gloomlamp','pebblit'];bots.forEach((b,i)=>{const x=((i*90+this.t)%(W+80))-60;ctx.drawImage(botSprite(b),x,196+Math.abs(Math.sin((this.t+i*20)/8))*-6,60,60);});
     ctx.font='64px '+FONT;wtxt('SHARDFALL',W/2,80,'#d8ecff',64,'center');wtxt('~ Ember Protocol ~',W/2,108,'#ff9a5a',24,'center');
     this.opts().forEach((o,i)=>{wtxt((i===this.i?'▶ ':'  ')+o,W/2-50,278+i*24,i===this.i?'#fff':'#7a8aa8',24);});
-    wtxt('Chapter 1: The Relay Road',W-8,H-6,'#5a6a88',16,'right');}};}
+    wtxt('Chapters 1–2',W-8,H-6,'#5a6a88',16,'right');}};}
 async function nameEntry(){return new Promise(res=>{const ov=document.getElementById('nameov');const inp=document.getElementById('namein');ov.style.display='flex';inp.value='';setTimeout(()=>inp.focus(),50);
   const done=()=>{const v=(inp.value||'').trim().slice(0,10)||'Rook';ov.style.display='none';document.getElementById('nameok').onclick=null;inp.onkeydown=null;inp.blur();res(v);};
   document.getElementById('nameok').onclick=done;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();done();}};});}
@@ -209,7 +210,7 @@ async function chapterEnd(){G.busy=true;Snd.music('title',true);
     wtxt('Time: '+fmtTime(G.time)+'    Linked bots: '+Object.keys(G.caught).length+'    Prime Shards: 2/8',W/2,160,'#e0d0c0',20,'center');
     G.party.slice(0,6).forEach((b,i)=>ctx.drawImage(botSprite(b.id),W/2-150+i*50,176,48,48));
     const rp=G.rep||{w:0,c:0};wtxt('Allegiance: '+(rp.w>rp.c?'Wardens':rp.c>rp.w?'Hollow Choir':'undecided')+'  ·  Kael: '+((G.kael||0)>=2?'friend':(G.kael||0)>=0?'rival':'bitter'),W/2,236,'#ffd0a0',18,'center');
-    wtxt('Next: Chapter 2 — The Rustworks',W/2,260,'#9ac0ff',22,'center');wtxt('Kael. The Cantor. Whatever sleeps under Mt. Cinder.',W/2,284,'#8090a0',18,'center');
+    wtxt('Next: Chapter 2 — The Rustworks',W/2,260,'#9ac0ff',22,'center');wtxt('Return to Vesna in Ashgrove to begin.',W/2,284,'#8090a0',18,'center');
     ctx.globalAlpha=1;if(this.t>60&&TICK%40<26)wtxt('Press A to keep exploring',W/2,310,'#ff9040',16,'center');}});
   Snd.music(curMap().music,true);setFlag('ch1done');const r=await ask('Save your progress?');if(r===0)await saveMenu();G.busy=false;}
 
