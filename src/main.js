@@ -149,7 +149,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
     if(k.length===2){ctx.drawImage(tileArt(th==='cave'?'^':'x',th,(x+y)%2,0),sx,sy,TS,TS);drawSpecial(k,sx,sy);}
     else{let tf=0;if(ch==='~'||ch==='M')tf=fr;else if(ch==='T')tf=Math.floor(TICK/48+x*0.37+y*0.21)%2;else if(ch==='z'||ch==='i'||ch==='E'||ch==='O'||ch==='a'||ch==='o')tf=Math.floor(TICK/20+x)%2;else if(BELT[ch])tf=Math.floor(TICK/6)%2;else if(ch==='L')tf=beltFlipped()?1:0;ctx.drawImage(tileArt(k,th,(x*7+y*3)%4===0?0:(x+y)%2+1,tf),sx,sy,TS,TS);}}
   if(m.decor)drawWorkshopDecor(cx,cy);
-  drawUnderFX(cx,cy);drawSurfaceFX(cx,cy);
+  drawUnderFX(cx,cy);drawWorldReflections(cx,cy);drawSurfaceFX(cx,cy);drawShoreFoam(cx,cy);
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){if(T(x,y)!=='V')continue;const sx=x*TS-cx,sy=y*TS-cy;
     if(ventActive(x,y)){const ph=ventPhase(x,y);for(let i=0;i<6;i++){const t=((ph*2+i*14)%60)/60;ctx.fillStyle='rgba(245,248,252,'+(0.75*(1-t))+')';ctx.beginPath();ctx.arc(sx+16+Math.sin(i*2+ph/6)*5,sy+16-t*44,6+t*10,0,7);ctx.fill();}}
     else if(ventWarn(x,y)){ctx.fillStyle='rgba(255,120,40,'+(0.3+0.3*Math.sin(TICK/2))+')';ctx.fillRect(sx+4,sy+4,24,24);}}
@@ -185,10 +185,10 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
     if(e.player&&G.glide){const gl=G.glide;const ox=(gl.sx+(gl.lx-gl.sx)*gl.p)*TS-cx,oy=(gl.sy+(gl.ly-gl.sy)*gl.p)*TS-cy-Math.sin(gl.p*Math.PI)*28;ctx.drawImage(charSprite('player',G.pdir,1),ox,oy-6,32,36);if(G.folShow)ctx.drawImage(bspr(G.folShow),ox-4,oy-30,40,40);continue;}
     if(!e.player&&bliz&&Math.hypot(ex-px,ey-py)>5*TS)continue;
     const mv=e.player?G.mv:e.mv;if(mv){fr2=mv.p<0.25||mv.p>=0.75?3:((e.player?G.stepN:(e.x+e.y))%2?1:2);}
-    entShadow(sx,sy,ex,ey);{const img=charSprite(e.player?'player':e.look,e.player?G.pdir:e.dir,fr2);entReflect(img,sx,sy-6,ex,ey);ctx.drawImage(img,sx,sy-6,32,36);}
+    entShadow(sx,sy,ex,ey);{const img=charSprite(e.player?'player':e.look,e.player?G.pdir:e.dir,fr2);reflectSprite(img,sx,sy-6,32,36,ex,ey);rimLight(img,sx,sy-6,32,36,ex,ey);ctx.drawImage(img,sx,sy-6,32,36);if(e.player)snowOnPlayer(sx,sy-6);}
     if(e.bubble>0){panel(sx+4,sy-34,24,26,'#fff');txt('!',sx+16,sy-14,'#e02020',24,'center',null);}
     if(e.trainer&&!flag('t_'+e.id)&&!e.player&&TICK%60<6){}}
-  drawOverFX(cx,cy);owParticles(cx,cy,px,py);drawLighting(cx,cy,px,py);drawLightBleed(cx,cy);drawSkyFX(cx,cy);drawWeatherOverlay(cx,cy);if(G.flick>0){G.flick--;if(G.flick%3<2){ctx.fillStyle='rgba(2,4,12,.82)';ctx.fillRect(0,0,W,H);}}if(m.outdoor&&!m.dungeon)coldGrade(0.07);
+  drawOverFX(cx,cy);drawHeatHaze(cx,cy);owParticles(cx,cy,px,py);drawLighting(cx,cy,px,py);drawLightBleed(cx,cy);drawSkyFX(cx,cy);drawShafts(cx,cy);drawDusk();drawWeatherOverlay(cx,cy);drawRainOW(cx,cy);if(G.flick>0){G.flick--;if(G.flick%3<2){ctx.fillStyle='rgba(2,4,12,.82)';ctx.fillRect(0,0,W,H);}}if(m.outdoor&&!m.dungeon)coldGrade(0.07);
   if(G.minimap&&m.world)drawMinimap();
   if(G.banner>0){const a=Math.min(1,G.banner/20);ctx.globalAlpha=a;panel(8,8,Math.max(150,measure(m.name,24)+40),40,'#f8f0d8');txt(m.name,24,36,'#403020',24);ctx.globalAlpha=1;}}
 function drawSpecial(k,sx,sy){const s=TS;

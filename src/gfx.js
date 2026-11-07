@@ -70,7 +70,7 @@ function bakeMapFX(){const m=curMap();const Wt=m.grid[0].length,Ht=m.grid.length
 function drawMapLayer(c,cx,cy,smooth,dy){if(!c)return;const prev=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=!!smooth;const oy=-(dy||0);
   let sx=Math.floor(cx/2)-1,sy=Math.floor(cy/2)+oy-1;let sw=Math.ceil(W/2)+3,sh=Math.ceil(H/2)+3;let dx=sx*2-cx,dyy=(sy-oy)*2-cy;
   if(sx<0){dx-=sx*2;sw+=sx;sx=0;}if(sy<0){dyy-=sy*2;sh+=sy;sy=0;}sw=Math.min(sw,c.width-sx);sh=Math.min(sh,c.height-sy);if(sw>0&&sh>0)ctx.drawImage(c,sx,sy,sw,sh,dx,dyy,sw*2,sh*2);ctx.imageSmoothingEnabled=prev;}
-function drawUnderFX(cx,cy){ensureMapFX();drawMapLayer(MFX.edge,cx,cy,false);drawMapLayer(MFX.under,cx,cy,true);}
+function drawUnderFX(cx,cy){G._camY=cy;ensureMapFX();drawMapLayer(MFX.edge,cx,cy,false);drawMapLayer(MFX.under,cx,cy,true);}
 function drawOverFX(cx,cy){drawMapLayer(MFX.over,cx,cy,false,-16);}
 
 // ---- per-frame surface animation: water shimmer, ice glints, fog drift, static arcs, footprints ----

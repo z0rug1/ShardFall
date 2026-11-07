@@ -39,6 +39,7 @@ function drawLighting(cx,cy,px,py){const wx=curWeather();if(!wx.dark)return;ensu
   g.globalCompositeOperation='destination-out';
   const lead=G.party.find(b=>b.hp>0);const pcol=lead?TCOL[BOTS[lead.id].types[0]]:'#a0c0ff';
   const all=[{x:px+16,y:py+14,r:wx.dark>0.5?110:80,col:pcol,fl:0,player:1}];
+  if(typeof dynLights==='function')for(const l of dynLights())all.push(l);
   for(const l of G.lights||[]){const sx=l.x-cx,sy=l.y-cy;if(sx<-120||sy<-120||sx>W+120||sy>H+120)continue;all.push(Object.assign({},l,{x:l.x,y:l.y}));}
   for(const l of all){const sx=l.x-cx,sy=l.y-cy;const r=l.r*(l.fl?(0.92+0.08*Math.sin(TICK/6+l.x)):1);const gr=g.createRadialGradient(sx,sy,0,sx,sy,r);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(0.55,'rgba(0,0,0,.6)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(sx-r,sy-r,r*2,r*2);}
   ctx.drawImage(LIGHT,0,0,W,H);
@@ -57,7 +58,7 @@ function owParticles(cx,cy,px,py){const wx=curWeather();const m=curMap();
   if(wx.static&&Math.random()<0.05){for(const l of (G.lights||[])){if(Math.random()<0.02)OWP.push({x:l.x+(Math.random()-0.5)*20,y:l.y,vx:(Math.random()-0.5)*1.4,vy:-Math.random()*1.4,t:0,max:20,k:'spark'});}}
   for(let i=OWP.length-1;i>=0;i--){const p=OWP[i];p.t++;p.x+=p.vx;p.y+=p.vy;if(p.t>=p.max){OWP.splice(i,1);continue;}
     const a=1-p.t/p.max;if(p.k==='breath'){ctx.fillStyle='rgba(235,242,250,'+(a*0.55)+')';ctx.beginPath();ctx.arc(p.x-cx,p.y-cy,2+p.t*0.08,0,7);ctx.fill();}
-    else{ctx.globalAlpha=a;ctx.fillStyle=p.col||'#a0c8ff';ctx.fillRect(p.x-cx,p.y-cy,p.col?3:1.5,p.col?3:1.5);ctx.globalAlpha=1;}}}
+    else if(p.k!=='ring'){ctx.globalAlpha=a;ctx.fillStyle=p.col||'#a0c8ff';ctx.fillRect(p.x-cx,p.y-cy,p.col?3:1.5,p.col?3:1.5);ctx.globalAlpha=1;}}}
 
 // ---- battle FX ----
 const BFX=[];

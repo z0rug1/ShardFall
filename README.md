@@ -43,6 +43,12 @@ Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.
 - Coloured light that spills from lamps, crystals and engines, snow piled on roofs, footprints that fade, drifting fog, static sparks and passing cloud shadows.
 - Soft edges between terrain types, tree tops and lamp heads you can walk behind, and interiors with shaded walls and a warm vignette.
 - Battle arenas that match the terrain (scrap, crystal, static, fog, ice, shore), with bot shadows, ground glow from each bot's core, and reflections on ice.
+- Reflections: lakes and ice mirror the trees, houses and cliffs along their shores, plus everyone standing on or beside them (you, your follower, ferals). Lab and gym floors are shiny. Water shows stars at night, turns violet in static storms and flashes when lightning strikes.
+- Rain on thawed maps comes in showers, with streaks at different depths, splashes, puddles and ripples. Drops hit the screen like a camera lens: they show a tiny upside-down view of the world behind them, and some slide down. Voltmere gets sleet.
+- Shore foam that moves, ripples when you walk beside water, heat haze over vents and furnaces, light shafts in fog.
+- A day and night cycle on outdoor maps (24 minutes of play), with dusk colours, lamps that show up after dark, and lightning in static storms.
+- At night, characters near lamps get a coloured outline, your follower's core lights the way, and ferals' eyes glow. Snow builds up on you in snowfall and shakes off indoors.
+- Battle skies: aurora up north, factory smoke in the Rustworks, an ember sky around Kilnhaven. Every attack lights up the arena, and rain falls in battle too.
 - Options → Visual effects: Low turns the per-frame effects off on slower phones.
 
 ## Controls
