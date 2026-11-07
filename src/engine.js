@@ -5,7 +5,7 @@ const FONT='VT323, monospace';
 let TICK=0;
 function txt(s,x,y,col='#303840',size=22,align='left',shadow='rgba(0,0,0,.15)'){ctx.font=size+'px '+FONT;ctx.textAlign=align;ctx.textBaseline='alphabetic';if(shadow){ctx.fillStyle=shadow;ctx.fillText(s,x+1,y+1);}ctx.fillStyle=col;ctx.fillText(s,x,y);}
 function wtxt(s,x,y,col='#fff',size=22,align='left'){txt(s,x,y,col,size,align,'rgba(0,0,0,.6)');}
-function panel(x,y,w,h,fill='#f8f6ec'){ctx.fillStyle='#2a3242';rr(x,y,w,h,8);ctx.fill();ctx.fillStyle='#8aa0c0';rr(x+3,y+3,w-6,h-6,6);ctx.fill();ctx.fillStyle=fill;rr(x+5,y+5,w-10,h-10,5);ctx.fill();}
+function panel(x,y,w,h,fill){const sk=(typeof SKINS!=='undefined'&&SKINS[G.skin])||['#2a3242','#8aa0c0','#f8f6ec'];if(!fill)fill=sk[2];ctx.fillStyle=sk[0];rr(x,y,w,h,8);ctx.fill();ctx.fillStyle=sk[1];rr(x+3,y+3,w-6,h-6,6);ctx.fill();ctx.fillStyle=fill;rr(x+5,y+5,w-10,h-10,5);ctx.fill();}
 function darkPanel(x,y,w,h){ctx.fillStyle='rgba(16,20,32,.92)';rr(x,y,w,h,6);ctx.fill();ctx.strokeStyle='#6a7fa8';ctx.lineWidth=2;rr(x+1,y+1,w-2,h-2,6);ctx.stroke();}
 function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function measure(s,size=22){ctx.font=size+'px '+FONT;return ctx.measureText(s).width;}
@@ -26,13 +26,13 @@ function tickInput(){for(const k in held)if(held[k])repT[k]=(repT[k]||0)+1;}
 function clearPressed(){for(const k in pressed)pressed[k]=0;}
 function setupTouch(){
   document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;
-    const on=e=>{e.preventDefault();if(!held[k]){pressed[k]=1;repT[k]=0;}held[k]=1;el.classList.add('on');Snd.unlock();};
+    const on=e=>{e.preventDefault();if(!held[k]){pressed[k]=1;repT[k]=0;}held[k]=1;el.classList.add('on');Snd.unlock();if(G.haptic&&navigator.vibrate)try{navigator.vibrate(8);}catch(_){}};
     const off=e=>{e.preventDefault();held[k]=0;el.classList.remove('on');};
     el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointerleave',off);el.addEventListener('pointercancel',off);});
   const pad=document.getElementById('dpad');if(!pad)return;let active=null;
   const setDir=(e)=>{const r=pad.getBoundingClientRect();const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
     let d=null;if(Math.hypot(dx,dy)>r.width*0.12){d=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');}
-    if(d!==active){if(active)held[active]=0;if(d){pressed[d]=1;repT[d]=0;held[d]=1;}active=d;}
+    if(d!==active){if(active)held[active]=0;if(d){pressed[d]=1;repT[d]=0;held[d]=1;if(G.haptic&&navigator.vibrate)try{navigator.vibrate(5);}catch(_){}}active=d;}
     pad.dataset.dir=d||'';};
   pad.addEventListener('pointerdown',e=>{e.preventDefault();pad.setPointerCapture(e.pointerId);setDir(e);Snd.unlock();});
   pad.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')setDir(e);});
@@ -45,38 +45,54 @@ const NOTE={C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
 function nfreq(n){const m=n.match(/^([A-G]#?)(\d)$/);if(!m)return 0;const midi=(+m[2]+1)*12+NOTE[m[1]];return 440*Math.pow(2,(midi-69)/12);}
 function parseSeq(s){return s.trim().split(/\s+/).map(t=>{const [n,d]=t.split(':');return{f:n==='-'?0:nfreq(n),d:+(d||1)};});}
 const SONGS={
- town:{bpm:108,lead:'E5 G5 A5 G5 E5 D5 C5:2 D5 E5 G5 E5 D5:4 E5 G5 A5 C6 B5 A5 G5:2 A5 G5 E5 D5 C5:4',bass:'C3:4 G2:4 A2:4 F2:4 C3:4 G2:4 F2:4 C3:4'},
- route:{bpm:132,lead:'G4 C5 E5 G5 F5 E5 D5 C5 A4 C5 F5 A5 G5 F5 E5 D5 G4 B4 D5 G5 F5 D5 B4 G4 C5 E5 G5 C6 G5:2 - -',bass:'C3:4 C3:4 F2:4 F2:4 G2:4 G2:4 C3:4 C3:4'},
- cave:{bpm:92,lead:'A4:2 C5:2 E5:4 D5:2 C5:2 B4:4 A4:2 C5:2 E5:2 G5:2 F5:6 - -',bass:'A2:8 G2:8 F2:8 E2:8'},
- gym:{bpm:144,lead:'D5 D5 F5 D5 G5 F5 E5 C5 D5 D5 F5 A5 G5:2 F5 E5 D5 D5 F5 D5 A5 G5 F5 E5 D5 F5 E5 C5 D5:4',bass:'D3:2 A2:2 D3:2 A2:2 C3:2 G2:2 C3:2 G2:2 D3:2 A2:2 D3:2 A2:2 A2:2 E2:2 D3:4'},
- battle:{bpm:168,lead:'A4 A4 C5 A4 D5 A4 E5 D5 C5 C5 E5 C5 F5 E5 D5 C5 B4 B4 D5 B4 E5 D5 C5 B4 A4 C5 E5 A5 G#5 E5 B4 G#4',bass:'A2 A3 A2 A3 A2 A3 A2 A3 F2 F3 F2 F3 F2 F3 F2 F3 G2 G3 G2 G3 G2 G3 G2 G3 E2 E3 E2 E3 E2 E3 E2 E3'},
+ town:{bpm:84,lead:'E5:2 - G5 A5:3 - B5:2 A5 G5 E5:4 D5:2 E5 G5:3 - E5:2 D5 B4 A4:4 - -',bass:'A2:8 F2:8 C3:8 E2:8',pad:'A3:8 F3:8 C4:8 E3:8'},
+ route:{bpm:112,lead:'D5 F5 A5:2 G5 F5 E5:2 D5 E5 F5:2 A4:4 D5 F5 A5:2 C6 A5 G5:2 F5 E5 D5:2 -:4',bass:'D3:4 D3:4 A#2:4 A#2:4 C3:4 C3:4 A2:4 A2:4',pad:'D4:8 A#3:8 C4:8 A3:8'},
+ cave:{bpm:70,lead:'E5:3 - - B4:2 G5:3 F#5:4 - - E5:2 B4:6 - - -:4',bass:'E2:8 C2:8 D2:8 B1:8',pad:'E3:8 C3:8 D3:8 B2:8'},
+ gym:{bpm:136,lead:'D5 D5 F5 D5 G5 F5 E5 C5 D5 D5 F5 A5 G5:2 F5 E5 D5 D5 F5 D5 A5 G5 F5 E5 D5 F5 E5 C5 D5:4',bass:'D3:2 A2:2 D3:2 A2:2 C3:2 G2:2 C3:2 G2:2 D3:2 A2:2 D3:2 A2:2 A2:2 E2:2 D3:4',pad:'D4:8 C4:8 D4:8 A3:8'},
+ battle:{bpm:164,lead:'A4 A4 C5 A4 D5 A4 E5 D5 C5 C5 E5 C5 F5 E5 D5 C5 B4 B4 D5 B4 E5 D5 C5 B4 A4 C5 E5 A5 G#5 E5 B4 G#4',bass:'A2 A3 A2 A3 A2 A3 A2 A3 F2 F3 F2 F3 F2 F3 F2 F3 G2 G3 G2 G3 G2 G3 G2 G3 E2 E3 E2 E3 E2 E3 E2 E3'},
+ trainer:{bpm:172,lead:'E5 B4 E5 G5 F#5 E5 D5 B4 C5 E5 G5 C6 B5 G5 E5 D5 E5 B4 E5 G5 A5 G5 F#5 D5 E5 F#5 G5 B5 A5:2 G5 F#5',bass:'E2 E3 E2 E3 E2 E3 E2 E3 C2 C3 C2 C3 C2 C3 C2 C3 E2 E3 E2 E3 D2 D3 D2 D3 C2 C3 C2 C3 B1 B2 B1 B2'},
+ choir:{bpm:120,lead:'C5:2 C#5:2 C5:2 G4:2 G#4:4 G4:4 C5:2 D#5:2 D5:2 C#5:2 C5:8',bass:'C2:4 C2:4 C#2:4 C2:4 C2:4 G#1:4 G1:4 G1:4',pad:'C4:8 C#4:8 C4:8 G3:8'},
  boss:{bpm:184,lead:'E5 E5 G5 E5 A5 G5 E5 D5 E5 E5 G5 B5 A5 G5 F#5 D5 C5 C5 E5 C5 F#5 E5 D5 C5 B4 D5 F#5 B5 A5 F#5 D5 B4',bass:'E2 E3 E2 E3 E2 E3 E2 E3 E2 E3 E2 E3 D2 D3 D2 D3 C2 C3 C2 C3 C2 C3 C2 C3 B1 B2 B1 B2 B1 B2 D2 D3'},
- title:{bpm:96,lead:'C5:2 G4:2 C5:2 E5:2 D5:4 G4:4 A4:2 E5:2 D5:2 C5:2 B4:4 G4:4',bass:'C3:8 G2:8 A2:8 G2:8'},
+ title:{bpm:72,lead:'A4:4 E5:4 D5:2 C5:2 B4:4 A4:2 C5:2 E5:4 G5:2 F5:2 E5:8',bass:'A2:8 F2:8 C3:8 E2:8',pad:'A3:8 F3:8 C4:8 E3:8'},
  victory:{bpm:150,once:1,lead:'G5 G5 G5 C6:3 - B5 C6:4 E6:4',bass:'C3:4 G2:4 C3:8'},
  heal:{bpm:160,once:1,lead:'C5 E5 G5 C6:2 G5 C6:4',bass:'C3:4 C3:6'},
  level:{bpm:180,once:1,lead:'C5 E5 G5 C6:3',bass:'-:6'},
  evo:{bpm:120,once:1,lead:'C5 D5 E5 F5 G5 A5 B5 C6:4',bass:'C3:8 C3:4'},
 };
-const Snd={ac:null,on:true,cur:null,want:null,timer:null,master:null,
+const AMBIENT={town:'wind',route:'wind',gym:null,cave:'drips'};
+const Snd={ac:null,on:true,cur:null,want:null,timer:null,master:null,amb:null,ambKind:null,ambLevel:0,
  unlock(){if(!this.ac){try{this.ac=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ac.createGain();this.master.gain.value=0.6;this.master.connect(this.ac.destination);}catch(e){return;}}
-   if(this.ac.state==='suspended')this.ac.resume();if(this.want&&!this.cur)this.music(this.want,true);},
- tone(f,t,d,type,vol){if(!this.ac||!f)return;const o=this.ac.createOscillator(),g=this.ac.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0008,t+d*0.95);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+d);},
+   if(this.ac.state==='suspended')this.ac.resume();if(this.want&&!this.cur)this.music(this.want,true);if(this.ambKind&&!this.amb)this.ambience(this.ambKind,this.ambLevel);},
+ tone(f,t,d,type,vol,slide){if(!this.ac||!f)return;const o=this.ac.createOscillator(),g=this.ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+d);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0008,t+d*0.95);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+d);},
+ padTone(f,t,d,vol){if(!this.ac||!f)return;const o=this.ac.createOscillator(),o2=this.ac.createOscillator(),g=this.ac.createGain();o.type='sine';o2.type='triangle';o.frequency.value=f;o2.frequency.value=f*1.004;
+   g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+d*0.3);g.gain.linearRampToValueAtTime(0.0001,t+d);o.connect(g);o2.connect(g);g.connect(this.master);o.start(t);o2.start(t);o.stop(t+d+0.05);o2.stop(t+d+0.05);},
  music(name,force){if(!force&&this.want===name&&this.cur)return;this.want=name;this.stopMusic();if(!this.ac||!this.on)return;
-   const s=SONGS[name];if(!s)return;const lead=parseSeq(s.lead),bass=parseSeq(s.bass);const step=60/s.bpm/2;
-   const st={name,s,lead,bass,step,li:0,bi:0,lt:this.ac.currentTime+0.05,bt:this.ac.currentTime+0.05,ended:false};this.cur=st;
+   const s=SONGS[name];if(!s)return;const lead=parseSeq(s.lead),bass=parseSeq(s.bass),pad=s.pad?parseSeq(s.pad):null;const step=60/s.bpm/2;
+   const t0=this.ac.currentTime+0.05;const st={name,s,lead,bass,pad,step,li:0,bi:0,pi:0,lt:t0,bt:t0,pt:t0,ended:false};this.cur=st;
    this.timer=setInterval(()=>{if(this.cur!==st)return;const ah=this.ac.currentTime+0.25;
-     while(st.lt<ah){if(st.li>=lead.length){if(s.once){st.ended=true;break;}st.li=0;}const n=lead[st.li++];this.tone(n.f,st.lt,n.d*step*0.9,'square',0.045);st.lt+=n.d*step;}
-     while(st.bt<ah){if(st.bi>=bass.length){if(s.once)break;st.bi=0;}const n=bass[st.bi++];this.tone(n.f,st.bt,n.d*step*0.95,'triangle',0.09);st.bt+=n.d*step;}
+     while(st.lt<ah){if(st.li>=lead.length){if(s.once){st.ended=true;break;}st.li=0;}const n=lead[st.li++];this.tone(n.f,st.lt,n.d*step*0.9,'square',0.04);st.lt+=n.d*step;}
+     while(st.bt<ah){if(st.bi>=bass.length){if(s.once)break;st.bi=0;}const n=bass[st.bi++];this.tone(n.f,st.bt,n.d*step*0.95,'triangle',0.085);st.bt+=n.d*step;}
+     if(pad)while(st.pt<ah){if(st.pi>=pad.length)st.pi=0;const n=pad[st.pi++];this.padTone(n.f,st.pt,n.d*step,0.03);st.pt+=n.d*step;}
      if(st.ended&&this.ac.currentTime>st.lt+0.1){this.stopMusic();if(this.after){const a=this.after;this.after=null;this.music(a,true);}}
    },60);},
  jingle(name,thenSong){this.after=thenSong||this.want;this.music(name,true);this.want=this.after;},
  stopMusic(){if(this.timer)clearInterval(this.timer);this.timer=null;this.cur=null;},
+ ambience(kind,level){this.ambKind=kind;this.ambLevel=level;if(!this.ac)return;
+   if(this.amb){try{this.amb.stop();}catch(e){}this.amb=null;}if(this.dripT){clearInterval(this.dripT);this.dripT=null;}
+   if(!kind||!this.on||level<=0)return;
+   if(kind==='wind'){const len=this.ac.sampleRate*4;const buf=this.ac.createBuffer(1,len,this.ac.sampleRate);const a=buf.getChannelData(0);let last=0;for(let i=0;i<len;i++){last=last*0.97+(Math.random()*2-1)*0.03;a[i]=last*3;}
+     const src=this.ac.createBufferSource();src.buffer=buf;src.loop=true;const f=this.ac.createBiquadFilter();f.type='bandpass';f.frequency.value=400;f.Q.value=0.6;
+     const lfo=this.ac.createOscillator();const lg=this.ac.createGain();lfo.frequency.value=0.13;lg.gain.value=220;lfo.connect(lg);lg.connect(f.frequency);lfo.start();
+     const g=this.ac.createGain();g.gain.value=0.12*level;src.connect(f);f.connect(g);g.connect(this.master);src.start();this.amb=src;}
+   if(kind==='drips'){this.dripT=setInterval(()=>{if(!this.on||Math.random()<0.5)return;const t=this.ac.currentTime;const f=900+Math.random()*900;this.tone(f,t,0.12,'sine',0.05,0.6);this.tone(f*0.98,t+0.18,0.12,'sine',0.018,0.6);},700);}},
+ chirp(frame){if(!this.ac||!this.on)return;let h=0;for(const c of frame)h=(h*31+c.charCodeAt(0))>>>0;const t=this.ac.currentTime;const types=['square','sawtooth','triangle'];
+   const ty=types[h%3];const base=300+(h%7)*70;for(let i=0;i<3+(h%2);i++){const f=base*(1+((h>>(i*3))%5)*0.18);this.tone(f,t+i*0.07,0.07,ty,0.05,(h>>i)%2?1.5:0.7);}},
  sfx(n){if(!this.ac||!this.on)return;const t=this.ac.currentTime;
    if(n==='blip')this.tone(880,t,0.05,'square',0.05);
    else if(n==='ok'){this.tone(660,t,0.05,'square',0.05);this.tone(990,t+0.05,0.07,'square',0.05);}
    else if(n==='bump')this.tone(110,t,0.08,'square',0.06);
-   else if(n==='hit'){this.noise(t,0.15,0.25);this.tone(140,t,0.12,'square',0.07);}
-   else if(n==='crit'){this.noise(t,0.25,0.3);this.tone(90,t,0.2,'sawtooth',0.07);}
+   else if(n==='hit'){this.noise(t,0.15,0.25);this.tone(140,t,0.12,'square',0.07,0.5);}
+   else if(n==='crit'){this.noise(t,0.25,0.3);this.tone(90,t,0.2,'sawtooth',0.07,0.4);}
    else if(n==='super'){this.noise(t,0.2,0.3);this.tone(220,t,0.08,'square',0.06);this.tone(330,t+0.08,0.1,'square',0.06);}
    else if(n==='spike'){for(let i=0;i<4;i++)this.tone(400+i*200,t+i*0.04,0.05,'square',0.05);}
    else if(n==='shake')this.tone(200,t,0.06,'triangle',0.1);
@@ -87,10 +103,12 @@ const Snd={ac:null,on:true,cur:null,want:null,timer:null,master:null,
    else if(n==='faint'){for(let i=0;i<5;i++)this.tone(400-i*60,t+i*0.06,0.07,'square',0.05);}
    else if(n==='wrong')this.tone(150,t,0.25,'sawtooth',0.05);
    else if(n==='od'){for(let i=0;i<8;i++)this.tone(300+i*120,t+i*0.03,0.05,'sawtooth',0.05);this.noise(t+0.25,0.4,0.3);}
+   else if(n==='thunder'){this.noise(t,0.9,0.5);this.tone(55,t,0.8,'sawtooth',0.06,0.6);}
+   else if(n==='glitch'){for(let i=0;i<10;i++)this.tone(200+Math.random()*1800,t+i*0.03,0.03,'square',0.04);}
  },
  noise(t,d,v){const len=Math.floor(this.ac.sampleRate*d);const buf=this.ac.createBuffer(1,len,this.ac.sampleRate);const a=buf.getChannelData(0);for(let i=0;i<len;i++)a[i]=(Math.random()*2-1)*(1-i/len);
    const s=this.ac.createBufferSource();s.buffer=buf;const g=this.ac.createGain();g.gain.value=v*0.3;s.connect(g);g.connect(this.master);s.start(t);},
- toggle(){this.on=!this.on;if(!this.on)this.stopMusic();else this.music(this.want,true);}
+ toggle(){this.on=!this.on;if(!this.on){this.stopMusic();this.ambience(null,0);}else{this.music(this.want,true);this.ambience(this.ambKind,this.ambLevel);}}
 };
 
 // ---------- pixel helpers ----------
@@ -110,7 +128,7 @@ function crisp(c,outlineCol,passes=1){const g=c.getContext('2d');const d=g.getIm
 
 // ---------- character sprites ----------
 const LOOKS={
- player:{skin:'#f4c8a0',hair:'#3a2418',top:'#e8642c',bot:'#30384c',acc:'#ffd040'},
+ player:{skin:'#f4c8a0',hair:'#3a2418',top:'#e8642c',bot:'#30384c',acc:'#ffd040',beanie:'#2a3450',pom:'#ffd040'},
  vesna:{skin:'#f0c8a8',hair:'#8a4ab8',top:'#f4f4f4',bot:'#5a6478',coat:1},
  kael:{skin:'#e8b890',hair:'#d0302a',top:'#26262e',bot:'#3a3a48',acc:'#d0302a'},
  mom:{skin:'#f0c8a8',hair:'#7a4a28',top:'#5aa060',bot:'#e0d8c0',dress:1},
@@ -121,45 +139,17 @@ const LOOKS={
  brakka:{skin:'#c88a5a',hair:'#5a4030',top:'#8a6a40',bot:'#4a3a2a',acc:'#ffb040'},
  ione:{skin:'#f4d0b0',hair:'#f0e040',top:'#2a2a40',bot:'#2a2a40',acc:'#ffe040'},
  tinker:{skin:'#f4c8a0',hair:'#202020',top:'#c8a040',bot:'#5a4a30'},
- scout:{skin:'#e8b890',hair:'#c07030',top:'#5a8a40',bot:'#6a5030'},
+ scout:{skin:'#e8b890',hair:'#c07030',top:'#5a8a40',bot:'#6a5030',beanie:'#3a5a30',pom:'#e0c060'},
  mech:{skin:'#d8a880',hair:'#404040',top:'#4a6a8a',bot:'#4a6a8a'},
  hiker:{skin:'#c89060',hair:'#6a4a2a',top:'#a04030',bot:'#5a4a3a',hat:'#6a5a3a'},
- old:{skin:'#f0d0b0',hair:'#d8d8d8',top:'#8a7aa0',bot:'#4a4a5a'},
- kid:{skin:'#f4d0b0',hair:'#f0a030',top:'#40a0e0',bot:'#e0e0e0'},
+ old:{skin:'#f0d0b0',hair:'#d8d8d8',top:'#8a7aa0',bot:'#4a4a5a',beanie:'#6a5a4a'},
+ kid:{skin:'#f4d0b0',hair:'#f0a030',top:'#40a0e0',bot:'#5a6478',beanie:'#e04060',pom:'#ffffff'},
  guard:{skin:'#e0b090',hair:'#303030',top:'#3a4a6a',bot:'#2a3042',hat:'#2a3a5a'},
  engineer:{skin:'#d8a070',hair:'#2a2a2a',top:'#e0a020',bot:'#405060',hat:'#f0c020'},
  woman:{skin:'#f0c8a8',hair:'#202028',top:'#c04a6a',bot:'#3a3040',dress:1},
  lineman:{skin:'#e0b090',hair:'#605040',top:'#e0d020',bot:'#303848',hat:'#e0d020'},
  quarry:{skin:'#d09a70',hair:'#3a2a1a',top:'#7a6a50',bot:'#4a3a2a',hat:'#d0a040'},
 };
-const CHARCACHE={};
-function charSprite(lk,dir,fr){const L=typeof lk==='string'?LOOKS[lk]:lk;const key=(typeof lk==='string'?lk:JSON.stringify(lk))+dir+fr;let c=CHARCACHE[key];if(c)return c;
-  c=mkCanvas(16,18);const g=c.getContext('2d');const sk=L.skin,hr=L.hair,tp=L.top,bt=L.bot;
-  const legY=13;const l1=fr===1?-1:0,l2=fr===2?-1:0;
-  if(L.robe){R(g,4,8,8,8,tp);R(g,4,15,8,1,shade(tp,-0.2));if(fr){R(g,fr===1?4:9,15,3,1,'#00000000');}}
-  else if(L.dress){R(g,4,8,8,4,tp);R(g,3,11,10,3,tp);R(g,5,14+l1,2,2,sk);R(g,9,14+l2,2,2,sk);}
-  else{R(g,5,legY+l1,2,3,bt);R(g,9,legY+l2,2,3,bt);R(g,4,8,8,6,tp);R(g,5,12,6,1,bt);}
-  if(L.coat){R(g,4,8,8,7,tp);R(g,7,8,2,5,'#a0d0f0');}
-  // arms
-  if(dir==='left'||dir==='right'){const ax=dir==='left'?8:6;R(g,ax,9,2,4,shade(tp,-0.15));R(g,ax,13,2,1,sk);}
-  else{R(g,3,9,1,4,shade(tp,-0.15));R(g,12,9,1,4,shade(tp,-0.15));R(g,3,13,1,1,sk);R(g,12,13,1,1,sk);}
-  if(L.acc&&!L.robe)R(g,4,8,8,1,L.acc);
-  if(L.robe&&L.acc)R(g,7,8,2,8,L.acc);
-  // head
-  R(g,4,2,8,7,sk);R(g,5,1,6,1,sk);
-  if(dir==='up'){R(g,4,1,8,7,hr);R(g,5,0,6,1,hr);}
-  else{R(g,4,1,8,2,hr);R(g,5,0,6,1,hr);
-    if(dir==='down'){R(g,4,3,1,3,hr);R(g,11,3,1,3,hr);}
-    if(dir==='left'){R(g,9,3,3,4,hr);}
-    if(dir==='right'){R(g,4,3,3,4,hr);}}
-  if(L.mask&&dir!=='up'){R(g,4,3,8,5,'#f8f8ff');R(g,dir==='right'?8:dir==='left'?5:5,5,dir==='down'?2:2,1,'#202030');if(dir==='down')R(g,9,5,2,1,'#202030');}
-  else if(dir==='down'){R(g,6,5,1,2,'#202030');R(g,9,5,1,2,'#202030');}
-  else if(dir==='left'){R(g,5,5,1,2,'#202030');}
-  else if(dir==='right'){R(g,10,5,1,2,'#202030');}
-  if(L.hat){R(g,3,1,10,2,L.hat);R(g,4,0,8,1,L.hat);}
-  crisp(c,'#1c1c28');
-  CHARCACHE[key]=c;return c;}
-
 // ---------- UI stack ----------
 const UI=[];
 function pushUI(w){UI.push(w);return new Promise(r=>w._res=r);}

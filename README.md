@@ -8,11 +8,18 @@ Calderra is freezing. The Heartforge under Mt. Cinder, the reactor that powers e
 On phones the game runs fullscreen in landscape. On iPhone, use Share → Add to Home Screen and launch it from there.
 
 ## Chapter 1: The Relay Road
-- 36 alien shardbots (11 base frames, 25 evolved forms), all drawn in code
-- **Socket evolution:** at Lv 16 the second socket opens, and the shard you fit decides the evolution branch (one swap allowed, then it locks)
-- **Overdrive:** a gauge that fills in battle and unleashes one 110-power shard move
-- Puzzles: crate plates, red/blue switch barriers, a Maker memory terminal, power-conduit routing
-- Minimap with fog of war, full world map with fast travel, Bestiary, shops, storage, 3 save slots
+- 36 alien shardbots (11 base frames, 25 evolved forms), drawn in code at high resolution, with idle animations
+- **Socket evolution:** at Lv 16 the second socket opens, and the shard you fit decides the evolution branch (preview first; one swap allowed)
+- **Core traits:** every frame has a passive ability (Afterburn, Bulwark, Volt Sink, Dread Aura…)
+- **Overdrive:** fill the gauge in battle for one cinematic 110-power shard strike
+- **The Forge:** salvage Scrap into shards, refine 3 shards into a Refined shard (+10% moves), fuse into Prime Fragments
+- **Modules:** equippable held items (Coolant Fin, Plating Kit, Overclock Chip, Repair Nanites)
+- **Weather:** snow, freezing night, blizzards and static storms change visibility and boost or weaken types
+- Typed move animations, damage numbers, screen shake, smarter trainer AI that switches and times its Overdrive
+- Puzzles: crate plates, red/blue switch barriers, Maker memory terminals, power-conduit routing
+- 3 side quests, rare Glitched variants, Rematch Board, Bestiary rewards and Navi-band skins
+- Minimap with fog of war, world map with fast travel, quest log, type chart, autosave + 3 slots, save codes to move between devices
+- Phone: fullscreen landscape play, big buttons, opacity, left-handed layout, vibration
 
 ## Controls
 | Keyboard | Phone | Action |

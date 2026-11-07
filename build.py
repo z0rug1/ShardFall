@@ -1,6 +1,6 @@
 import sys,os
-SRC=os.path.join(os.path.dirname(os.path.abspath(__file__)),'src') if os.path.isdir('src') else '.'
-files=['engine.js','art.js','data.js','maps.js','battle.js','ui.js','main.js']
+SRC=os.path.join(os.path.dirname(os.path.abspath(__file__)),'src') if os.path.isdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src')) else '.'
+files=['engine.js','chars.js','art.js','data.js','fx.js','systems.js','maps.js','battle.js','ui.js','main.js']
 js=''.join(open(os.path.join(SRC,f)).read()+'\n' for f in files)
 h=open(os.path.join(SRC,'shell.html')).read().replace('/*JS*/',js)
 pwa='--pwa' in sys.argv

@@ -1,10 +1,10 @@
 // ===================== MAPS & STORY =====================
-const SOLID=new Set(['T','~','f','R','Y','Q','W','s','#','%','X','c','M','t','h','v','l','m']);
+const SOLID=new Set(['T','~','f','R','Y','Q','W','s','#','%','X','c','M','t','h','v','l','m','z','i']);
 const MAPS={};
 const N=()=>G.name;
 
 // ---------- Ashgrove ----------
-MAPS.ashgrove={name:'Ashgrove',theme:'out',music:'town',outdoor:1,world:{x:0,y:56},town:1,heal:{map:'home',x:4,y:6},grid:[
+MAPS.ashgrove={name:'Ashgrove',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:0,y:56},town:1,heal:{map:'home',x:4,y:6},grid:[
 'TTTTTTTTTT==TTTTTTTTTT',
 'TTTTTTTTTT==TTTTTTTTTT',
 'TT........==........TT',
@@ -28,11 +28,17 @@ warps:[{x:5,y:5,to:'home',tx:4,ty:6},{x:17,y:5,to:'lab',tx:5,ty:8},{x:6,y:11,to:
 signs:{'9,5':'ASHGROVE — "Warm hearths, warm hearts." The lab is to the east.'},
 npcs:[
  {id:'aide',x:12,y:2,dir:'down',look:'clerk',text:'The Heartforge readings were weird again last night. Dr. Vesna hasn\'t slept.'},
- {id:'kid1',x:7,y:12,dir:'right',look:'kid',wander:1,text:'My dad says bots used to glow brighter. Now some just... stop.'},
+ {id:'kid1',x:7,y:12,dir:'right',look:'kid',wander:1,script:kidQuest},
  {id:'old1',x:16,y:9,dir:'down',look:'old',text:'I remember when snow never reached Ashgrove. Mt. Cinder kept us warm. Times change.'},
 ],
 triggers:[{x:10,y:2,run:blockNorth},{x:11,y:2,run:blockNorth}]};
 async function guardBlock(){if(flag('badge1'))return;G.busy=true;await say('Hold on! Route 2 is crawling with feral bots and Choir thugs. Come back when you have Warden Brakka\'s Prime Shard.',{speaker:'Guard'});await stepPlayer('left');G.busy=false;}
+async function kidQuest(){const s=qstate('lostbit');
+ if(!flag('starter')){await say('My dad says bots used to glow brighter. Now some just... stop.',{speaker:'Kid'});return;}
+ if(!s){await say('My Pipsprock, Bit, flew off chasing snowflakes... toward Route 1! Can you find it? It\'s tiny and it hides in the grass.',{speaker:'Kid'});setQ('lostbit','active');Snd.sfx('ok');await say('New quest: LOST BIT. (Check QUESTS in the menu.)');}
+ else if(s==='active')await say('Bit is somewhere on Route 1. It likes hiding in the far corners of tall grass!',{speaker:'Kid'});
+ else if(s==='found'){setQ('lostbit','done');Snd.jingle('victory',curMap().music);await say('BIT! You found it! Thank you, thank you!',{speaker:'Kid'});addItem('spike2',2);addItem('coolfin',1);await say(N()+' received 2 Tuned Spikes and a Coolant Fin module!');}
+ else await say('Bit and I are never going out in a blizzard again.',{speaker:'Kid'});}
 async function blockNorth(){if(flag('starter'))return;G.busy=true;await say('Hey, wait! Don\'t go into the tall grass without a bot! Feral ones bite. Dr. Vesna\'s lab is just east of here.',{speaker:'Lab Aide'});await stepPlayer('down');G.busy=false;}
 
 MAPS.home={name:'Your House',theme:'house',music:'town',grid:[
@@ -44,7 +50,7 @@ npcs:[{id:'mom',x:5,y:3,dir:'left',look:'mom',script:async()=>{
 MAPS.house_a={name:'Ashgrove',theme:'house',music:'town',grid:['XXXXXXXXX','XvxxMxxhX','XxxxxxxxX','XxxxxtxxX','XxxxxxxxX','XxxxxxxxX','XxxxxxxvX','XXXXeXXXX'],
 warps:[{x:4,y:7,to:'ashgrove',tx:6,ty:12,dir:'down'}],
 npcs:[{id:'ha1',x:2,y:3,dir:'right',look:'woman',text:'The Makers built every bot you\'ve ever seen. Nobody knows where the Makers went.'},
- {id:'ha2',x:6,y:5,dir:'left',look:'old',text:'Shards are like hearts. Fit a different one, get a different bot. My old Gearpup became a Shockhound when I gave it a Volt shard!'}]};
+ {id:'ha2',x:6,y:5,dir:'left',look:'old',text:'Shards are like hearts. Fit a different one, get a different bot. And every frame has its own core trait. Check a bot\'s Summary to see it!'}]};
 
 // ---------- Lab ----------
 MAPS.lab={name:'Orla Lab',theme:'lab',music:'town',grid:[
@@ -90,7 +96,7 @@ async function choosePod(o){
  G.busy=false;}
 
 // ---------- Route 1 ----------
-MAPS.route1={name:'Route 1',theme:'out',music:'route',outdoor:1,world:{x:2,y:20},enc:{tile:',',rate:10,list:[['pipsprock',2,4,35],['boltbun',2,4,25],['scrapmite',3,4,25],['sporelet',3,5,15]]},grid:[
+MAPS.route1={name:'Route 1',theme:'out',music:'route',outdoor:1,weather:'snow',world:{x:2,y:20},enc:{tile:',',rate:10,list:[['pipsprock',2,4,35],['boltbun',2,4,25],['scrapmite',3,4,25],['sporelet',3,5,15]]},grid:[
 'TTTTTTTT====TTTTTTTT',
 'TTTTTTTT====TTTTTTTT',
 'TT,,,,....=....,,,TT',
@@ -103,7 +109,7 @@ MAPS.route1={name:'Route 1',theme:'out',music:'route',outdoor:1,world:{x:2,y:20}
 'TT.,,,.=..........TT',
 'TT.,,,.=..~~~~~...TT',
 'TT.,,,.=..~~~~~...TT',
-'TT.,,,.=..~~~~~...TT',
+'TT.,,,.=..i~~~~...TT',
 'TT.....=..........TT',
 'TTTT...=....TTTTTTTT',
 'TTTT...=....TTTTTTTT',
@@ -130,7 +136,8 @@ MAPS.route1={name:'Route 1',theme:'out',music:'route',outdoor:1,world:{x:2,y:20}
 warps:[{x:8,y:35,to:'ashgrove',tx:10,ty:1},{x:9,y:35,to:'ashgrove',tx:11,ty:1},
  {x:8,y:0,to:'brasston',tx:10,ty:18},{x:9,y:0,to:'brasston',tx:11,ty:18},{x:10,y:0,to:'brasston',tx:12,ty:18},{x:11,y:0,to:'brasston',tx:13,ty:18}],
 signs:{'15,19':'ROUTE 1 — North: Brasston. Feral bots in tall grass!'},
-objs:[{type:'item',id:'r1gale',x:16,y:12,item:'shard_Gale'},{type:'item',id:'r1patch',x:3,y:26,item:'patch'},{type:'item',id:'r1spike',x:17,y:3,item:'spike',qty:2}],
+objs:[{type:'lostbot',x:3,y:32,cond:()=>qstate('lostbit')==='active',run:async()=>{setQ('lostbit','found');Snd.chirp('pipsprock');await say('A tiny Pipsprock is shivering in the grass. Its tag says BIT. It hops onto your shoulder.');await say('Quest updated: bring Bit back to the kid in Ashgrove.');}},
+ {type:'item',id:'r1gale',x:16,y:12,item:'shard_Gale'},{type:'item',id:'r1patch',x:3,y:26,item:'patch'},{type:'item',id:'r1spike',x:17,y:3,item:'spike',qty:2}],
 npcs:[
  {id:'lou',x:12,y:9,dir:'left',look:'tinker',range:5,trainer:{name:'Lou',title:'Tinker',team:[['scrapmite',4],['pipsprock',4]],money:80,pre:'You! Your bot looks freshly booted. Let\'s see how it runs!',post:'Huh. Your bot\'s better calibrated than mine.'}},
  {id:'mara',x:16,y:24,dir:'left',look:'scout',range:5,trainer:{name:'Mara',title:'Scout',team:[['boltbun',5],['sporelet',5]],money:100,pre:'Scouts never back down from a battle!',post:'Okay, okay. You\'ve got good instincts.'}},
@@ -138,7 +145,7 @@ npcs:[
 ]};
 
 // ---------- Brasston ----------
-MAPS.brasston={name:'Brasston',theme:'out',music:'town',outdoor:1,world:{x:0,y:0},town:1,heal:{map:'repair_b',x:5,y:6},grid:[
+MAPS.brasston={name:'Brasston',theme:'out',music:'town',outdoor:1,weather:'night',world:{x:0,y:0},town:1,heal:{map:'repair_b',x:5,y:6},grid:[
 'TTTTTTTTTTTTTTTTTTTTTTTT',
 'TT....................TT',
 'TT.YYYYYYY.....RRRR...TT',
@@ -167,10 +174,18 @@ signs:{'12,5':'BRASSTON WARDEN HALL — Warden Brakka. "Solid as bedrock."'},
 npcs:[
  {id:'bguard',x:21,y:11,dir:'up',look:'guard',text:'Route 2 is dangerous these days. I only let through people who have a Prime Shard from Warden Brakka.'},
  {id:'grunt0',x:17,y:12,dir:'left',look:'grunt',range:4,cond:()=>!flag('t_grunt0'),trainer:{name:'Choir Grunt',title:'Hollow',team:[['gloomlamp',7],['scrapmite',6]],money:150,pre:'The Heartforge is a chain around every bot\'s neck. The Hollow Choir will break it. Get out of my way!',post:'Silence is coming. The Cantor promised. You can\'t stop a song...'},after:async n=>{n.hidden=true;await say('The Choir grunt ran off toward Route 2...');}},
- {id:'eng',x:19,y:13,dir:'left',look:'engineer',text:'Those masked creeps call themselves the Hollow Choir. They\'ve been stealing shards all over Brasston!'},
+ {id:'eng',x:19,y:13,dir:'left',look:'engineer',script:engQuest},
  {id:'bkid',x:9,y:12,dir:'down',look:'kid',wander:1,text:'Warden Brakka makes you push crates around his gym. He says it builds character.'},
  {id:'bwoman',x:13,y:3,dir:'down',look:'woman',text:'Kael came through here this morning. Beat Brakka in three turns, they say. Scary kid.'},
 ]};
+async function engQuest(){const s=qstate('stolen');const sp={speaker:'Engineer'};
+ if(!flag('t_grunt0')){await say('Those masked creeps call themselves the Hollow Choir. They\'ve been stealing shards all over Brasston!',sp);return;}
+ if(!s){await say('You chased off that Choir creep! I heard him muttering... they stashed our shards on Route 2, by the frozen lake up north.',sp);await say('The guard won\'t let anyone through without Brakka\'s Prime. Get it back for us?',sp);setQ('stolen','active');Snd.sfx('ok');await say('New quest: STOLEN SHARDS.');}
+ else if(s==='active')await say('The stash should be on Route 2, near the frozen lake to the north.',sp);
+ else if(s==='found'){setQ('stolen','done');delete G.bag.stolen;Snd.jingle('victory',curMap().music);await say('Our shards! The whole crate! Here, take some for your trouble, and this chip I\'ve been tinkering with.',sp);
+   const ts=TYPES.filter(t=>t!=='Core');const got=[];for(let i=0;i<3;i++){const t=pick(ts);addItem('shard_'+t,1);got.push(t);}addItem('overclock',1);G.money+=800;
+   await say(N()+' received '+got.join(', ')+' Shards, an Overclock Chip and 800 Cr!');}
+ else await say('Brasston owes you one. If the Choir comes back, we\'ll be ready.',sp);}
 MAPS.house_b1={name:'Brasston',theme:'house',music:'town',grid:['XXXXXXXXX','XvxxMxxhX','XxxxxxxxX','XxtxxxxxX','XxxxxxxxX','XxxxxxxxX','XvxxxxxxX','XXXXeXXXX'],warps:[{x:4,y:7,to:'brasston',tx:17,ty:5,dir:'down'}],
  npcs:[{id:'hb1',x:5,y:2,dir:'down',look:'old',text:'Socket types matter. Fit a shard that covers your bot\'s weaknesses and it\'ll serve you well.'}]};
 MAPS.house_b2={name:'Brasston',theme:'house',music:'town',grid:['XXXXXXXXX','XhxxxxMvX','XxxxxxxxX','XxxxtxxxX','XxxxxxxxX','XxxxxxxxX','XvxxxxxvX','XXXXeXXXX'],warps:[{x:4,y:7,to:'brasston',tx:7,ty:16,dir:'down'}],
@@ -179,7 +194,8 @@ MAPS.house_b2={name:'Brasston',theme:'house',music:'town',grid:['XXXXXXXXX','Xhx
 function repairMap(name,ret,shop){return{name,theme:'repair',music:'town',heal:1,grid:['XXXXXXXXXXX','XxxxxMxxxxX','XcccxxxcccX','XxxxxxxxxxX','XxxxxxxxxxX','XvxxxxxxxvX','XxxxxxxxxxX','XXXXXeXXXXX'],
  warps:[{x:5,y:7,to:ret.map,tx:ret.x,ty:ret.y,dir:'down'}],
  npcs:[{id:'nurse',x:2,y:1,dir:'down',look:'nurse',script:nurseTalk},{id:'clerk',x:8,y:1,dir:'down',look:'clerk',script:()=>openShop(shop)},
-  {id:'rp1',x:8,y:5,dir:'left',look:pick(['kid','woman','mech']),text:'The terminal in the back is a storage system. Bots you catch with a full party get sent there.'}],
+  {id:'rp1',x:8,y:5,dir:'left',look:pick(['kid','woman','mech']),text:'The terminal in the back is storage. The Forge Tech can refine shards, and the board by the door lists trainers who want rematches.'},
+  {id:'forge',x:9,y:3,dir:'left',look:'engineer',script:openForge},{id:'board',x:1,y:3,dir:'right',look:'guard',script:openRematch}],
  terminal:{x:5,y:1}};}
 MAPS.repair_b=repairMap('Brasston Repair Station',{map:'brasston',x:5,y:11},['patch','debug','spike']);
 async function nurseTalk(){G.busy=true;const r=await ask('Welcome to the Repair Station! Shall I restore your bots to full power?');
@@ -223,7 +239,7 @@ async function brakkaTalk(){if(flag('badge1')){await say('Your bots are solid no
  G.busy=false;}
 
 // ---------- Route 2 ----------
-MAPS.route2={name:'Route 2',theme:'out',music:'route',outdoor:1,world:{x:24,y:3},enc:{tile:',',rate:10,list:[['boltbun',7,9,20],['pebblit',7,9,20],['gearpup',8,10,18],['dripcell',7,9,20],['sporelet',8,9,15],['gloomlamp',8,10,7]]},grid:[
+MAPS.route2={name:'Route 2',theme:'out',music:'route',outdoor:1,weather:'blizzard',world:{x:24,y:3},enc:{tile:',',rate:10,list:[['boltbun',7,9,20],['pebblit',7,9,20],['gearpup',8,10,18],['dripcell',7,9,20],['sporelet',8,9,15],['gloomlamp',8,10,7]]},grid:[
 'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
 'TTTT,,,,,,TTTTTTTT......~~~~~~~~TTTTTTTT',
 'TT..,,,,,,....TTTT...,,,~~~~~~~~,,,..TTT',
@@ -232,7 +248,7 @@ MAPS.route2={name:'Route 2',theme:'out',music:'route',outdoor:1,world:{x:24,y:3}
 'TT...====================.............TT',
 '....==..,,,,,,.............=.....,,,..TT',
 '....=...,,,,,,.............=.....,,,..TT',
-'TT..=...,,,,,,....TTTT.....=.....,,,..TT',
+'TT..=...,,,,,,....zTTT.....=.....,,,..TT',
 'TT..=.........,,,,TTTT.....=.........TTT',
 'TT..==========,,,,.........========..KTT',
 'TT............,,,,....TTTT............TT',
@@ -240,7 +256,8 @@ MAPS.route2={name:'Route 2',theme:'out',music:'route',outdoor:1,world:{x:24,y:3}
 'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'],
 warps:[{x:0,y:6,to:'brasston',tx:22,ty:9},{x:0,y:7,to:'brasston',tx:22,ty:10},{x:37,y:10,to:'cave',tx:1,ty:7}],
 signs:{},
-objs:[{type:'cache',id:'cache2',x:34,y:5,item:'shard_Volt'},{type:'item',id:'r2p',x:3,y:11,item:'patch2'},{type:'item',id:'r2s',x:9,y:1,item:'spike',qty:3}],
+objs:[{type:'stash',x:20,y:3,cond:()=>qstate('stolen')==='active',run:async()=>{addItem('stolen',1);setQ('stolen','found');Snd.sfx('item');await say('A crate stamped with the Choir\'s mask. Inside: dozens of Brasston\'s shards. You take the whole crate.');await say('Quest updated: return the Stolen Shards to the engineer in Brasston.');}},
+ {type:'cache',id:'cache2',x:34,y:5,item:'shard_Volt'},{type:'item',id:'r2p',x:3,y:11,item:'patch2'},{type:'item',id:'r2s',x:9,y:1,item:'spike',qty:3}],
 terminalPuzzle:{x:28,y:4,flag:'cache2open'},
 npcs:[
  {id:'dov',x:12,y:9,dir:'up',look:'mech',range:4,trainer:{name:'Dov',title:'Mechanic',team:[['gearpup',10],['scrapmite',10],['boltbun',11]],money:330,pre:'Hold it! I tune bots for a living. Let\'s see how yours handle!',post:'Your bots run smoother than anything in my shop.'}},
@@ -264,7 +281,7 @@ async function kael2(){if(flag('kael2'))return;setFlag('kael2');G.busy=true;
 // ---------- Relay Tunnel (switch puzzle) ----------
 MAPS.cave={name:'Relay Tunnel',theme:'cave',music:'cave',outdoor:1,dungeon:1,world:{x:62,y:6},enc:{tile:'^',rate:5,list:[['scrapmite',9,11,30],['pebblit',9,11,25],['gloomlamp',10,12,25],['gearpup',10,11,20]]},grid:[
 '%%%%%%%%%%%%%%%%%%%%%%%%',
-'%%^^^^%%%%%^^^%%%%^^^^%%',
+'%%^^^^%%%%z^^^%%%%^^^^%%',
 '%^^^^^^%%%^^^^^%%^^^^^^%',
 '%^^S^^^%%%^^^^^%%^^^^^^%',
 '%^^^^^^%%%%%u%%%%^^%%^^%',
@@ -298,7 +315,7 @@ async function deaconFight(n){G.busy=true;
  G.busy=false;}
 
 // ---------- Voltmere ----------
-MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,world:{x:86,y:5},town:1,heal:{map:'repair_v',x:5,y:6},grid:[
+MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,weather:'static',world:{x:86,y:5},town:1,heal:{map:'repair_v',x:5,y:6},grid:[
 'TTTTTTTTTTTTTTTTTTTTTTTT',
 'T#####......MM......TTTT',
 'T#####.YYYYYYYY.....l.TT',
@@ -317,14 +334,26 @@ MAPS.voltmere={name:'Voltmere',theme:'out',music:'town',outdoor:1,world:{x:86,y:
 'TT..WDWW....l.........TT',
 'TT....................TT',
 'TTTTTTTTTTTTTTTTTTTTTTTT'],
+tileScripts:{'19,10':generatorTile,'20,10':generatorTile,'19,11':generatorTile,'20,11':generatorTile},
 warps:[{x:1,y:8,to:'cave',tx:22,ty:7,dir:'left'},{x:10,y:5,to:'gym2',tx:6,ty:11},{x:14,y:10,to:'repair_v',tx:5,ty:6},{x:18,y:5,to:'house_v1',tx:4,ty:6},{x:5,y:15,to:'house_v2',tx:4,ty:6}],
 signs:{'13,6':'VOLTMERE WARDEN HALL — Warden Ione. "Stay connected."'},
 npcs:[
- {id:'vm1',x:16,y:12,dir:'left',look:'lineman',text:'The power came back all at once! Somebody fixed the relay. Was it you?'},
+ {id:'vm1',x:16,y:12,dir:'left',look:'lineman',script:genQuest},
  {id:'vm2',x:7,y:9,dir:'down',look:'kid',wander:1,text:'Ione\'s gym is full of power conduits. You have to rotate them so the current reaches the gate!'},
  {id:'vm3',x:20,y:7,dir:'down',look:'old',text:'Voltmere was built around Maker generators. Without the Heartforge, they\'d be just scrap.'},
 ]};
-MAPS.repair_v=repairMap('Voltmere Repair Station',{map:'voltmere',x:14,y:11},['patch','patch2','debug','spike','spike2','rebootcell']);
+async function genQuest(){const s=qstate('generator');const sp={speaker:'Lineman'};
+ if(!s){await say('The power came back all at once! Was that you? Then maybe you can help with one more thing.',sp);await say('The old generator east of here is still dead. It needs a manual restart sequence, and my hands are too frozen to punch it in.',sp);setQ('generator','active');Snd.sfx('ok');await say('New quest: DEAD GENERATOR.');}
+ else if(s==='active')await say('The generator\'s the big machine on the east side, by the fence.',sp);
+ else if(s==='found'){setQ('generator','done');Snd.jingle('victory',curMap().music);await say('Listen to it hum! You\'re a natural. Take these, I salvaged them from the old control room.',sp);addItem('nanites',1);addItem('rshard_Volt',1);await say(N()+' received Repair Nanites and a Refined Volt Shard!');}
+ else await say('East side has lights again. The kids are building snow-bots under them.',sp);}
+async function generatorTile(){const s=qstate('generator');
+ if(s==='active'){await say('A dead Maker generator. Its restart panel blinks weakly.');const r=await ask('Enter the restart sequence?');if(r!==0)return;
+   const seq=Array.from({length:5},()=>pick(['up','right','down','left']));const ok=await pushUI(memoryW(seq));
+   if(ok){setQ('generator','found');Snd.sfx('item');await say('The generator coughs, sputters... and roars to life! Lights flicker on along the fence.');collectLights();}else{Snd.sfx('wrong');await say('The sequence fails. The panel resets.');}}
+ else if(s==='found'||s==='done')await say('The generator hums steadily. Warm air rolls off its vents.');
+ else await say('A dead Maker generator. Frost has crept into its vents.');}
+MAPS.repair_v=repairMap('Voltmere Repair Station',{map:'voltmere',x:14,y:11},['patch','patch2','debug','spike','spike2','rebootcell','coolfin','platekit']);
 MAPS.house_v1={name:'Voltmere',theme:'house',music:'town',grid:['XXXXXXXXX','XhxxMxxvX','XxxxxxxxX','XxxtxxxxX','XxxxxxxxX','XxxxxxxxX','XvxxxxxvX','XXXXeXXXX'],warps:[{x:4,y:7,to:'voltmere',tx:18,ty:6,dir:'down'}],
  npcs:[{id:'hv1',x:5,y:4,dir:'left',look:'woman',text:'My husband swears Overdrive is the Makers\' real secret. Fill the gauge in battle and your bot can unleash its shard power once!'}]};
 MAPS.house_v2={name:'Voltmere',theme:'house',music:'town',grid:['XXXXXXXXX','XvxxxxxhX','XxxxxxxxX','XxxxxtxxX','XxxxxxxxX','XxxxxxxxX','XxxxxxxvX','XXXXeXXXX'],warps:[{x:4,y:7,to:'voltmere',tx:5,ty:16,dir:'down'}],

@@ -1,6 +1,6 @@
 // ---------- bot sprites (robots) ----------
 const BOTCACHE={};const BQ=4;
-function botSprite(id,silhouette){const key=id+(silhouette?'_s':'');if(BOTCACHE[key])return BOTCACHE[key];
+function botSprite(id,opt){const O=opt===true?{sil:1}:(opt||{});const silhouette=!!O.sil;const key=id+(silhouette?'_s':'')+(O.blink?'_b':'')+(O.glitch?'_g':'');if(BOTCACHE[key])return BOTCACHE[key];
   const d=BOTS[id];const Q=BQ;const c=mkCanvas(40*Q,40*Q);const g=c.getContext('2d');
   const s=d.stage>=1?1.12:0.92;const ox=20-16*s,oy=d.stage>=1?40-34*s:40-33*s;
   const X=x=>(ox+x*s)*Q,Y=y=>(oy+y*s)*Q,S=v=>v*s*Q;
@@ -19,14 +19,15 @@ function botSprite(id,silhouette){const key=id+(silhouette?'_s':'');if(BOTCACHE[
   const glow=(x,y,w,h)=>{B(x,y,w,h,eye);B(x,y,Math.max(0.5,w/2),0.5,'#ffffff');glowPt(x+w/2,y+h/2,Math.max(w,h)*1.4);};
   // angry visor: dark band, two slanted slit eyes angled toward centre, heavy V brow
   const visor=(x,y,w)=>{B(x,y,w,2.4,vis);const m=x+w/2;
+    if(O.blink){B(x+0.8,y+1.2,w/2-1.5,0.5,md);B(m+0.7,y+1.2,w/2-1.5,0.5,md);Tr([x-1,y-1.6,m,y+1.1,x+w+1,y-1.6,x+w+1,y-0.2,m,y+2.0,x-1,y-0.2],md);return;}
     Tr([x+0.8,y+0.5,m-0.7,y+1.4,m-0.7,y+2.0,x+0.8,y+1.4],eye);Tr([x+w-0.8,y+0.5,m+0.7,y+1.4,m+0.7,y+2.0,x+w-0.8,y+1.4],eye);
     B(x+0.9,y+0.6,(w/2-1.6)*0.5,0.4,'#ffffff');
     Tr([x-1,y-1.6,m,y+1.1,x+w+1,y-1.6,x+w+1,y-0.2,m,y+2.0,x-1,y-0.2],md);Tr([x-1,y-1.6,m,y+1.1,x+w+1,y-1.6],shade(md,0.25));
     glowPt(x+w*0.28,y+1.3,2.6);glowPt(x+w*0.72,y+1.3,2.6);};
   // single cyclops eye with angled brow slash
-  const cyc=(x,y,r)=>{E(x,y,r+0.6,r+0.6,vis);E(x,y,r,r,eye);E(x,y+0.3,r*0.35,r*0.75,'#ffffff');Tr([x-r-1.2,y-r-0.6,x+r+1.2,y-r*0.1,x+r+1.2,y-r-1.6,x-r-1.2,y-r-2.2],md);glowPt(x,y,r*2.6);};
+  const cyc=(x,y,r)=>{E(x,y,r+0.6,r+0.6,vis);if(O.blink){E(x,y,r,r*0.25,md);Tr([x-r-1.2,y-r-0.6,x+r+1.2,y-r*0.1,x+r+1.2,y-r-1.6,x-r-1.2,y-r-2.2],md);return;}E(x,y,r,r,eye);E(x,y+0.3,r*0.35,r*0.75,'#ffffff');Tr([x-r-1.2,y-r-0.6,x+r+1.2,y-r*0.1,x+r+1.2,y-r-1.6,x-r-1.2,y-r-2.2],md);glowPt(x,y,r*2.6);};
   const spikes=(x,y,n,step,h,col=md)=>{for(let k=0;k<n;k++)Tr([x+k*step,y,x+k*step+step/2,y-h,x+k*step+step,y],col);};
-  const core=(x,y)=>{E(x,y,3.2,3.2,'#0a0e14');E(x,y,2.6,2.6,'#1c2430');Tr([x,y-2.2,x+2.2,y,x,y+2.2,x-2.2,y],TCOL[d.types[0]]);B(x-0.6,y-1,0.8,0.8,'#ffffff');glowPt(x,y,4);
+  const core=(x,y)=>{if(!c.core)c.core=[X(x)/(40*Q),Y(y)/(40*Q)];E(x,y,3.2,3.2,'#0a0e14');E(x,y,2.6,2.6,'#1c2430');Tr([x,y-2.2,x+2.2,y,x,y+2.2,x-2.2,y],TCOL[d.types[0]]);B(x-0.6,y-1,0.8,0.8,'#ffffff');glowPt(x,y,4);
     if(d.stage>=1&&sc){E(x+6,y,2.6,2.6,'#0a0e14');Tr([x+6,y-1.8,x+7.8,y,x+6,y+1.8,x+4.2,y],sc);glowPt(x+6,y,3.4);}};
   const addon=(A)=>{if(!shardType)return;const a=sc,ad=shade(sc,-0.4);
     if(shardType==='Volt'){B(A.x-2,A.y-7,1,7,jt);B(A.x+7,A.y-7,1,7,jt);Tr([A.x-4,A.y-6,A.x-1,A.y-11,A.x-2,A.y-7,A.x+1,A.y-7,A.x-2,A.y-2],a);Tr([A.x+5,A.y-6,A.x+8,A.y-11,A.x+7,A.y-7,A.x+10,A.y-7,A.x+7,A.y-2],a);glowPt(A.x-1,A.y-7,3);glowPt(A.x+8,A.y-7,3);}
@@ -110,6 +111,9 @@ function botSprite(id,silhouette){const key=id+(silhouette?'_s':'');if(BOTCACHE[
   if(silhouette){g.globalCompositeOperation='source-in';R(g,0,0,40*Q,40*Q,'#2a303c');g.globalCompositeOperation='source-over';}
   crisp(c,silhouette?'#0e1118':'#040507',3);
   if(!silhouette){g.globalCompositeOperation='lighter';for(const [gx,gy,gr] of glows){const rg=g.createRadialGradient(gx,gy,0,gx,gy,gr);rg.addColorStop(0,eye+'aa');rg.addColorStop(1,eye+'00');g.fillStyle=rg;g.fillRect(gx-gr,gy-gr,gr*2,gr*2);}g.globalCompositeOperation='source-over';}
+  if(O.glitch&&!silhouette){const id2=g.getImageData(0,0,c.width,c.height);const p=id2.data;for(let i=0;i<p.length;i+=4){if(!p[i+3])continue;const r=p[i],gg=p[i+1],b=p[i+2];p[i]=Math.min(255,b*1.1+30);p[i+1]=Math.min(255,r*0.9+20);p[i+2]=Math.min(255,gg*1.2+40);}
+    g.putImageData(id2,0,0);const rr2=hrand(id.length*97+13);for(let k=0;k<5;k++){const y=Math.floor(rr2()*c.height);const h=2+Math.floor(rr2()*6);const dx=Math.round((rr2()-0.5)*14);const strip=g.getImageData(0,y,c.width,h);g.clearRect(0,y,c.width,h);g.putImageData(strip,dx,y);}
+    g.globalCompositeOperation='source-atop';g.fillStyle='rgba(255,0,200,.12)';for(let y=0;y<c.height;y+=6)g.fillRect(0,y,c.width,2);g.globalCompositeOperation='source-over';}
   BOTCACHE[key]=c;return c;}
 
 // ---------- tiles (cold palette) ----------
@@ -129,8 +133,8 @@ function tileArt(ch,th,v,fr){const key=ch+th+v+fr;let c=TCACHE[key];if(c)return 
  switch(ch){
  case '.':grass(g,v);break;
  case ',':R(g,0,0,16,16,'#6c9282');for(let i=0;i<4;i++)for(let j=0;j<4;j++){const x=i*4+(j%2)*2,y=j*4+1;R(g,x,y+1,1,2,'#4e7264');R(g,x+2,y+1,1,2,'#4e7264');R(g,x+1,y,1,3,'#3e6054');R(g,x+1,y,1,1,'#dceaf0');}break;
- case 'T':grass(g,v);R(g,7,13,2,3,'#4e4038');ptri(g,[8,0,14,7,2,7],'#2c5250');ptri(g,[8,3,15,12,1,12],'#244646');ptri(g,[8,6,16,15,0,15],'#1c3a3c');
-   ptri(g,[8,0,11,4,5,4],'#eef4f8');ptri(g,[3,11,6,9,7,12],'#d8e6ee');ptri(g,[10,7,13,10,9,10],'#d8e6ee');R(g,7,2,1,1,'#ffffff');break;
+ case 'T':{grass(g,v);R(g,7,13,2,3,'#4e4038');const s=fr?0.5:0;ptri(g,[8+s,0,14+s,7,2+s,7],'#2c5250');ptri(g,[8+s*0.6,3,15+s*0.6,12,1+s*0.6,12],'#244646');ptri(g,[8,6,16,15,0,15],'#1c3a3c');
+   ptri(g,[8+s,0,11+s,4,5+s,4],'#eef4f8');ptri(g,[3+s*0.6,11,6+s*0.6,9,7+s*0.6,12],'#d8e6ee');ptri(g,[10+s,7,13+s,10,9+s,10],'#d8e6ee');R(g,7+s,2,1,1,'#ffffff');break;}
  case '~':R(g,0,0,16,16,'#3a6890');{const o=fr?3:0;R(g,(1+o)%16,4,5,1,'#6c98bc');R(g,(9+o)%16,4,4,1,'#6c98bc');R(g,(5+o)%16,11,6,1,'#6c98bc');R(g,(0+o)%16,8,2,1,'#2c5478');if(v===0){R(g,10,9,4,2,'#d4e6f2');R(g,10,9,4,1,'#ffffff');}}break;
  case '=':R(g,0,0,16,16,'#c2c6c8');seedSpeck(g,'#a6acb2',8,v+3);seedSpeck(g,'#e2e8ec',6,v+9);break;
  case 'F':grass(g,v);for(const [x,y,c2] of [[3,3,'#a8d8f4'],[10,5,'#ffffff'],[5,11,'#c4b4ec'],[12,12,'#a8d8f4']]){R(g,x,y,3,3,c2);R(g,x+1,y+1,1,1,'#5a8ab0');}break;
@@ -158,6 +162,8 @@ function tileArt(ch,th,v,fr){const key=ch+th+v+fr;let c=TCACHE[key];if(c)return 
  case 'P':floorT(g,th);R(g,2,2,12,12,'#6a5a3a');R(g,3,3,10,10,'#c0a050');R(g,5,5,6,6,'#d8bc70');break;
  case 'm':grass(g,v);R(g,3,2,10,14,'#3e4a5a');R(g,4,3,8,6,'#60c0ff');R(g,5,4,3,2,'#c0f0ff');R(g,5,11,6,2,'#262e3a');R(g,3,1,10,1,'#eef4f8');break;
  case 'b':R(g,0,0,16,16,'#3a6890');R(g,0,1,16,14,'#7e6a5a');for(let x=0;x<16;x+=4)R(g,x,1,1,14,'#5e4c40');R(g,0,1,16,1,'#e6eef4');R(g,0,14,16,1,'#4e3e34');break;
+ case 'z':R(g,0,0,16,16,'#7c8490');R(g,0,0,16,3,'#e8eef4');R(g,0,12,16,4,'#5a626e');ptri(g,[6,3,9,8,5,10],'#1a1e26');ptri(g,[9,8,12,6,11,11],'#1a1e26');R(g,7,7,2,2,fr?'#ff9a5a':'#c06030');break;
+ case 'i':R(g,0,0,16,16,'#9cc8e0');R(g,1,1,14,14,'#b8dcf0');R(g,3,3,6,1,'#ffffff');R(g,9,10,4,1,'#ffffff');R(g,6,7,3,3,fr?'#ffe080':'#e0b040');R(g,0,15,16,1,'#6a98b8');break;
  case 'k':floorT(g,th);R(g,0,0,16,16,'#4a5a8a');R(g,1,1,14,14,'#5a6aa0');break;
  default:R(g,0,0,16,16,'#ff00ff');}
  g.setTransform(1,0,0,1,0,0);tileDetail(g,ch,th,v,fr);
@@ -179,7 +185,7 @@ function tileDetail(g,ch,th,v,fr){let hs=0;for(const k of ch+th)hs=hs*31+k.charC
   if(ch==='W'||ch==='D'){dots(g,r,10,'rgba(0,0,0,.08)');}
   if(ch==='x'||ch==='X'){dots(g,r,14,'rgba(0,0,0,.08)');dots(g,r,8,'rgba(255,255,255,.12)');}}
 // ---------- weather ----------
-const SNOW=Array.from({length:70},(_,i)=>({x:Math.random()*480,y:Math.random()*320,s:0.4+Math.random()*0.9,z:Math.random()<0.3?2:1,w:Math.random()*6.28}));
-function drawSnow(dx,dy,amt=1){ctx.fillStyle='rgba(240,246,252,.85)';const n=Math.floor(SNOW.length*amt);
-  for(let i=0;i<n;i++){const p=SNOW[i];const x=((p.x-dx*0.6*p.z+Math.sin(TICK/50+p.w)*8)%480+480)%480,y=((p.y+TICK*p.s*0.6-dy*0.6*p.z)%320+320)%320;ctx.fillRect(x,y,p.z*0.75,p.z*0.75);}}
+const SNOW=Array.from({length:220},(_,i)=>({x:Math.random()*480,y:Math.random()*320,s:0.4+Math.random()*0.9,z:Math.random()<0.3?2:1,w:Math.random()*6.28}));
+function drawSnow(dx,dy,amt=0.32,wind=0){ctx.fillStyle='rgba(240,246,252,.85)';const n=Math.floor(SNOW.length*Math.min(1,amt));
+  for(let i=0;i<n;i++){const p=SNOW[i];const x=((p.x-dx*0.6*p.z+Math.sin(TICK/50+p.w)*8+TICK*wind*p.s)%480+480)%480,y=((p.y+TICK*p.s*(0.6+wind*0.3)-dy*0.6*p.z)%320+320)%320;ctx.fillRect(x,y,p.z*0.75,p.z*0.75);}}
 function coldGrade(a=0.1){ctx.fillStyle='rgba(90,130,190,'+a+')';ctx.fillRect(0,0,W,H);}
