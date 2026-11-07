@@ -1,12 +1,12 @@
 // ===================== GAME =====================
 const G={name:'Rook',map:'home',px:2,py:2,pdir:'down',busy:false,party:[],storage:[],bag:{},money:500,flags:{},seen:{},caught:{},explored:{},time:0,
-  lastHeal:{map:'home',x:4,y:4},visited:{},npcs:[],objs:[],crates:[],cond:null,minimap:true,fade:0,mv:null,stepN:0,banner:0,pendSock:[],sw:0,flashOW:0,lastOut:null,started:false,skin:'classic',bspeed:1,skipFx:false,alwaysRun:false,haptic:true,padOp:1,quests:{},skins:{classic:1},lights:[],thaw:{},ferals:[],fol:null,surf:null,rep:{w:0,c:0},kael:0,scan:{},tileOv:{},vault:null,vaultRuns:[],vaultBest:0};
+  lastHeal:{map:'workshop',x:2,y:7},visited:{},npcs:[],objs:[],crates:[],cond:null,minimap:true,fade:0,mv:null,stepN:0,banner:0,pendSock:[],sw:0,flashOW:0,lastOut:null,started:false,skin:'classic',bspeed:1,skipFx:false,alwaysRun:false,haptic:true,padOp:1,quests:{},skins:{classic:1},lights:[],thaw:{},ferals:[],fol:null,surf:null,rep:{w:0,c:0},kael:0,scan:{},tileOv:{},vault:null,vaultRuns:[],vaultBest:0};
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};const OPP={up:'down',down:'up',left:'right',right:'left'};
 function flag(k){return !!G.flags[k];}function setFlag(k,v=1){G.flags[k]=v;}
 function seen(id,c){G.seen[id]=1;if(c)G.caught[id]=1;}
 function curMap(){return MAPS[G.map];}
 async function healAll(){for(const b of G.party){b.hp=stats(b).hp;b.st=null;b.moves.forEach(m=>m.pp=MOVES[m.id].pp);}}
-function setLastHeal(){G.lastHeal={map:G.map,x:5,y:4};}
+function setLastHeal(){G.lastHeal={map:G.map,x:G.px,y:G.py};}
 
 function loadMap(id,x,y,dir){const m=MAPS[id];G.map=id;G.px=x;G.py=y;if(dir)G.pdir=dir;G.mv=null;
   G.npcs=(m.npcs||[]).map(n=>Object.assign({},n,{hx:n.x,hy:n.y,mv:null,hidden:false,bubble:0,wt:60+rnd(120)}));
@@ -58,7 +58,7 @@ function stepPlayer(dir){return new Promise(res=>{if(!tryMove(dir,true)){res();r
 function walkNPC(n,dir,steps){return new Promise(async res=>{for(let i=0;i<steps;i++){n.dir=dir;const [dx,dy]=DIRS[dir];const nx=n.x+dx,ny=n.y+dy;
     if(tileSolid(T(nx,ny))||(G.px===nx&&G.py===ny))break;await new Promise(r=>{n.mv={fx:n.x,fy:n.y,tx:nx,ty:ny,p:0,res:r};});}res();});}
 function updateMovers(){const running=G.alwaysRun?!held.b:held.b;const spd=running&&!G.busy?1/8:1/16;
-  if(G.mv){G.mv.p+=G.mv.belt?1/7:G.mv.forced?1/14:spd;if(G.mv.p>=1){const r=G.mv.res,f=G.mv.forced,bl=G.mv.belt;G.mv=null;if(r)r();if(!f||bl)onStep();}}
+  if(G.mv){G.mv.p+=G.mv.belt==='slide'?1/5:G.mv.belt?1/7:G.mv.forced?1/14:(T(G.mv.tx,G.mv.ty)==='d'?spd*0.45:spd);if(G.mv.p>=1){const r=G.mv.res,f=G.mv.forced,bl=G.mv.belt;G.mv=null;if(r)r();if(!f||bl)onStep();}}
   for(const n of G.npcs){if(n.mv){n.mv.p+=1/14;if(n.mv.p>=1){n.x=n.mv.tx;n.y=n.mv.ty;const r=n.mv.res;n.mv=null;if(r)r();}}
     else if(n.wander&&!G.busy&&!UI.length&&npcVisible(n)){if(--n.wt<=0){n.wt=90+rnd(150);const d=pick(Object.keys(DIRS));const [dx,dy]=DIRS[d];const nx=n.x+dx,ny=n.y+dy;n.dir=d;
       if(Math.abs(nx-n.hx)<=1&&Math.abs(ny-n.hy)<=1&&!isBlocked(nx,ny)&&!warpAt(nx,ny)&&!(G.mv&&G.mv.tx===nx&&G.mv.ty===ny))n.mv={fx:n.x,fy:n.y,tx:nx,ty:ny,p:0};}}
@@ -72,6 +72,7 @@ async function onStepInner(){markExplored();const m=curMap();if(m.world)G.lastOu
   const w=warpAt(G.px,G.py);if(w){if(w.req&&!flag(w.req)){G.busy=true;await say(w.locked||'It\'s locked.');await stepPlayer(OPP[G.pdir]);G.busy=false;return;}await doWarp(w);return;}
   const here=T(G.px,G.py);
   {const bd=beltDir(here);if(bd){const [dx,dy]=DIRS[bd];const nx=G.px+dx,ny=G.py+dy;if(!isBlocked(nx,ny,true)&&!crateAt(nx,ny)){startMove(nx,ny,true,true);Snd.sfx('push');return;}}}
+  if(here==='-'&&!G.surf){const [dx,dy]=DIRS[G.pdir];const nx=G.px+dx,ny=G.py+dy;if(!isBlocked(nx,ny,true)&&!crateAt(nx,ny)&&!feralAt(nx,ny)&&!warpAt(nx,ny)){startMove(nx,ny,true,'slide');return;}}
   if(here==='V'&&ventActive(G.px,G.py)){await scald();return;}
   if(G.map==='vault'&&here==='E'){G.vault.floor++;await enterVaultFloor();return;}
   if(G.map==='vault'&&here==='O'){G.busy=true;const r=await ask('Leave the Vault now and keep your loot?',['Leave','Keep exploring']);G.busy=false;if(r===0){await vaultExit();}return;}
@@ -109,7 +110,6 @@ async function interact(){const m=curMap();const [dx,dy]=DIRS[G.pdir];let fx=G.p
     G.busy=false;return;}
   const o=objAt(fx,fy);if(o){G.busy=true;
     if(o.type==='item'){setFlag('got_'+o.id);const q=o.qty||1;addItem(o.item,q);if(G.vault&&o.vault){G.vault.loot[o.item]=(G.vault.loot[o.item]||0)+q;}Snd.sfx('item');await say(N()+' found '+(q>1?q+'× ':'a ')+ITEMS[o.item].n+'!');}
-    else if(o.type==='pod'){if(o.taken)await say('An empty restoration pod.');else await choosePod(o);}
     else if(o.run){await o.run(o);}
     else if(o.type==='cache'){if(flag('got_'+o.id))await say('The cache is empty.');else if(!flag(m.terminalPuzzle.flag))await say('A sealed Maker cache. The lock is wired to a terminal somewhere nearby.');
       else{setFlag('got_'+o.id);addItem(o.item,1);Snd.sfx('item');await say('The cache opens with a hiss. '+N()+' found a '+ITEMS[o.item].n+'!');}}
@@ -139,7 +139,7 @@ function applyCondSolution(){const sol={'4,6':0,'5,6':0,'6,6':2,'6,7':3,'5,7':1,
 function camera(){const m=curMap();const mw=m.grid[0].length*TS,mh=m.grid.length*TS;let px=G.px*TS,py=G.py*TS;
   if(G.mv){px=(G.mv.fx+(G.mv.tx-G.mv.fx)*G.mv.p)*TS;py=(G.mv.fy+(G.mv.ty-G.mv.fy)*G.mv.p)*TS;}
   if(G.glide){const gl=G.glide;px=(gl.sx+(gl.lx-gl.sx)*gl.p)*TS;py=(gl.sy+(gl.ly-gl.sy)*gl.p)*TS;}
-  let cx=px-W/2+TS/2,cy=py-H/2+TS/2;cx=mw<=W?(mw-W)/2:clamp(cx,0,mw-W);cy=mh<=H?(mh-H)/2:clamp(cy,0,mh-H);return{cx:Math.round(cx),cy:Math.round(cy),px,py};}
+  let cx=px-W/2+TS/2,cy=py-H/2+TS/2;cx=mw<=W?(mw-W)/2:clamp(cx,0,mw-W);cy=mh<=H?(mh-H)/2:clamp(cy,0,mh-H);if(G.shake>0){G.shake--;const a=Math.min(6,G.shake/4+1);cx+=(Math.random()*2-1)*a;cy+=(Math.random()*2-1)*a;}return{cx:Math.round(cx),cy:Math.round(cy),px,py};}
 function tileKey(ch,x,y){const m=curMap();if(BELT[ch]&&beltFlipped())return BFLIP[ch];
   if(ch==='g')return flag(m.gate)?'x':'gC';if(ch==='r')return G.sw===0?'rU':'rD';if(ch==='u')return G.sw===1?'uU':'uD';if(ch==='S')return 'S'+G.sw;return ch;}
 function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map)?'outw':m.theme;const {cx,cy,px,py}=camera();ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
@@ -159,8 +159,13 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
   for(const o of G.objs){if(!objVisible(o))continue;const sx=o.x*TS-cx,sy=o.y*TS-cy;
     if(o.type==='item'){const c=ITEMS[o.item].shard?TCOL[ITEMS[o.item].shard]:'#e04040';const bob=Math.sin(TICK/12)*2;ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(sx+16,sy+26,8,3,0,0,7);ctx.fill();
       if(ITEMS[o.item].shard){ptri(ctx,[sx+16,sy+6+bob,sx+24,sy+15+bob,sx+16,sy+24+bob,sx+8,sy+15+bob],c);R(ctx,sx+13,sy+11+bob,3,3,'#fff');}
-      else{ctx.fillStyle='#202028';ctx.beginPath();ctx.arc(sx+16,sy+16+bob,8,0,7);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(sx+16,sy+16+bob,7,Math.PI,0);ctx.fill();ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.arc(sx+16,sy+16+bob,7,0,Math.PI);ctx.fill();R(ctx,sx+9,sy+15+bob,14,2,'#202028');}}
+      else{const y=sy+bob;R(ctx,sx+9,y+9,14,15,'#1a202a');R(ctx,sx+10,y+10,12,13,'#5a6676');R(ctx,sx+10,y+10,12,3,'#8a96a6');R(ctx,sx+10,y+15,12,2,c==='#e04040'?'#40d0e0':c);R(ctx,sx+14,y+7,4,3,'#3a4250');if(TICK%60<30)R(ctx,sx+20,y+19,2,2,'#ffd060');}}
     if(o.type==='pod'){ctx.fillStyle='rgba(160,220,255,.6)';rr(sx+6,sy-6,20,30,8);ctx.fill();ctx.strokeStyle='#e0f4ff';ctx.lineWidth=2;rr(sx+6,sy-6,20,30,8);ctx.stroke();if(!o.taken)ctx.drawImage(botSprite(o.bot),sx+4,sy-6,24,24);}
+    if(o.type==='capsule'){const op=flag('starter')||o.open;ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(sx+16,sy+28,15,5,0,0,7);ctx.fill();
+      ctx.fillStyle='#2a3240';ctx.beginPath();ctx.ellipse(sx+16,sy+16,14,12,-0.3,0,7);ctx.fill();ctx.fillStyle='#4a5668';ctx.beginPath();ctx.ellipse(sx+13,sy+12,9,6,-0.3,0,7);ctx.fill();
+      const p=0.5+0.5*Math.sin(TICK/7);ctx.fillStyle=op?'rgba(60,90,110,.9)':'rgba(64,224,240,'+(0.55+0.45*p)+')';ctx.fillRect(sx+10,sy+14,12,4);ctx.fillRect(sx+14,sy+10,4,12);
+      if(!op&&TICK%9===0)OWP.push({x:o.x*TS+12+rnd(10),y:o.y*TS+6,vx:(Math.random()-0.5)*0.3,vy:-0.4,t:0,max:60,k:'breath'});
+      if(op){ctx.strokeStyle='#101820';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+6,sy+8);ctx.lineTo(sx+14,sy+16);ctx.lineTo(sx+10,sy+24);ctx.stroke();}}
     if(o.type==='pylon')drawPylon(o,sx,sy);
     if(o.type==='log')drawLogObj(o,sx,sy);
     if(o.type==='archive'){const p=0.6+0.4*Math.sin(TICK/8);ctx.fillStyle='#2a3242';ctx.fillRect(sx+6,sy+10,20,18);ctx.fillStyle='rgba(120,230,255,'+p+')';ctx.fillRect(sx+10,sy+4,12,14);ctx.fillStyle='#fff';ctx.fillRect(sx+14,sy+8,4,4);}
@@ -182,7 +187,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
     ctx.drawImage(charSprite(e.player?'player':e.look,e.player?G.pdir:e.dir,fr2),sx,sy-6,32,36);
     if(e.bubble>0){panel(sx+4,sy-34,24,26,'#fff');txt('!',sx+16,sy-14,'#e02020',24,'center',null);}
     if(e.trainer&&!flag('t_'+e.id)&&!e.player&&TICK%60<6){}}
-  owParticles(cx,cy,px,py);drawLighting(cx,cy,px,py);drawWeatherOverlay(cx,cy);if(m.outdoor&&!m.dungeon)coldGrade(0.07);
+  owParticles(cx,cy,px,py);drawLighting(cx,cy,px,py);drawWeatherOverlay(cx,cy);if(G.flick>0){G.flick--;if(G.flick%3<2){ctx.fillStyle='rgba(2,4,12,.82)';ctx.fillRect(0,0,W,H);}}if(m.outdoor&&!m.dungeon)coldGrade(0.07);
   if(G.minimap&&m.world)drawMinimap();
   if(G.banner>0){const a=Math.min(1,G.banner/20);ctx.globalAlpha=a;panel(8,8,Math.max(150,measure(m.name,24)+40),40,'#f8f0d8');txt(m.name,24,36,'#403020',24);ctx.globalAlpha=1;}}
 function drawSpecial(k,sx,sy){const s=TS;
@@ -253,12 +258,11 @@ async function boot(){loadPrefs();setupTouch();setupFS();try{await Promise.race(
       const slots=[];if(auto)slots.push(['Autosave: '+auto.name+' · '+(MAPS[auto.map]?MAPS[auto.map].name:'?')+' · '+fmtTime(auto.time),auto]);
       [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'?')+' · '+fmtTime(s.time):'— empty —'),s]);});
       const i=await choose(slots.map(x=>x[0]).concat(['Back']),{x:30,y:50});const s=i>=0&&i<slots.length?slots[i][1]:null;if(!s)continue;G.started=true;loadSave(s);G.fade=1;break;}
-    else{await pushUI(storyW(['Calderra. A volcanic peninsula covered in the ruins of the Makers.','The Makers vanished long ago. Their machines did not.','Shardbots: robots that run on elemental crystals called shards.','For a thousand years, every bot has drawn power from the HEARTFORGE, deep beneath Mt. Cinder.','Now the Heartforge is failing. Bots are going feral. The winters are getting longer.','What is your name?']));
+    else{await pushUI(storyW(['Calderra. A peninsula of ash and ice, built on the bones of the Makers.','The Makers vanished. Their machines did not: shardbots, robots that run on elemental crystals called shards.','Every shardbot drinks from one source, the HEARTFORGE, buried under Mt. Cinder.','Lately it stutters. Bots go feral. Winter forgets to end.','You are a salvager. You fix what the Makers left behind.','What is your name?']));
       G.name=await nameEntry();
-      await pushUI(storyW(['In the village of Ashgrove, '+G.name+' is about to wake up...']));
-      G.started=true;loadMap('home',2,2,'down');G.fade=1;G.busy=true;await wait(30);
-      await say(G.name+'! Are you awake? Dr. Vesna was here this morning. She wants to see you at the lab, the big building on the east side of town.',{speaker:'Mom'});
-      await say('Controls: Arrow keys / D-pad to move, Z or A to talk, X or B to go back (hold to run), Enter or START for the menu, M for the map. OPTIONS has always-run, battle speed and phone button settings.');
+      await pushUI(storyW(['Ashgrove Crater. The night the lights went out.']));
+      G.started=true;setFlag('workshop');loadMap('workshop',9,7,'up');G.fade=1;
+      await openingScene();
       G.busy=false;break;}}}
 window.G=G;
 boot();

@@ -20,9 +20,14 @@ On phones the game runs fullscreen in landscape. On iPhone, use Share → Add to
 - **Maker Vault:** endless randomly generated floors with no free healing. Escape to keep your loot, black out and lose it. Leaderboard of your deepest runs.
 
 ## Chapter 1: The Relay Road
+- **The Brownout:** the game opens in your workshop the night the Heartforge skips a beat. A Maker capsule crashes into Ashgrove's crater, and the core you fit into its frame decides which bot it becomes.
+- **Kael** is a rival salvager from Brasston who reached the capsule second. **Vesna** is a Maker researcher with a field station by the dead relay tower.
+- **Ashgrove**, a village inside a crater; **the Wreckfield**, a crashed Maker ship surrounded by scrap drifts, crystal beds, fog banks, static fields and an ice-slide field; **Brasston**, a three-terrace mining town; **the Mirrorlake Drifts**, a frozen lake slide puzzle and a titan's spine bridge; **Voltmere**, a city on stilts.
+- Different ferals live in each terrain. Ice slides keep you moving until you hit something, and deep snow slows you down.
+- Repair Caravans run by Juno. Scrap traders accept Cr or scrap. Every house is furnished to suit whoever lives there.
 - 36 alien shardbots with core traits, socket evolution (Lv 16) and Overdrive
 - The Forge, Refined shards, modules, 3 side quests, glitched variants, rematch board, Bestiary rewards
-- Puzzles, weather, minimap and world map, quest log, type chart, autosave, save codes, phone fullscreen mode
+- Weather, minimap and world map, quest log, type chart, autosave, save codes, phone fullscreen mode
 
 ## Chapter 2: The Rustworks
 Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.

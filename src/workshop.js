@@ -1,9 +1,11 @@
 // ===================== ASHGROVE WORKSHOP + MAKER VAULT =====================
 MAPS.workshop={name:'Your Workshop',theme:'lab',music:'town',decor:1,grid:[
-'XXXXXXXXXXXXX','XMxxpxpxpxxMX','XxxxxxxxxxxxX','XxxxxxxxxxxxX','XxxxxxxxxxxxX','XaxxxxxxxxxoX','XxxxxxxxxxxxX','XxxxxxxxxxxxX','XxxxxxxxxxxOX','XXXXXXeXXXXXX'],
-warps:[{x:6,y:9,to:'ashgrove',tx:16,ty:10,dir:'down'}],
-tileScripts:{'1,1':()=>workshopConsole(),'11,1':()=>vaultBoard(),'4,1':()=>pedestal(0),'6,1':()=>pedestal(1),'8,1':()=>pedestal(2),'1,5':()=>trainingRig(),'11,5':()=>openForge()},
+'XXXXXXXXXXXXX','XMxxpxpxpxxMX','XxxxxxxxxxxxX','Xhxxxxxxxxx9X','XxxxxxxxxxxxX','XaxxxxxxxxxoX','Xxxxxxxx77xxX','X5xxxxxxxxx&X','XxxxxxxxxxxOX','XXXXXXeXXXXXX'],
+warps:[{x:6,y:9,to:'ashgrove',tx:below('ashgrove','workshopDoor')[0],ty:below('ashgrove','workshopDoor')[1],dir:'down'}],heal:1,
+tileScripts:{'1,1':()=>workshopConsole(),'11,1':()=>vaultBoard(),'4,1':()=>pedestal(0),'6,1':()=>pedestal(1),'8,1':()=>pedestal(2),'1,5':()=>trainingRig(),'11,5':()=>openForge(),'1,7':cradleTalk,'8,6':benchTalk,'9,6':benchTalk,'1,3':async()=>{await say(flag('starter')?'Your bunk. '+BOTS[(lead()||{id:G.starter||'flicker'}).id].name+' likes to sleep on the end of it.':'Your bunk. No time for sleep tonight.');},'11,3':async()=>{await say('Shelves of salvage: bolts, wire, a cracked Maker visor you\'ve never managed to fix.');}},
 npcs:[],objs:[]};
+async function cradleTalk(){if(!G.party.length){await say('Your charging cradle. Nothing to charge yet. The power\'s out anyway.');return;}G.busy=true;await say('You set your bots on the charging cradle. It hums...');Snd.jingle('heal');await wait(70);await healAll();setLastHeal();await say('Fully charged.');G.busy=false;}
+async function benchTalk(){await say(flag('starter')?pick(['Your workbench. Half-finished projects, all of them waiting for a better shard.','A sketch pinned above the bench: a frame you\'ve dreamed of building since you were nine.','The radio on the bench mutters Heartforge numbers. You turn it down.']):'Your workbench. The radio\'s still muttering about the Heartforge.');}
 function WS(){G.ws=G.ws||{rig:1,forge:1,decor:{}};G.ws.decor=G.ws.decor||{};return G.ws;}
 const DECOR={rug:{n:'Ember Rug',c:300},plants:{n:'Frost Ferns',c:200},lamps:{n:'Shard Lamps',c:400},banner:{n:'Calderra Banner',c:500},trophy:{n:'Prime Trophy Case',c:0,req:()=>G.bag.prime1&&G.bag.prime2}};
 async function workshopConsole(){const ws=WS();
@@ -13,7 +15,7 @@ async function workshopConsole(){const ws=WS();
       if(G.money<cost||(G.bag.scrap||0)<sc){await say('Not enough Cr or Scrap.');continue;}G.money-=cost;G.bag.scrap-=sc;if(!G.bag.scrap)delete G.bag.scrap;ws.rig++;Snd.sfx('item');await say('Training Rig upgraded to Lv '+ws.rig+'!');}
     else if(i===1){if(ws.forge>=3){await say('The Forge is fully upgraded.');continue;}const cost=[0,2000,5000][ws.forge],sc=[0,8,15][ws.forge];
       if((await ask('Upgrade every Forge to Lv '+(ws.forge+1)+' for '+cost+' Cr and '+sc+' Scrap? ('+(ws.forge===1?'Salvage costs 4 Scrap':'Refining needs only 2 shards')+')',['Upgrade','Cancel']))!==0)continue;
-      if(G.money<cost||(G.bag.scrap||0)<sc){await say('Not enough Cr or Scrap.');continue;}G.money-=cost;G.bag.scrap-=sc;if(!G.bag.scrap)delete G.bag.scrap;ws.forge++;Snd.sfx('item');await say('Forge upgraded to Lv '+ws.forge+'! This applies at every Repair Station too.');}
+      if(G.money<cost||(G.bag.scrap||0)<sc){await say('Not enough Cr or Scrap.');continue;}G.money-=cost;G.bag.scrap-=sc;if(!G.bag.scrap)delete G.bag.scrap;ws.forge++;Snd.sfx('item');await say('Forge upgraded to Lv '+ws.forge+'! This applies at every Repair Caravan too.');}
     else if(i===2){const keys=Object.keys(DECOR);const opts=keys.map(k=>(ws.decor[k]?'✓ ':'')+DECOR[k].n+(ws.decor[k]?'':(DECOR[k].c?' — '+DECOR[k].c+' Cr':' — needs both Primes')));opts.push('Back');
       const j=await ask('Decorate your workshop:',opts);if(j<0||j>=keys.length)continue;const k=keys[j];
       if(ws.decor[k]){ws.decor[k]=0;await say('Put the '+DECOR[k].n+' in storage.');continue;}
@@ -67,7 +69,7 @@ function genVault(floor,seed){const r=hrand(seed*977+floor*131+7);const W_=22,H_
 function vaultFlagKey(){return 'alpha_vault';}
 async function startVault(){if(!flag('ch1done')){await say('The Vault Link pad is dormant. It needs Prime energy from two Wardens to open the way.');return;}
   if(!G.party.some(b=>b.hp>0)){await say('Your bots need repairs first.');return;}
-  const r=await ask('Enter the MAKER VAULT? No Repair Stations inside. Step on an amber pad to leave with your loot. Black out and you lose it.',['Enter','Not yet']);if(r!==0)return;
+  const r=await ask('Enter the MAKER VAULT? No Repair Caravans inside. Step on an amber pad to leave with your loot. Black out and you lose it.',['Enter','Not yet']);if(r!==0)return;
   G.vault={floor:1,seed:1+rnd(99999),loot:{},kills:0};await enterVaultFloor();}
 async function enterVaultFloor(){const v=G.vault;MAPS.vault=genVault(v.floor,v.seed);delete G.flags[vaultFlagKey()];
   G.busy=true;G.inWarp=true;for(let i=0;i<=10;i++){G.fade=i/10;await wait(1);}loadMap('vault',MAPS.vault.start[0],MAPS.vault.start[1],'down');for(let i=10;i>=0;i--){G.fade=i/10;await wait(1);}G.inWarp=false;

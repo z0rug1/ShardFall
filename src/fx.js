@@ -9,9 +9,11 @@ const WEATHER={
  clear:{name:'Thawing',dark:0.14,snow:0.07,wind:0.25,fog:0.04},
  clearnight:{name:'Thawing night',dark:0.5,snow:0.05,wind:0.1,fog:0},
  clearstatic:{name:'Thawing storm',dark:0.32,snow:0.04,wind:0.4,fog:0,static:1},
+ brownout:{name:'Brownout',dark:0.8,snow:0.35,wind:0.3,fog:0.04},
  vault:{name:'Maker Vault',dark:0.7,snow:0,wind:0,fog:0},
 };
-function weatherKey(){const m=curMap();if(m.vaultMap)return 'vault';if(m.outdoor&&m.theme==='out'&&thawed(G.map))return m.weather==='night'?'clearnight':m.weather==='static'?'clearstatic':'clear';return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
+function brownout(){return flag('brownout')&&!flag('starter')&&(G.map==='ashgrove'||G.map==='workshop');}
+function weatherKey(){const m=curMap();if(brownout())return 'brownout';if(m.vaultMap)return 'vault';if(m.outdoor&&m.theme==='out'&&thawed(G.map))return m.weather==='night'?'clearnight':m.weather==='static'?'clearstatic':'clear';return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
 function curWeather(){return WEATHER[weatherKey()];}
 
 // ---- lighting ----
@@ -19,12 +21,18 @@ let LIGHT=null,lgx=null;
 function ensureLight(){if(!LIGHT){LIGHT=mkCanvas(480*RS,320*RS);lgx=LIGHT.getContext('2d');}}
 function collectLights(){const m=curMap();const L=[];const w=m.grid[0].length;
   m.grid.forEach((row,y)=>{for(let x=0;x<w;x++){const ch=row[x];const v=(x*7+y*3)%4===0?0:(x+y)%2+1;
+    if(brownout()&&'lWMm5*'.includes(ch))continue;
     if(ch==='l')L.push({x:x*TS+16,y:y*TS+6,r:90,col:'#ffcf80',fl:1});
     else if(ch==='W'&&v===0)L.push({x:x*TS+16,y:y*TS+14,r:46,col:'#ffd890',fl:0});
+    else if(ch==='*')L.push({x:x*TS+16,y:y*TS+22,r:80,col:'#ff9a50',fl:1});
+    else if(ch==='J')L.push({x:x*TS+16,y:y*TS+16,r:70,col:'#40e0f0',fl:1});
+    else if(ch==='q'&&(x+y)%3===0)L.push({x:x*TS+16,y:y*TS+16,r:30,col:'#80d0ff',fl:0});
+    else if(ch==='5')L.push({x:x*TS+16,y:y*TS+20,r:50,col:'#40e0a0',fl:0});
     else if(ch==='M')L.push({x:x*TS+16,y:y*TS+10,r:52,col:'#60e0d0',fl:0});
     else if(ch==='m')L.push({x:x*TS+16,y:y*TS+10,r:50,col:'#60c0ff',fl:0});
     else if(ch==='z')L.push({x:x*TS+16,y:y*TS+14,r:30,col:'#ff9a5a',fl:1});
     else if(ch==='i')L.push({x:x*TS+16,y:y*TS+14,r:28,col:'#ffe080',fl:1});}});
+  for(const o of G.objs||[])if(o.type==='capsule'&&!flag('starter'))L.push({x:o.x*TS+16,y:o.y*TS+14,r:110,col:'#40e0f0',fl:1});
   G.lights=L;}
 function drawLighting(cx,cy,px,py){const wx=curWeather();if(!wx.dark)return;ensureLight();const g=lgx;
   g.setTransform(RS,0,0,RS,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,W,H);g.fillStyle='rgba(4,8,22,'+wx.dark+')';g.fillRect(0,0,W,H);

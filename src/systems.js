@@ -63,8 +63,8 @@ async function moduleMenu(b){const mods=Object.keys(G.bag).filter(k=>ITEMS[k]&&I
 
 // ---- quests ----
 const QUESTS={
- lostbit:{n:'Lost Bit',where:'Ashgrove / Route 1',steps:{active:'A kid in Ashgrove lost his Pipsprock, Bit, somewhere on Route 1.',found:'You found Bit. Bring it back to the kid in Ashgrove.',done:'Bit is home safe.'}},
- stolen:{n:'Stolen Shards',where:'Brasston / Route 2',steps:{active:'The Brasston engineer says the Choir stashed stolen shards on Route 2.',found:'You found the stash. Return it to the engineer in Brasston.',done:'Brasston has its shards back.'}},
+ lostbit:{n:'Lost Bit',where:'Ashgrove / Wreckfield',steps:{active:'Tobin in Ashgrove lost his Pipsprock, Bit, in the Wreckfield crystal beds.',found:'You found Bit. Bring it back to Tobin in Ashgrove.',done:'Bit is home safe.'}},
+ stolen:{n:'Stolen Shards',where:'Brasston / Mirrorlake Drifts',steps:{active:'The Brasston engineer says the Choir stashed stolen shards on the Mirrorlake island.',found:'You found the stash. Return it to the engineer in Brasston.',done:'Brasston has its shards back.'}},
  generator:{n:'Dead Generator',where:'Voltmere',steps:{active:'Restart the dead generator on the east side of Voltmere.',found:'The generator is running. Tell the lineman.',done:'Voltmere\'s east side has power again.'}},
 };
 function qstate(id){return (G.quests||{})[id];}

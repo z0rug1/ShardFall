@@ -51,7 +51,10 @@ function drawBattle(){const B=BT;const th=B.bg;const wx=B.wx;
   ctx.restore();
   ctx.fillStyle='#161c28';ctx.fillRect(0,232,W,88);panel(4,232,472,84);
   if(B.flash>0){ctx.fillStyle=B.flashCol||'rgba(255,255,255,.8)';ctx.globalAlpha=Math.min(1,B.flash/20);ctx.fillRect(0,0,W,232);ctx.globalAlpha=1;}
-  if(B.intro>0){ctx.fillStyle='#000';const h=B.intro*8;ctx.fillRect(0,0,W,h);ctx.fillRect(0,H-h,W,h);}
+  if(B.intro>0){const p=B.intro/26;const cw=W/6,ch=H/4;for(let gy=0;gy<4;gy++)for(let gx=0;gx<6;gx++)for(let k=0;k<2;k++){const x0=gx*cw,y0=gy*ch;const pts=k?[x0,y0,x0+cw,y0,x0,y0+ch]:[x0+cw,y0,x0+cw,y0+ch,x0,y0+ch];
+      const mx=(pts[0]+pts[2]+pts[4])/3,my=(pts[1]+pts[3]+pts[5])/3;const dx=mx-W/2,dy=my-H/2,dl=Math.hypot(dx,dy)||1;const q=Math.pow(1-p,1.6)*(260+((gx*7+gy*3+k)%5)*40);const ox=dx/dl*q,oy=dy/dl*q;
+      ctx.save();ctx.translate(mx+ox,my+oy);ctx.rotate((1-p)*((gx+gy+k)%2?1:-1)*0.8);ctx.beginPath();ctx.moveTo(pts[0]-mx,pts[1]-my);ctx.lineTo(pts[2]-mx,pts[3]-my);ctx.lineTo(pts[4]-mx,pts[5]-my);ctx.closePath();
+      ctx.fillStyle='#04060e';ctx.fill();ctx.strokeStyle='rgba(80,230,255,'+(0.3+0.6*p)+')';ctx.lineWidth=2;ctx.stroke();ctx.restore();}}
 }
 function drawSpike(x,y,wob){ctx.save();ctx.translate(x,y);ctx.rotate(wob);R(ctx,-3,-14,6,22,'#506070');R(ctx,-2,-13,4,20,'#8aa0b8');ptri(ctx,[-5,8,5,8,0,18],'#40e0ff');R(ctx,-6,-16,12,4,'#ffd040');ctx.restore();}
 function drawInfo(side){const B=BT;const b=cur(side);const st=stats(b);const d=BOTS[b.id];const nm=(b.glitch?'✦':'')+d.name;
@@ -83,7 +86,7 @@ function battleSong(tr){if(!tr)return 'battle';if(tr.warden)return tr.title==='D
 async function runBattleInner(o){
   const wk=weatherKey();
   const B={wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
-    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:20,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
+    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
   if(!curMap().outdoor)B.wx='indoor';
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
   B.pi=G.party.findIndex(b=>b.hp>0);if(B.pi<0){await healAll();B.pi=0;}
@@ -108,7 +111,7 @@ async function runBattleInner(o){
   if(result==='win'&&B.tr){Snd.jingle('victory',curMap().music);await bsay(B.tr.title+' '+B.tr.name+' was defeated!');
     G.money+=B.tr.money;await bsay(N()+' got '+B.tr.money+' Cr for winning!');}
   if(result==='lose'){await bsay(N()+' has no working bots left!');
-    if(!(B.tr&&B.tr.noBlackout)){const lost=Math.floor(G.money/2);G.money-=lost;await bsay(N()+' dropped '+lost+' Cr and blacked out...');
+    if(!(B.tr&&B.tr.noBlackout)&&!o.noBlackout){const lost=Math.floor(G.money/2);G.money-=lost;await bsay(N()+' dropped '+lost+' Cr and blacked out...');
       BT=null;BFX.length=0;G.fade=1;await healAll();if(G.vault){await vaultFail();G.busy=false;return 'lose';}loadMap(G.lastHeal.map,G.lastHeal.x,G.lastHeal.y,'down');await say('You were towed back to safety. Your bots have been repaired.');G.busy=false;return 'lose';}}
   for(const b of G.party){b.st=b.st&&['sleep','freeze','glitch'].includes(b.st.k)?null:b.st;}
   BT=null;BFX.length=0;G.fade=1;Snd.music(curMap().music,true);
@@ -320,7 +323,7 @@ async function throwSpike(item){const B=BT;const e=cur('e');G.bag[item]--;if(G.b
   const chance=clamp((d.cr*(1-0.66*hr)*ITEMS[item].spike*sm)/255+0.03,0.02,0.98);
   const ok=Math.random()<chance;const shakes=ok?3:(chance>0.5?rnd(3)+1:rnd(3));
   for(let i=0;i<shakes;i++){Snd.sfx('shake');for(let k=0;k<16;k++){B.anim.spike.wob=Math.sin(k/16*Math.PI*2)*0.5;await wait(1);}B.anim.spike.wob=0;await wait(18);}
-  if(ok){Snd.jingle('victory',curMap().music);burst(360,90,'#ffe080',20,3,3,30);await bsay('Reboot complete! '+(e.glitch?'✦ ':'')+d.name+' is now linked to you!');B.anim.spike=null;
+  if(ok){Snd.jingle('link',curMap().music);burst(360,90,'#ffe080',20,3,3,30);await bsay('Reboot complete! '+(e.glitch?'✦ ':'')+d.name+' is now linked to you!');B.anim.spike=null;
     G.caught[e.id]=1;if(e.glitch)G.glitchCaught=(G.glitchCaught||0)+1;seen(e.id);e.st=null;if(G.party.length<6){G.party.push(e);}else{G.storage.push(e);await bsay(d.name+' was sent to the storage terminal.');}
     return true;}
   B.anim.spike=null;B.anim.eHide=false;B.flash=8;await bsay(['Oh no! It broke free!','Argh! Almost had it!','Gah! So close!'][Math.min(2,shakes)]);return false;}

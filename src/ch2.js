@@ -1,9 +1,10 @@
 // ===================== CHAPTER 2: THE RUSTWORKS =====================
 Object.assign(ITEMS,{prime3:{n:'Iron Prime',d:'Prime Shard from Warden Hask. Cold, heavy, perfectly balanced.',cat:'key'},prime4:{n:'Flame Prime',d:'Prime Shard from Warden Sora. Warm to the touch, even here.',cat:'key'},
  archive:{n:'Maker Archive Core',d:'A data core from the Rustworks. It holds the truth about the Heartforge.',cat:'key'}});
-Object.assign(QUESTS,{archive:{n:'The Maker Archive',where:'Route 3 / Rustworks',steps:{active:'Find the Maker archives inside the Rustworks factory east of Voltmere.',found:'You have the Archive Core. Decide what to do with it.',done:'The Archive\'s truth is out of your hands now.'}},
- logs:{n:'Maker Logs',where:'Chapter 2 area',steps:{active:'Old Maker log terminals are scattered around Route 3, the Rustworks, Ferrow and Route 4.',done:'You read every Maker log.'}}});
-function makeHouse(name,ret,npcs,objs){return{name,theme:'house',music:'town',grid:['XXXXXXXXX','XvxxMxxhX','XxxxxxxxX','XxxtxxxxX','XxxxxxxxX','XxxxxxxxX','XvxxxxxvX','XXXXeXXXX'],warps:[{x:4,y:7,to:ret.map,tx:ret.x,ty:ret.y,dir:'down'}],npcs:npcs||[],objs:objs||[]};}
+Object.assign(QUESTS,{archive:{n:'The Maker Archive',where:'Railbed Road / Rustworks',steps:{active:'Find the Maker archives inside the Rustworks factory east of Voltmere.',found:'You have the Archive Core. Decide what to do with it.',done:'The Archive\'s truth is out of your hands now.'}},
+ logs:{n:'Maker Logs',where:'Chapter 2 area',steps:{active:'Old Maker log terminals are scattered along Railbed Road, the Rustworks, Ferrow and the Geyser Flats.',done:'You read every Maker log.'}}});
+const HOUSE_V=[['XXXXXXXXX','X7x7xx9hX','XxxxxxxxX','X&xxxxxxX','XxxxtxxxX','XxxxxxxxX','XvxxxxxvX','XXXXeXXXX'],['XXXXXXXXX','X99x*xxhX','XxxxxxxxX','XxtxxxxxX','XxxxxxxxX','X&xxxxx&X','XxxxxxxvX','XXXXeXXXX'],['XXXXXXXXX','XhxMMx@vX','XxxxxxxxX','XxxxxtxxX','XxxxxxxxX','XxxxxxxxX','X9xxxxx&X','XXXXeXXXX']];
+function makeHouse(name,ret,npcs,objs){const k=((npcs&&npcs[0]&&npcs[0].id)||name).split('').reduce((a,c)=>a+c.charCodeAt(0),0)%HOUSE_V.length;return{name,theme:'house',music:'town',grid:HOUSE_V[k],warps:[{x:4,y:7,to:ret.map,tx:ret.x,ty:ret.y,dir:'down'}],npcs:npcs||[],objs:objs||[]};}
 const LOGS={
  log1:'MAKER LOG 117: "The Heartforge is complete. It will keep the titan asleep for a thousand years. Longer, if the Wardens keep the Primes apart."',
  log2:'MAKER LOG 203: "Secondary function enabled: the Accord. Every shardbot now obeys whoever holds the Primes. We told ourselves this was for safety."',
@@ -15,7 +16,7 @@ async function readLog(o){G.logs=G.logs||{};Snd.sfx('switch');await say(LOGS[o.l
 function drawLogObj(o,sx,sy){R(ctx,sx+8,sy+4,16,24,'#3a4250');R(ctx,sx+10,sy+6,12,8,(G.logs&&G.logs[o.log])?'#4a6a7a':(TICK%40<20?'#60e0ff':'#40b0d0'));R(ctx,sx+10,sy+18,12,2,'#20262e');}
 
 // ---------- Route 3 ----------
-MAPS.route3={name:'Route 3',theme:'out',music:'route',outdoor:1,weather:'snow',world:{x:110,y:11},grid:['TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT','TTTTTTTTTTUUUUUUUUUUTTTTTTTTTTTTTTTT','TT.,,,,,,.UUUUUUUUUU.......,,,,,..TT','TT.,,,,,,.UUUUUUUUUU.i.~~~.,,,,,..TT','TT.,,,,,,.WWWWDWWWWW...~~~.,,,,,..TT','TT............=...................TT','====================================','====================================','TT....................,,,,,,,.....TT','TT..........,,,,,,....,,,,,,,..TT.TT','TT..........,,,,,,....,,,,,,,..TTTTT','TTT...............................TT','TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT','TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'],
+MAPS.route3={name:'Railbed Road',theme:'out',music:'route',outdoor:1,weather:'snow',world:{x:110,y:11},grid:['TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT','TTTTTTTTTTUUUUUUUUUUTTTTTTTTTTTTTTTT','TT.,,,,,,.UUUUUUUUUU.......,,,,,..TT','TT.,,,,,,.UUUUUUUUUU.i.~~~.,,,,,..TT','TT.,,,,,,.WWWWDWWWWW...~~~.,,,,,..TT','TT............=...................TT','====================================','====================================','TT....................,,,,,,,.....TT','TT..........,,,,,,....,,,,,,,..TT.TT','TT..........,,,,,,....,,,,,,,..TTTTT','TTT...............................TT','TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT','TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'],
  enc:{tile:',',count:7,list:[['boltbun',16,18,18],['scrapmite',16,18,18],['frostling',16,18,26],['pipsprock',17,19,18],['cogwyrm',17,19,14]]},thawEnc:[['kilnfly',17,19,14],['dripcell',17,19,12]],
  alpha:{id:'cogwyrm',lv:21,at:[25,9]},iceLoot:{'21,3':'core_cooler'},
  warps:[{x:0,y:6,to:'voltmere',tx:22,ty:12},{x:0,y:7,to:'voltmere',tx:22,ty:13},{x:35,y:6,to:'ferrow',tx:1,ty:12},{x:35,y:7,to:'ferrow',tx:1,ty:13},{x:14,y:4,to:'rustworks',tx:12,ty:16}],
@@ -78,8 +79,8 @@ async function takeArchive(){Snd.sfx('item');addItem('archive',1);setQ('archive'
 async function toggleLever(){const m=curMap();G.beltFlip=G.beltFlip||{};G.beltFlip[G.map]=!G.beltFlip[G.map];Snd.sfx('switch');await say('CLUNK. Every conveyor belt in the building reverses direction!');}
 
 // ---------- Ferrow ----------
-MAPS.ferrow={name:'Ferrow',theme:'out',music:'town',outdoor:1,weather:'night',world:{x:146,y:5},town:1,heal:{map:'repair_f',x:5,y:6},grid:['TTTTTTTTTTTTTTTTTTTTTTTT','TT....................TT','TT.YYYYYYY....RRRRR...TT','TT.YYYYYYY....RRRRR...TT','TT.WWWDWWW....WWDWW...TT','TT....===s==..........TT','TT.........=......FFF.TT','TT.........=====......TT','TT.RRRR....=.QQQQ.....TT','TT.RRRR.l..=.QQQQ.....TT','TT.WDWW....=.WDWW.MM..TT','TT.........=......MM..TT','=============.........TT','=============...l..MM.TT','TT.........==......MM.TT','TT........====........TT','TT........====........TT','TTTTTTTTTT====TTTTTTTTTT'],
- warps:[{x:0,y:12,to:'route3',tx:34,ty:6},{x:0,y:13,to:'route3',tx:34,ty:7},{x:6,y:4,to:'gym3',tx:6,ty:13},{x:16,y:4,to:'house_f1',tx:4,ty:6},{x:14,y:10,to:'repair_f',tx:5,ty:6},{x:4,y:10,to:'house_f2',tx:4,ty:6},
+MAPS.ferrow={name:'Ferrow',theme:'out',music:'town',outdoor:1,weather:'night',world:{x:146,y:5},town:1,heal:{map:'repair_f',x:6,y:4},grid:['TTTTTTTTTTTTTTTTTTTTTTTT','TT....................TT','TT.YYYYYYY....RRRRR...TT','TT.YYYYYYY....RRRRR...TT','TT.WWWDWWW....WWDWW...TT','TT....===s==..........TT','TT.........=......FFF.TT','TT.........=====......TT','TT.RRRR....=.QQQQ.....TT','TT.RRRR.l..=.QQQQ.....TT','TT.WDWW....=.WDWW.MM..TT','TT.........=......MM..TT','=============.........TT','=============...l..MM.TT','TT.........==......MM.TT','TT........====........TT','TT........====........TT','TTTTTTTTTT====TTTTTTTTTT'],
+ warps:[{x:0,y:12,to:'route3',tx:34,ty:6},{x:0,y:13,to:'route3',tx:34,ty:7},{x:6,y:4,to:'gym3',tx:6,ty:13},{x:16,y:4,to:'house_f1',tx:4,ty:6},{x:14,y:10,to:'repair_f',tx:6,ty:4},{x:4,y:10,to:'house_f2',tx:4,ty:6},
   {x:10,y:17,to:'route4',tx:8,ty:1},{x:11,y:17,to:'route4',tx:9,ty:1},{x:12,y:17,to:'route4',tx:10,ty:1},{x:13,y:17,to:'route4',tx:11,ty:1}],
  signs:{'9,5':'FERROW WARDEN HALL — Warden Hask. "Forged, not born."'},
  objs:[{type:'log',log:'log3',x:20,y:1,run:readLog}],
@@ -87,7 +88,7 @@ MAPS.ferrow={name:'Ferrow',theme:'out',music:'town',outdoor:1,weather:'night',wo
   {id:'fe1',x:8,y:12,dir:'down',look:'mech',text:'Ferrow builds half the bot parts in Calderra. Got Scrap? Any Forge can turn it into body parts now.'},
   {id:'fe2',x:17,y:7,dir:'left',look:'woman',text:'The furnaces are running cold. Hask keeps them going with the Iron Prime\'s heat alone.'},
   {id:'fe3',x:15,y:15,dir:'up',look:'kid',wander:1,text:'Warden Hask\'s gym has conveyor belts! You push crates onto them and WHOOSH.'},
-  {id:'fguard',x:12,y:15,dir:'up',look:'guard',cond:()=>!flag('badge3'),text:'Route 4 runs through the geyser fields. Hask wants challengers to prove themselves before heading south.'},
+  {id:'fguard',x:12,y:15,dir:'up',look:'guard',cond:()=>!flag('badge3'),text:'The Geyser Flats start past the south gate. Hask wants challengers to prove themselves before heading south.'},
  ],
  triggers:[{x:10,y:16,run:ferrowGate},{x:11,y:16,run:ferrowGate},{x:12,y:16,run:ferrowGate},{x:13,y:16,run:ferrowGate}]};
 async function ferrowGate(){if(flag('badge3'))return;G.busy=true;await say('The south road leads into the geyser fields. Beat Warden Hask first. Those vents will boil an untested bot.',{speaker:'Guard'});await stepPlayer('up');G.busy=false;}
@@ -110,7 +111,7 @@ async function haskTalk(){if(flag('badge3')){await say('Forged, not born. Keep t
  G.busy=false;}
 
 // ---------- Route 4 ----------
-MAPS.route4={name:'Route 4',theme:'out',music:'route',outdoor:1,weather:'blizzard',world:{x:148,y:23},grid:['TTTTTTTT====TTTTTTTT','TT.......==.......TT','TT.......==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.......TT','TT.......==.......TT','TT.......==.......TT','TT.......==.......TT','TT#####..==V.#####TT','TT#####.VV=..#####TT','TT#####V.=VV.#####TT','TT#####..VV..#####TT','TT#####.V==..#####TT','TT.......==.......TT','TT.~~~...==.......TT','TT.~~~...==.....i.TT','TT.......==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.......TT','TT.......==....TTTTT','TT.......==....TTTTT','TT.......==.......TT','TTTTTTTT====TTTTTTTT'],ventReset:[9,12],
+MAPS.route4={name:'Geyser Flats',theme:'out',music:'route',outdoor:1,weather:'blizzard',world:{x:148,y:23},grid:['TTTTTTTT====TTTTTTTT','TT.......==.......TT','TT.......==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.......TT','TT.......==.......TT','TT.......==.......TT','TT.......==.......TT','TT#####..==V.#####TT','TT#####.VV=..#####TT','TT#####V.=VV.#####TT','TT#####..VV..#####TT','TT#####.V==..#####TT','TT.......==.......TT','TT.~~~...==.......TT','TT.~~~...==.....i.TT','TT.......==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.......TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.,,,,,.==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.,,,,,.TT','TT.......==.......TT','TT.......==....TTTTT','TT.......==....TTTTT','TT.......==.......TT','TTTTTTTT====TTTTTTTT'],ventReset:[9,12],
  enc:{tile:',',count:8,list:[['kilnfly',20,23,22],['frostling',20,22,18],['cogwyrm',21,23,18],['gearpup',21,23,16],['pebblit',21,23,16]]},thawEnc:[['sporelet',21,23,12],['dripcell',21,23,12]],
  alpha:{id:'blastfan',lv:26,at:[14,26]},iceLoot:{'16,20':'arm_claws'},
  warps:[{x:8,y:0,to:'ferrow',tx:10,ty:16},{x:9,y:0,to:'ferrow',tx:11,ty:16},{x:10,y:0,to:'ferrow',tx:12,ty:16},{x:11,y:0,to:'ferrow',tx:13,ty:16},
@@ -122,9 +123,9 @@ MAPS.route4={name:'Route 4',theme:'out',music:'route',outdoor:1,weather:'blizzar
  ]};
 
 // ---------- Kilnhaven ----------
-MAPS.kilnhaven={name:'Kilnhaven',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:146,y:57},town:1,heal:{map:'repair_k',x:5,y:6},grid:['TTTTTTTT====TTTTTTTTTTTT','TTTTTTTT====TTTTTTTTTTTT','TT.......==...........TT','TT.RRRR..==..YYYYYYYY.TT','TT.RRRR..==..YYYYYYYY.TT','TT.WDWW..==s.WWWDWWWW.TT','TT.....l.==...........TT','TT.......========.....TT','TT.QQQQ..==...........TT','TT.QQQQ..==...........TT','TT.WDWW..==...........TT','TT...======...........TT','TT.......==.l.~~~~~...TT','TT.MMM........~~b~~...TT','TT.MMM........~~~~~...TT','TT....................TT','TT....................TT','TTTTTTTTTTTTTTTTTTTTTTTT'],
+MAPS.kilnhaven={name:'Kilnhaven',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:146,y:57},town:1,heal:{map:'repair_k',x:6,y:4},grid:['TTTTTTTT====TTTTTTTTTTTT','TTTTTTTT====TTTTTTTTTTTT','TT.......==...........TT','TT.RRRR..==..YYYYYYYY.TT','TT.RRRR..==..YYYYYYYY.TT','TT.WDWW..==s.WWWDWWWW.TT','TT.....l.==...........TT','TT.......========.....TT','TT.QQQQ..==...........TT','TT.QQQQ..==...........TT','TT.WDWW..==...........TT','TT...======...........TT','TT.......==.l.~~~~~...TT','TT.MMM........~~b~~...TT','TT.MMM........~~~~~...TT','TT....................TT','TT....................TT','TTTTTTTTTTTTTTTTTTTTTTTT'],
  warps:[{x:8,y:0,to:'route4',tx:8,ty:32},{x:9,y:0,to:'route4',tx:9,ty:32},{x:10,y:0,to:'route4',tx:10,ty:32},{x:11,y:0,to:'route4',tx:11,ty:32},
-  {x:16,y:5,to:'gym4',tx:6,ty:13},{x:4,y:10,to:'repair_k',tx:5,ty:6},{x:4,y:5,to:'house_k1',tx:4,ty:6}],
+  {x:16,y:5,to:'gym4',tx:6,ty:13},{x:4,y:10,to:'repair_k',tx:6,ty:4},{x:4,y:5,to:'house_k1',tx:4,ty:6}],
  signs:{'11,5':'KILNHAVEN WARDEN HALL — Warden Sora. "Burn bright, burn steady."'},
  npcs:[
   {id:'kh1',x:13,y:15,dir:'up',look:'woman',text:'These hot springs never freeze. Kilnhaven sits right on Mt. Cinder\'s oldest vent.'},
@@ -142,7 +143,7 @@ async function soraTalk(){if(flag('badge4')){await say('Burn bright, burn steady
  await say('I\'m Sora, Warden of Kilnhaven. Heat is life up here. Let\'s see if you can manage yours. This is a LINK battle!',{speaker:'Sora'});
  const r=await runBattle({trainer:{name:'Sora',title:'Warden',look:'ione',warden:1,link:1,team:[['furnadrone',27],['cinderlamp',26],['magmaw',27],['blastfan',28]],money:3000,items:1}});
  if(r==='win'){setFlag('badge4');addItem('prime4',1);addItem('shard_Flame',1);Snd.jingle('victory',curMap().music);await say('Bright AND steady. Take it.',{speaker:'Sora'});await say(N()+' received the FLAME PRIME and a Flame Shard!');
-   await thawRegions(['kilnhaven','route4'],'The Flame Prime blazes. The geyser fields steam, and the snow on Route 4 melts away...');G.busy=false;await chapter2End();return;}
+   await thawRegions(['kilnhaven','route4'],'The Flame Prime blazes. The geyser fields steam, and the snow on the Geyser Flats melts away...');G.busy=false;await chapter2End();return;}
  G.busy=false;}
 async function chapter2End(){G.busy=true;Snd.sfx('glitch');
  await pushUI({t:0,update(){this.t++;if(this.t>150)popUI(this);},draw(){for(let i=0;i<30;i++){ctx.fillStyle=Math.random()<0.5?'rgba(255,0,200,.25)':'rgba(0,255,220,.2)';ctx.fillRect(0,Math.random()*H,W,2+Math.random()*10);}if(this.t%20<3){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,0,W,H);}wtxt('— SIGNAL INTERRUPTED —',W/2,H/2,'#ff60d0',24,'center');}});

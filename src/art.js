@@ -133,7 +133,7 @@ function botSprite(id,opt){const O=opt===true?{sil:1}:(opt||{});const silhouette
 const TCACHE={};
 function seedSpeck(g,col,n,seed){let s=seed*7919+13;for(let i=0;i<n;i++){s=(s*9301+49297)%233280;const x=s%16;s=(s*9301+49297)%233280;const y=s%16;R(g,x,y,1,1,col);}}
 const THEMES={out:{floor:'#c4a888',wall:'#8a7060'},house:{floor:'#c8aa8a',fl2:'#b0927a',wall:'#7e6a62',wl2:'#5e4e4a'},lab:{floor:'#dfe4ee',fl2:'#c2c9d8',wall:'#a8b6cc',wl2:'#7a88a2'},
- repair:{floor:'#e6e2ec',fl2:'#cec6d6',wall:'#b896a8',wl2:'#8a6e80'},gym1:{floor:'#a8a6a6',fl2:'#8e8c8e',wall:'#5a5a62',wl2:'#3e3e46'},gym2:{floor:'#7e8898',fl2:'#687282',wall:'#323a4a',wl2:'#d8c040'},cave:{floor:'#6e7682',wall:'#3c4450'},factory:{floor:'#6a6058',fl2:'#564c46',wall:'#3a3230',wl2:'#c07030'},kiln:{floor:'#4e4240',fl2:'#3a302e',wall:'#2a201e',wl2:'#ff7030'}};
+ repair:{floor:'#9a7e62',fl2:'#866c54',wall:'#4a5260',wl2:'#2e343e'},gym1:{floor:'#a8a6a6',fl2:'#8e8c8e',wall:'#5a5a62',wl2:'#3e3e46'},gym2:{floor:'#7e8898',fl2:'#687282',wall:'#323a4a',wl2:'#d8c040'},cave:{floor:'#6e7682',wall:'#3c4450'},factory:{floor:'#6a6058',fl2:'#564c46',wall:'#3a3230',wl2:'#c07030'},kiln:{floor:'#4e4240',fl2:'#3a302e',wall:'#2a201e',wl2:'#ff7030'}};
 function grass(g,v){R(g,0,0,16,16,'#8fb0a2');seedSpeck(g,'#7a9c8e',9,v+1);seedSpeck(g,'#b4cec4',4,v+7);seedSpeck(g,'#eef4f8',v===0?4:2,v+11);}
 function snowCap(g,col){R(g,0,0,16,3,'#eef4f8');for(let x=0;x<16;x+=3)R(g,x,3,2,1,'#eef4f8');R(g,0,3,16,1,'rgba(0,0,0,0)');}
 function floorT(g,th){const t=THEMES[th]||THEMES.house;R(g,0,0,16,16,t.floor);
@@ -203,6 +203,31 @@ function tileArt(ch,th,v,fr){const key=ch+th+v+fr;let c=TCACHE[key];if(c)return 
  case 'L':floorT(g,th);R(g,5,9,6,6,'#3a3a42');R(g,6,10,4,4,'#5a5a64');R(g,7,2,2,9,'#8a8a96');R(g,6,1,4,3,fr?'#ff5040':'#40d060');break;
  case 'V':if(th==='out'||th==='outw')R(g,0,0,16,16,'#7a7468');else floorT(g,th);R(g,2,2,12,12,'#2a2624');R(g,3,3,10,10,'#14100e');for(let i=4;i<12;i+=3)R(g,3,i,10,1,'#4a423e');break;
  case 'k':floorT(g,th);R(g,0,0,16,16,'#4a5a8a');R(g,1,1,14,14,'#5a6aa0');break;
+
+ case 'j':grass(g,v);{const P=[[2,3,5,3,'#6a727e'],[9,2,4,2,'#8a5a40'],[11,9,4,3,'#5a626e'],[3,10,5,2,'#7a4a34'],[7,6,3,2,'#9aa2ae']];for(const [x,y,w,h,c] of P){R(g,x,y+1,w,h,'#4a5a58');R(g,x,y,w,h,c);R(g,x,y,w,1,shade(c,0.3));}
+   R(g,6,12,1,3,'#3a424e');R(g,13,5,1,2,'#3a424e');if(fr)R(g,(v*5+4)%14+1,7,1,1,'#ffd860');}break;
+ case 'q':grass(g,v);{const C=[[4,12,3,8,'#58c8e8'],[10,13,3,10,'#9a7ae8'],[13,11,2,6,'#58c8e8'],[7,14,2,5,'#c8f0ff']];for(const [x,b,w,h,c] of C){ptri(g,[x-w,b,x,b-h,x+w,b],shade(c,-0.35));ptri(g,[x-w+1,b,x,b-h+1,x,b],c);}
+   if(fr){R(g,4,5,1,1,'#ffffff');R(g,10,4,1,1,'#ffffff');}else R(g,13,6,1,1,'#ffffff');}break;
+ case 'y':R(g,0,0,16,16,'#6e7e8c');seedSpeck(g,'#5e6e7c',10,v+3);seedSpeck(g,'#9aa8b8',5,v+5);
+   {const L=fr?[[1,4,6,1],[6,4,1,5],[6,9,7,1],[12,2,1,7]]:[[2,12,5,1],[7,7,1,5],[7,7,6,1],[3,2,1,5]];for(const [x,y,w,h] of L)R(g,x,y,w,h,'#8a7cff');R(g,fr?12:3,fr?2:2,1,1,'#e8e0ff');}break;
+ case 'w':grass(g,v);R(g,3,8,1,6,'#5e786e');R(g,11,6,1,7,'#5e786e');R(g,7,10,1,5,'#6a8478');g.globalAlpha=0.55;pell(g,5+(fr?1:0),6,6,3,'#f2f6fa');pell(g,11-(fr?1:0),11,5,3,'#e6eef4');g.globalAlpha=1;break;
+ case 'd':grass(g,v);g.globalAlpha=0.9;pell(g,4+(v%2)*2,6,7,4,'#f2f7fb');pell(g,12,12,6,4,'#eef4f8');g.globalAlpha=1;R(g,1,9,7,1,'#c4d2dc');R(g,8,15,7,1,'#c4d2dc');R(g,3,4,3,1,'#ffffff');R(g,10,9,3,1,'#ffffff');break;
+ case '-':R(g,0,0,16,16,'#a8cce0');R(g,0,0,16,1,'#c8e4f2');R(g,2,3,7,1,'#e8f6ff');R(g,8,10,6,1,'#e8f6ff');R(g,3,13,1,1,'#ffffff');R(g,11,5,3,1,'#88b4cc');R(g,13,6,1,3,'#88b4cc');break;
+ case 'G':R(g,0,0,16,16,'#5e5a62');R(g,0,6,16,1,'#4a464e');R(g,0,11,16,1,'#4a464e');R(g,3,6,1,5,'#4a464e');R(g,11,11,1,5,'#4a464e');R(g,9,1,1,5,'#4a464e');R(g,0,0,16,3,'#e8eef4');R(g,0,3,16,1,'#b8c2cc');R(g,(v*3)%12,3,3,1,'#e8eef4');R(g,1,15,14,1,'#3a363e');break;
+ case 'H':R(g,0,0,16,16,'#8a8690');for(let y=0;y<16;y+=4){R(g,0,y,16,1,'#b4b0ba');R(g,0,y+3,16,1,'#5e5a64');}R(g,0,0,1,16,'#5e5a62');R(g,15,0,1,16,'#5e5a62');seedSpeck(g,'#eef4f8',3,v+2);break;
+ case 'C':R(g,0,0,16,16,'#0c1220');R(g,0,0,16,2,'#1e2a3e');seedSpeck(g,'#18223a',6,v+4);if(v===1)R(g,5,8,1,1,'#3a5a8a');break;
+ case 'B':grass(g,v);R(g,2,12,12,3,'#9a927e');for(const x of [3,7,11]){R(g,x,2,2,11,'#d8d0c0');R(g,x,2,1,11,'#f2ece2');R(g,x+1,12,1,1,'#8a8272');}R(g,3,1,10,2,'#c8c0b0');R(g,3,1,10,1,'#ece6da');break;
+ case 'A':R(g,0,0,16,16,'#0c1220');R(g,0,4,16,8,'#8a8272');R(g,0,5,16,6,'#d4ccbc');R(g,0,5,16,1,'#f2ece2');for(let x=1;x<16;x+=5){R(g,x,3,3,10,'#c8c0b0');R(g,x,3,3,1,'#f2ece2');R(g,x+1,0,1,4,'#b8b0a0');R(g,x+1,12,1,4,'#b8b0a0');}break;
+ case 'N':R(g,0,0,16,16,'#2a3240');R(g,0,0,16,1,'#4a5668');R(g,0,7,16,1,'#1a2028');R(g,7,0,1,16,'#1a2028');for(const [x,y] of [[2,2],[12,2],[2,11],[12,11]])R(g,x,y,1,1,'#6a7688');R(g,0,8,16,1,fr?'#2a8a9a':'#1e6a78');R(g,0,0,16,2,'#dfe8f0');break;
+ case 'J':R(g,0,0,16,16,'#2a3240');pell(g,8,8,7,7,'#141a24');pell(g,8,8,5,5,fr?'#40e0f0':'#2aa8c0');pell(g,8,8,2,2,'#d8ffff');R(g,0,0,16,2,'#dfe8f0');break;
+ case 'Z':grass(g,v);ptri(g,[1,15,7,3,15,15],'#4e5662');ptri(g,[4,15,9,6,14,15],'#6a5244');R(g,5,9,4,2,'#8a929e');R(g,9,11,3,3,'#3a4250');R(g,7,5,1,4,'#2a323e');R(g,1,15,14,1,'#3a423e');break;
+ case '0':grass(g,v);R(g,2,0,12,16,'#2e3644');R(g,2,0,2,16,'#5a6676');R(g,12,0,2,16,'#1a202a');for(let y=0;y<16;y+=8){ptri(g,[4,y,12,y+8,11,y+8],'#4a5668');ptri(g,[12,y,4,y+8,5,y+8],'#4a5668');R(g,2,y,12,1,'#6a7688');}R(g,7,7,2,2,fr?'#c03838':'#7a2a2a');break;
+ case '7':floorT(g,th);R(g,0,3,16,9,'#6a5440');R(g,0,3,16,2,'#8a7058');R(g,1,12,2,4,'#4a3a2c');R(g,13,12,2,4,'#4a3a2c');R(g,2,1,4,3,'#8a929e');R(g,9,2,5,2,'#c0a050');R(g,7,1,1,3,'#5a6676');R(g,11,6,3,2,'#40c8e0');break;
+ case '9':floorT(g,th);R(g,1,0,14,15,'#5a4838');for(const y of [4,9,14])R(g,1,y,14,1,'#3a2c22');R(g,2,1,3,3,'#8a929e');R(g,6,2,2,2,'#c06040');R(g,10,1,4,3,'#58c8e8');R(g,3,6,4,3,'#c0a050');R(g,9,6,2,3,'#6a7688');R(g,4,11,7,3,'#7a8a6a');break;
+ case '*':floorT(g,th);R(g,1,1,14,14,'#5a4a46');R(g,2,2,12,4,'#7a6a64');R(g,3,7,10,8,'#1a1210');R(g,4,10,8,5,fr?'#ff9a40':'#ffb850');R(g,6,9,4,3,'#ffe090');break;
+ case '@':floorT(g,th);R(g,7,9,2,6,'#3a4250');R(g,4,14,8,1,'#3a4250');ptri(g,[3,3,13,8,12,10],'#8a929e');ptri(g,[3,3,12,10,2,5],'#5a6676');R(g,12,7,2,3,'#c0a050');break;
+ case '&':floorT(g,th);R(g,1,6,8,9,'#7a5a3c');R(g,1,6,8,1,'#a07a54');R(g,2,9,6,1,'#5a3e28');R(g,7,1,8,8,'#8a6a48');R(g,7,1,8,1,'#b08a60');R(g,10,4,3,1,'#5a3e28');break;
+ case '5':floorT(g,th);R(g,2,8,12,7,'#3a4250');R(g,1,7,14,2,'#5a6676');R(g,3,10,10,3,fr?'#40e0a0':'#30b080');R(g,4,2,2,6,'#5a6676');R(g,10,2,2,6,'#5a6676');R(g,4,1,8,2,'#6a7688');R(g,7,3,2,2,fr?'#a0ffd0':'#60e0a0');break;
  default:R(g,0,0,16,16,'#ff00ff');}
  g.setTransform(1,0,0,1,0,0);tileDetail(g,ch,th,v,fr);
  TCACHE[key]=c;return c;}
