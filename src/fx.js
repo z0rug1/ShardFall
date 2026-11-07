@@ -6,9 +6,11 @@ const WEATHER={
  static:{name:'Static storm',dark:0.4,snow:0.18,wind:0.5,fog:0,static:1},
  cave:{name:'Underground',dark:0.86,snow:0.05,wind:0,fog:0},
  indoor:{name:'Indoors',dark:0,snow:0,wind:0,fog:0},
+ clear:{name:'Thawed',dark:0,snow:0,wind:0.3,fog:0,petals:1},
+ vault:{name:'Maker Vault',dark:0.7,snow:0,wind:0,fog:0},
 };
-function curWeather(){const m=curMap();return WEATHER[m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor')];}
-function weatherKey(){const m=curMap();return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
+function weatherKey(){const m=curMap();if(m.vaultMap)return 'vault';if(m.outdoor&&m.theme==='out'&&thawed(G.map))return 'clear';return m.weather||(m.theme==='cave'?'cave':m.outdoor?'snow':'indoor');}
+function curWeather(){return WEATHER[weatherKey()];}
 
 // ---- lighting ----
 let LIGHT=null,lgx=null;
@@ -33,7 +35,7 @@ function drawLighting(cx,cy,px,py){const wx=curWeather();if(!wx.dark)return;ensu
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const l of all){const sx=l.x-cx,sy=l.y-cy;const r=l.r*0.7;const gr=ctx.createRadialGradient(sx,sy,0,sx,sy,r);gr.addColorStop(0,l.col+(l.player?'30':'44'));gr.addColorStop(1,l.col+'00');ctx.fillStyle=gr;ctx.fillRect(sx-r,sy-r,r*2,r*2);}
   ctx.restore();}
-function drawWeatherOverlay(cx,cy){const wx=curWeather();if(wx.snow)drawSnow(cx,cy,wx.snow,wx.wind);
+function drawWeatherOverlay(cx,cy){const wx=curWeather();if(wx.snow)drawSnow(cx,cy,wx.snow,wx.wind);if(wx.petals)drawPetals(cx,cy);if(G.thawFx>0){G.thawFx--;const t=G.thawFx/180;ctx.fillStyle='rgba(255,210,140,'+(t*0.45)+')';ctx.fillRect(0,0,W,H);}
   if(wx.fog){const g=ctx.createRadialGradient(W/2,H/2,60,W/2,H/2,300);g.addColorStop(0,'rgba(220,232,244,'+(wx.fog*0.4)+')');g.addColorStop(1,'rgba(220,232,244,'+(wx.fog*2.6)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
   if(wx.static){if(G.bolt>0){ctx.fillStyle='rgba(180,200,255,'+(G.bolt/14*0.45)+')';ctx.fillRect(0,0,W,H);G.bolt--;}
     else if(Math.random()<0.004){G.bolt=14;Snd.sfx('thunder');}}}
@@ -45,7 +47,7 @@ function owParticles(cx,cy,px,py){const wx=curWeather();const m=curMap();
   if(wx.static&&Math.random()<0.05){for(const l of (G.lights||[])){if(Math.random()<0.02)OWP.push({x:l.x+(Math.random()-0.5)*20,y:l.y,vx:(Math.random()-0.5)*1.4,vy:-Math.random()*1.4,t:0,max:20,k:'spark'});}}
   for(let i=OWP.length-1;i>=0;i--){const p=OWP[i];p.t++;p.x+=p.vx;p.y+=p.vy;if(p.t>=p.max){OWP.splice(i,1);continue;}
     const a=1-p.t/p.max;if(p.k==='breath'){ctx.fillStyle='rgba(235,242,250,'+(a*0.55)+')';ctx.beginPath();ctx.arc(p.x-cx,p.y-cy,2+p.t*0.08,0,7);ctx.fill();}
-    else{ctx.fillStyle='rgba(160,200,255,'+a+')';ctx.fillRect(p.x-cx,p.y-cy,1.5,1.5);}}}
+    else{ctx.globalAlpha=a;ctx.fillStyle=p.col||'#a0c8ff';ctx.fillRect(p.x-cx,p.y-cy,p.col?3:1.5,p.col?3:1.5);ctx.globalAlpha=1;}}}
 
 // ---- battle FX ----
 const BFX=[];
@@ -88,3 +90,6 @@ async function odCinematic(side,type){const B=BT;const b=cur(side);const col=TCO
     if(t>max-28&&t<max-6){const k=(t-(max-28))/22;ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-0.45);ctx.fillStyle='#ffffff';ctx.fillRect(-W,-6-30*(1-Math.abs(k-0.5)*2),W*2*Math.min(1,k*2),12+60*(1-Math.abs(k-0.5)*2));ctx.fillStyle=col;ctx.fillRect(-W,-3,W*2*Math.min(1,k*2),6);ctx.restore();}
     if(t>max-8){ctx.fillStyle='rgba(255,255,255,'+((t-(max-8))/8)+')';ctx.fillRect(0,0,W,H);}}});}
 function bspr(b,o){return botSprite(b.id,Object.assign({glitch:b.glitch},o||{}));}
+
+const PETALS=Array.from({length:40},(_,i)=>({x:Math.random()*480,y:Math.random()*320,s:0.3+Math.random()*0.6,w:Math.random()*6.28,c:['#f0a0c0','#ffe080','#a0e080','#ffffff'][i%4]}));
+function drawPetals(dx,dy){for(const p of PETALS){const x=((p.x-dx*0.6+TICK*p.s*0.8+Math.sin(TICK/40+p.w)*10)%480+480)%480,y=((p.y+TICK*p.s*0.4-dy*0.6)%320+320)%320;ctx.fillStyle=p.c;ctx.globalAlpha=0.8;ctx.fillRect(x,y,2,1.5);}ctx.globalAlpha=1;}

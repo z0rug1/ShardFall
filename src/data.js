@@ -127,4 +127,5 @@ function makeBot(id,lv){
   b.hp=stats(b).hp;return b;
 }
 function stats(b){const d=BOTS[b.id];const L=b.lv;const s=d.base;
-  return{hp:Math.floor(s[0]*2*L/100)+L+10,atk:Math.floor(s[1]*2*L/100)+5,def:Math.floor(s[2]*2*L/100)+5,spd:Math.floor(s[3]*2*L/100)+5};}
+  const hm=typeof partMult==='function'?partMult(b,'hp'):1;
+  return{hp:Math.floor((Math.floor(s[0]*2*L/100)+L+10)*hm),atk:Math.floor(s[1]*2*L/100)+5,def:Math.floor(s[2]*2*L/100)+5,spd:Math.floor(s[3]*2*L/100)+5};}

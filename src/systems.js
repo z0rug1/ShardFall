@@ -34,12 +34,12 @@ function resonant(b){const d=BOTS[b.id];if(d.stage<1||b.shards.length<2)return f
 
 // ---- Forge ----
 async function openForge(){G.busy=true;await say('The Forge hums. Molten shard-light pours between the anvils.',{speaker:'Forge'});
-  while(true){const i=await ask('What do you want to forge? (Scrap: '+(G.bag.scrap||0)+')',['Salvage 5 Scrap','Refine 3 shards','Fuse 2 Refined','Refit a socket','Leave']);
-    if(i===0){if((G.bag.scrap||0)<5){await say('You need 5 Scrap. Feral bots sometimes drop it.');continue;}
-      G.bag.scrap-=5;if(!G.bag.scrap)delete G.bag.scrap;const t=pick(TYPES.filter(x=>x!=='Core'));addItem('shard_'+t,1);Snd.sfx('item');await say('The scrap melts down... and cools into a '+t+' Shard!');}
-    else if(i===1){const ts=TYPES.filter(t=>(G.bag['shard_'+t]||0)>=3);if(!ts.length){await say('You need 3 shards of the same type.');continue;}
+  while(true){const ws=WS();const SC=ws.forge>=2?4:5,RN=ws.forge>=3?2:3;const i=await ask('FORGE Lv '+ws.forge+' — what do you want to forge? (Scrap: '+(G.bag.scrap||0)+')',['Salvage '+SC+' Scrap','Refine '+RN+' shards','Fuse 2 Refined','Refit a socket','Forge a part (8 Scrap)','Leave']);
+    if(i===0){if((G.bag.scrap||0)<SC){await say('You need '+SC+' Scrap. Feral bots sometimes drop it.');continue;}
+      G.bag.scrap-=SC;if(!G.bag.scrap)delete G.bag.scrap;const t=pick(TYPES.filter(x=>x!=='Core'));addItem('shard_'+t,1);Snd.sfx('item');await say('The scrap melts down... and cools into a '+t+' Shard!');}
+    else if(i===1){const ts=TYPES.filter(t=>(G.bag['shard_'+t]||0)>=RN);if(!ts.length){await say('You need '+RN+' shards of the same type.');continue;}
       const k=await ask('Refine which type?',ts.map(t=>t+' (x'+G.bag['shard_'+t]+')').concat(['Cancel']));if(k<0||k>=ts.length)continue;const t=ts[k];
-      G.bag['shard_'+t]-=3;if(!G.bag['shard_'+t])delete G.bag['shard_'+t];addItem('rshard_'+t,1);Snd.sfx('item');await say('Three '+t+' Shards fuse into a Refined '+t+'!');}
+      G.bag['shard_'+t]-=RN;if(!G.bag['shard_'+t])delete G.bag['shard_'+t];addItem('rshard_'+t,1);Snd.sfx('item');await say(RN+' '+t+' Shards fuse into a Refined '+t+'!');}
     else if(i===2){const ts=TYPES.filter(t=>(G.bag['rshard_'+t]||0)>=2);if(!ts.length){await say('You need 2 Refined shards of the same type.');continue;}
       const k=await ask('Fuse which type?',ts.map(t=>t+' (x'+G.bag['rshard_'+t]+')').concat(['Cancel']));if(k<0||k>=ts.length)continue;const t=ts[k];
       G.bag['rshard_'+t]-=2;if(!G.bag['rshard_'+t])delete G.bag['rshard_'+t];addItem('frag_'+t,1);Snd.sfx('item');await say('Blinding light! You forged a '+t+' Prime Fragment.');}
@@ -47,6 +47,7 @@ async function openForge(){G.busy=true;await say('The Forge hums. Molten shard-l
       if(!cand.length){await say('Refitting swaps a bot\'s fitted Socket 2 shard for a Refined one of the same type. You don\'t have a match right now.');continue;}
       const k=await ask('Refit which bot?',cand.map(b=>BOTS[b.id].name+' ('+b.shards[1]+')').concat(['Cancel']));if(k<0||k>=cand.length)continue;const b=cand[k];const t=b.shards[1];
       G.bag['rshard_'+t]--;if(!G.bag['rshard_'+t])delete G.bag['rshard_'+t];addItem('shard_'+t,1);b.refined=(b.refined||[]).concat([t]);Snd.sfx('item');await say(BOTS[b.id].name+'\'s socket now holds a Refined '+t+'. Its '+t+' moves hit 10% harder. The old shard went back to your bag.');}
+    else if(i===4){if((G.bag.scrap||0)<8){await say('You need 8 Scrap to forge a body part.');continue;}G.bag.scrap-=8;if(!G.bag.scrap)delete G.bag.scrap;const p=pick(Object.keys(PARTS));addItem(p,1);Snd.sfx('item');await say('Sparks fly... you forged a '+PARTS[p].n+'! ('+PARTS[p].slot.toUpperCase()+' part)');}
     else break;}
   G.busy=false;}
 

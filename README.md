@@ -7,19 +7,22 @@ Calderra is freezing. The Heartforge under Mt. Cinder, the reactor that powers e
 **Play:** https://z0rug1.github.io/ShardFall/
 On phones the game runs fullscreen in landscape. On iPhone, use Share → Add to Home Screen and launch it from there.
 
+## What makes Shardfall different
+- **The Thaw:** Calderra starts frozen. Beating Wardens and repairing Relay Pylons thaws regions for good: the palette warms, snow melts, sealed paths open and new bots appear.
+- **Heat, not PP:** moves build Heat. Overheat and your bot is forced to vent. Frost moves cool you down, Flame runs hot, and weather changes the rate.
+- **Visible ferals:** no random encounters. Ferals roam the grass. Some flee, some hunt you, Alphas carry bounties. Hit one from behind for a sneak attack, or get ambushed.
+- **Your lead bot follows you** and its type does the field work: Flame melts black ice, Brawl smashes cracked rock, Volt powers pylons, Gale glides over water, Tide surfs.
+- **Modular bodies:** fit ARM / CORE / LEG parts that change how your bot looks and add stats or moves.
+- **Link battles:** Rival, Choir and Warden duos fight with a partner who assists every turn, and matching shards unlock a Link Strike.
+- **Scan & research:** scan bots in battle to reveal weaknesses, traits and evolution trees.
+- **Choices:** your answers build Warden or Choir reputation and shape Kael's attitude, with shop discounts and a Choir defector already in Chapter 1.
+- **Ashgrove Workshop:** display pedestals, a training rig, Forge upgrades, decorations.
+- **Maker Vault:** endless randomly generated floors with no free healing. Escape to keep your loot, black out and lose it. Leaderboard of your deepest runs.
+
 ## Chapter 1: The Relay Road
-- 36 alien shardbots (11 base frames, 25 evolved forms), drawn in code at high resolution, with idle animations
-- **Socket evolution:** at Lv 16 the second socket opens, and the shard you fit decides the evolution branch (preview first; one swap allowed)
-- **Core traits:** every frame has a passive ability (Afterburn, Bulwark, Volt Sink, Dread Aura…)
-- **Overdrive:** fill the gauge in battle for one cinematic 110-power shard strike
-- **The Forge:** salvage Scrap into shards, refine 3 shards into a Refined shard (+10% moves), fuse into Prime Fragments
-- **Modules:** equippable held items (Coolant Fin, Plating Kit, Overclock Chip, Repair Nanites)
-- **Weather:** snow, freezing night, blizzards and static storms change visibility and boost or weaken types
-- Typed move animations, damage numbers, screen shake, smarter trainer AI that switches and times its Overdrive
-- Puzzles: crate plates, red/blue switch barriers, Maker memory terminals, power-conduit routing
-- 3 side quests, rare Glitched variants, Rematch Board, Bestiary rewards and Navi-band skins
-- Minimap with fog of war, world map with fast travel, quest log, type chart, autosave + 3 slots, save codes to move between devices
-- Phone: fullscreen landscape play, big buttons, opacity, left-handed layout, vibration
+- 36 alien shardbots with core traits, socket evolution (Lv 16) and Overdrive
+- The Forge, Refined shards, modules, 3 side quests, glitched variants, rematch board, Bestiary rewards
+- Puzzles, weather, minimap and world map, quest log, type chart, autosave, save codes, phone fullscreen mode
 
 ## Controls
 | Keyboard | Phone | Action |
