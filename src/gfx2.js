@@ -1,6 +1,6 @@
 // ===================== GFX 2: reflections, rain + lens drops, ripples, haze, day/night, rim light, battle skies =====================
 const REFL=ch=>ch==='~'||ch==='-';
-const SHINY=['lab','gym1','gym2','factory','kiln'];
+const SHINY=['lab','gym1','gym2'];
 // ---------- world reflections: mirror what stands above the shoreline ----------
 function drawWorldReflections(cx,cy){if(!hq())return;const m=curMap();const shiny=!m.outdoor&&(SHINY.includes(m.theme)||m.vaultMap);if(!m.outdoor&&!shiny)return;
   const can=ctx.canvas;const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS),nx=Math.ceil(W/TS)+1,ny=Math.ceil(H/TS)+1;

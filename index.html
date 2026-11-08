@@ -1241,7 +1241,7 @@ function botReflect(sp,x,y,sz,flip,alpha){if(!hq())return;ctx.save();ctx.globalA
 
 // ===================== GFX 2: reflections, rain + lens drops, ripples, haze, day/night, rim light, battle skies =====================
 const REFL=ch=>ch==='~'||ch==='-';
-const SHINY=['lab','gym1','gym2','factory','kiln'];
+const SHINY=['lab','gym1','gym2'];
 // ---------- world reflections: mirror what stands above the shoreline ----------
 function drawWorldReflections(cx,cy){if(!hq())return;const m=curMap();const shiny=!m.outdoor&&(SHINY.includes(m.theme)||m.vaultMap);if(!m.outdoor&&!shiny)return;
   const can=ctx.canvas;const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS),nx=Math.ceil(W/TS)+1,ny=Math.ceil(H/TS)+1;
@@ -1976,14 +1976,14 @@ async function kaelFriend(){if(flag('kael3')||(G.kael||0)<2)return;setFlag('kael
  await walkNPC(k,'right',4);G.npcs.splice(G.npcs.indexOf(k),1);G.busy=false;}
 
 // ---------- Rustworks ----------
-MAPS.rustworks={name:'Rustworks',theme:'factory',music:'gym',leverFlip:1,grid:['XXXXXXXXXXXXXXXXXXXXXXXXXX','XxxxxxxxMxxxxxxxxMxxxxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XXXXXXXXXXXXXXXXXXXXXXXXxX','Xx4444444444444444444444xX','XxxxxxxxxxXXXXXXXXXXXXXXXX','XxXXXXXXXXXXXXXXXXXXXXXXXX','Xx6666666666666666666666xX','XXXXXXXXXXXXXXXXXXXLxxxxxX','XXXXXXXXXXXXXXXXXXXXXXXXxX','Xx6666666666666666666666xX','XxXXXXXXXXXXXXXXXXXXXXXXXX','XxxxxMxxxxxxxxxxxxxxxxxxxX','XxxLxxxxxxxxxxxxxxxxxxxxxX','XxxxxxxxxxxxxxxxxxxxMxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XXXXXXXXXXXXeXXXXXXXXXXXXX'],
+MAPS.rustworks={name:'Rustworks',theme:'factory',music:'gym',leverFlip:1,grid:['XXXXXXXXXXXXXXXXXXXXXXXXXX','XxxxxxxxMxxxxxxxxMxxxxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XXXXXXXXXXXXXXXXXXXXXXXXxX','Xx4444444444444444444444xX','XxxxxxxxxxXXXXXXXXXXXXXXXX','XxXXXXXXXXXXXXXXXXXXXXXXXX','Xx6666666666666666666666xX','XXXXXXXXXXXXXXXXXXXLxxxxxX','XXXXXXXXXXXXXXXXXXXXxxxxxX','Xx6666666666666666666666xX','XxXXXXXXXXXXXXXXXXXXXXXXXX','XxxxxMxxxxxxxxxxxxxxxxxxxX','XxxLxxxxxxxxxxxxxxxxxxxxxX','XxxxxxxxxxxxxxxxxxxxMxxxxX','XxxxxxxxxxxxxxxxxxxxxxxxxX','XXXXXXXXXXXXeXXXXXXXXXXXXX'],
  warps:[{x:12,y:17,to:'route3',tx:14,ty:5,dir:'down'}],
  tileScripts:{'3,14':toggleLever,'19,9':toggleLever},
  objs:[{type:'log',log:'log2',x:22,y:14,run:readLog},{type:'archive',x:20,y:2,cond:()=>flag('ostrel')&&!G.bag.archive&&!flag('archiveDone'),run:takeArchive},{type:'item',id:'rwa',x:2,y:6,item:'arm_cannon'},{type:'item',id:'rwb',x:23,y:16,item:'scrap',qty:3}],
  npcs:[
   {id:'rwguide',x:6,y:15,dir:'down',look:'engineer',text:'The conveyor lines only run one way at a time. Those levers flip every belt in the building. Ride them in the right order!'},
   {id:'rg1',x:8,y:6,dir:'left',look:'grunt',range:7,trainer:{name:'Choir Grunt',title:'Hollow',team:[['frostling',19],['scrapmite',19]],money:600,pre:'The Deacon said nobody gets near the archive. Especially not a Warden pet!',post:'The archive will open your eyes. Not that it matters now.'}},
-  {id:'rg2',x:21,y:9,dir:'right',look:'grunt',range:3,trainer:{name:'Choir Grunt',title:'Hollow',team:[['cogwyrm',20],['gloomlamp',19]],money:620,pre:'You rode the belts all the way up here? Impressive. Now get ground down!',post:'Ugh. Go on then. The Deacon will deal with you.'}},
+  {id:'rg2',x:21,y:10,dir:'right',look:'grunt',range:3,trainer:{name:'Choir Grunt',title:'Hollow',team:[['cogwyrm',20],['gloomlamp',19]],money:620,pre:'You rode the belts all the way up here? Impressive. Now get ground down!',post:'Ugh. Go on then. The Deacon will deal with you.'}},
   {id:'kael_rw',x:4,y:2,dir:'right',look:'kael',range:4,cond:()=>(G.kael||0)<2&&!flag('kaelRW'),script:kaelRust},
   {id:'ostrel',x:12,y:2,dir:'down',look:'deacon',range:2,cond:()=>!flag('ostrel'),script:ostrelFight},
  ]};
