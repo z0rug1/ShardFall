@@ -88,8 +88,8 @@ async function runBattle(o){if(BT)return 'run';try{return await runBattleInner(o
 function battleSong(tr){if(!tr)return 'battle';if(tr.warden)return tr.title==='Deacon'?'choir':'boss';if(tr.title==='Hollow')return 'choir';return 'trainer';}
 async function runBattleInner(o){
   const wk=weatherKey();
-  const B={arena:arenaOf(),mapId:G.map,rain:rainNow(),wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
-    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
+  const B={boss:!!o.boss,ally:o.ally||null,arena:arenaOf(),mapId:G.map,rain:rainNow(),wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
+    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!((o.trainer&&o.trainer.link)||o.ally),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
   if(!curMap().outdoor)B.wx='indoor';
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
   B.pi=G.party.findIndex(b=>b.hp>0);if(B.pi<0){await healAll();B.pi=0;}
@@ -252,6 +252,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     if(traitId(u)==='flicker'&&mv.t==='Flame'&&u.hp<stats(u).hp/3)m*=1.5;
     if((u.refined||[]).includes(mv.t))m*=1.1;
     if(traitId(u)==='kilnfly'&&mv.t==='Gale')m*=1.3;
+    if(traitId(u)==='squallkite'&&mv.t==='Gale')m*=1.3;if(traitId(u)==='cinderwisp'&&mv.t==='Spirit'&&['night','cave','static'].includes(BT.wx))m*=1.3;if(traitId(t)==='brinejaw'&&(mv.t==='Volt'||mv.t==='Gale'))m*=0.75;if(traitId(t)==='glacimite'&&mv.t==='Flame')m*=0.75;if(traitId(t)==='glacivore')m*=0.75;
     if(traitId(t)==='thornbit'&&ef>1)m*=0.75;
     const fullHP=t.hp>=stats(t).hp;if(traitId(t)==='pebblit'&&fullHP)m*=0.5;
     let dmg=Math.max(1,Math.floor((((2*u.lv/5+2)*mv.p*at/df)/50+2)*m));

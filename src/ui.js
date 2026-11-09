@@ -132,7 +132,7 @@ function openWorldMap(){const towns=Object.keys(MAPS).filter(k=>MAPS[k].town&&G.
      if(towns.length){const t=MAPS[towns[this.i]];ctx.strokeStyle=TICK%20<10?'#ffe080':'#fff';ctx.lineWidth=2;ctx.strokeRect(ox+t.world.x*sc-2,oy+t.world.y*sc-2,t.grid[0].length*sc+4,t.grid.length*sc+4);}
      darkPanel(0,0,W,22);wtxt('CALDERRA — '+Math.floor(ex/tot*100)+'% explored',8,17,'#fff',20);
      darkPanel(0,H-24,W,24);wtxt(BT?'B: close':towns.length?'◀ ▶ town   A: warp to '+MAPS[towns[this.i]].name+'   B: close':'B: close',8,H-7,'#c0d0f0',18);
-     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ far south',310,276,'#ff9060',16);}});}
+     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ below Rimefall',310,276,'#ff9060',16);}});}
 
 // ---------- start menu ----------
 async function startMenu(){G.busy=true;
@@ -155,7 +155,7 @@ function cardW(){return{update(){if(press('a')||press('b'))popUI(this);},draw(){
   ctx.drawImage(charSprite('player','down',0),330,50,64,72);txt('NAME   '+G.name,60,100);txt('CREDITS '+G.money+' Cr',60,128);
   txt('LINKED '+Object.keys(G.caught).length+'   SEEN '+Object.keys(G.seen).length,60,156);txt('TIME   '+fmtTime(G.time),60,184);
   txt('PRIMES',60,220,'#606870');const PC=[TCOL.Stone,TCOL.Volt,TCOL.Iron,TCOL.Flame];for(let i=0;i<8;i++){const x=160+i*32;const has=i<4&&G.bag['prime'+(i+1)];ptri(ctx,[x,208,x+10,218,x,228,x-10,218],has?PC[i]:'#c8ccd8');}
-  txt(flag('ch2start')?'Chapter 2: The Rustworks':'Chapter 1: The Relay Road',60,238,'#a06020',16);
+  txt(flag('gameClear')?'Story complete':flag('ch3done')?'Chapter 4: Heart of Cinder':flag('ch2done')?'Chapter 3: The Drowned Coast':flag('ch2start')?'Chapter 2: The Rustworks':'Chapter 1: The Relay Road',60,238,'#a06020',16);
   const rep=G.rep||{w:0,c:0};const lean=rep.w>rep.c?'leaning Warden':rep.c>rep.w?'leaning Choir':'undecided';const k=G.kael||0;
   txt('Allegiance: '+lean+' ('+rep.w+'W / '+rep.c+'C)',60,256,'#2a5a8a',18);txt('Kael: '+(flag('kaelChoir')?'Choir':k>=2?'friend':k>=0?'rival':'bitter rival')+'   Thaw: '+thawCount()+'/10   Vault best: B'+(G.vaultBest||0),60,276,'#606870',16);}};}
 function fmtTime(t){const s=Math.floor(t/60);return Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');}
@@ -216,7 +216,7 @@ function titleW(){return{t:0,i:0,update(){this.t++;const opts=this.opts();if(rep
     const gl=Math.random()<0.04;if(gl){wtxt('SHARDFALL',W/2+3,80,'#ff3a5a',64,'center');wtxt('SHARDFALL',W/2-3,80,'#3affff',64,'center');}
     wtxt('SHARDFALL',W/2,80,'#e6f2ff',64,'center');wtxt('~ Ember Protocol ~',W/2,108,'#ff9a5a',24,'center');
     this.opts().forEach((o,i)=>{wtxt((i===this.i?'▶ ':'  ')+o,60,282+i*24,i===this.i?'#fff':'#7a8aa8',24);});
-    wtxt('Chapters 1–2',W-8,H-6,'#5a6a88',16,'right');wtxt('Press A',W/2,H-8,t%60<40?'#7a8aa8':'#3a4a68',16,'center');}};}
+    wtxt('Chapters 1–4',W-8,H-6,'#5a6a88',16,'right');wtxt('Press A',W/2,H-8,t%60<40?'#7a8aa8':'#3a4a68',16,'center');}};}
 async function nameEntry(){return new Promise(res=>{const ov=document.getElementById('nameov');const inp=document.getElementById('namein');ov.style.display='flex';inp.value='';setTimeout(()=>inp.focus(),50);
   const done=()=>{const v=(inp.value||'').trim().slice(0,10)||'Rook';ov.style.display='none';document.getElementById('nameok').onclick=null;inp.onkeydown=null;inp.blur();res(v);};
   document.getElementById('nameok').onclick=done;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();done();}};});}

@@ -37,6 +37,21 @@ Talk to Vesna in Brasston after Chapter 1 to open Voltmere's east road.
 - 6 new shardbots (Frostling, Cogwyrm and Kilnfly lines), 3 new traits, collectible Maker Logs, and a Choir signal that sets up Chapter 3
 - Thawed regions now look like early thaw, with muted greens, leftover snow and light flurries, and night towns stay dark
 
+## Chapter 3: The Drowned Coast
+The coast road west of Kilnhaven opens after Chapter 2.
+- **Saltwind Shore**, then **Saltmarrow**, a harbour built around a beached Maker ark. Warden Maren's Tide hall floods on a timer. Winning gets you the Tide Prime and an Icebreaker Skiff.
+- **The Drowned Reach**: tide flats that are only walkable at low tide, with wrecks to loot. Get caught out there when the water comes in and it sweeps you back.
+- **Galecrest**, a town of rope bridges over a chasm. Warden Pell-Ashe's hall is a wind maze with dead ends.
+- **The Drowned Cathedral**, reached by skiff across rough sea. You meet the Cantor, Ilian Orla, who is Vesna's brother. Kael fights beside you, against you, or turns up in between, depending on how you've treated him. What you did with the archive changes the scene.
+
+## Chapter 4: Heart of Cinder
+- **Cinder Ascent**: heat bands and frost bands that wear your bots down unless your lead is suited to them.
+- **Rimefall**, a monastery town with Warden Yoru's ice-slide hall. **Summit Trail** has a Choir camp that helps or fights you depending on your reputation, and a Spirit Shrine memory puzzle.
+- **The Heartforge**: Accord interference can stop your bots obeying mid-battle. Glacivore is fought in three phases, with an ally for the second.
+- **Three endings** (Restore, Silence, Rewrite), then a timed escape through a collapsing tunnel, an epilogue and credits.
+- **Postgame**: link with Glacivore.
+- **New bots**: Brinejaw, Squallkite, Cinderwisp and Glacimite lines (12 bots) plus Glacivore, each line with its own trait.
+
 ## Visuals
 - Soft cast shadows from trees, buildings, cliffs and wrecks. Shadow under walls and cliffs, and shadows that stretch away from street lamps.
 - Water that gets darker with depth, has foam along the shore, shimmers, and reflects lamps and anyone standing at the edge. Ice that glints, with spray when you stop sliding.

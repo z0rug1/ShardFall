@@ -155,7 +155,7 @@ async function chapter2End(){G.busy=true;Snd.sfx('glitch');
  if(flag('kaelChoir'))await say('That was the Cantor. You felt it, right? That\'s the Accord. Still think Vesna\'s right?',{speaker:'Kael (Navi-band)'});
  else if(k>=2)await say('Did your bots just freeze too? That was the Accord. Someone\'s testing it. Meet me at the foot of Mt. Cinder. We do this together.',{speaker:'Kael (Navi-band)'});
  else await say('...My bots locked up for three seconds. Don\'t say anything. I\'m figuring this out on my own.',{speaker:'Kael (Navi-band)'});
- await say('Two Wardens left before Mt. Cinder. Stay safe. And... whatever you decided about the archive, I understand.',{speaker:'Vesna (Navi-band)'});
+ await say('Four Primes are still out there: two on the coast, two on Mt. Cinder. The coast road west of Kilnhaven is open now. And... whatever you decided about the archive, I understand.',{speaker:'Vesna (Navi-band)'});
  Snd.music('title',true);
  await pushUI({t:0,update(){this.t++;if(this.t>60&&(press('a')||press('start')))popUI(this);},draw(){ctx.fillStyle='#0a0610';ctx.fillRect(0,0,W,H);ctx.globalAlpha=Math.min(1,this.t/40);
     wtxt('CHAPTER 2 COMPLETE',W/2,66,'#ffd060',40,'center');wtxt('The Rustworks',W/2,100,'#ffb080',26,'center');

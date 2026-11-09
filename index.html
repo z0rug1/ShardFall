@@ -2095,7 +2095,7 @@ async function chapter2End(){G.busy=true;Snd.sfx('glitch');
  if(flag('kaelChoir'))await say('That was the Cantor. You felt it, right? That\'s the Accord. Still think Vesna\'s right?',{speaker:'Kael (Navi-band)'});
  else if(k>=2)await say('Did your bots just freeze too? That was the Accord. Someone\'s testing it. Meet me at the foot of Mt. Cinder. We do this together.',{speaker:'Kael (Navi-band)'});
  else await say('...My bots locked up for three seconds. Don\'t say anything. I\'m figuring this out on my own.',{speaker:'Kael (Navi-band)'});
- await say('Two Wardens left before Mt. Cinder. Stay safe. And... whatever you decided about the archive, I understand.',{speaker:'Vesna (Navi-band)'});
+ await say('Four Primes are still out there: two on the coast, two on Mt. Cinder. The coast road west of Kilnhaven is open now. And... whatever you decided about the archive, I understand.',{speaker:'Vesna (Navi-band)'});
  Snd.music('title',true);
  await pushUI({t:0,update(){this.t++;if(this.t>60&&(press('a')||press('start')))popUI(this);},draw(){ctx.fillStyle='#0a0610';ctx.fillRect(0,0,W,H);ctx.globalAlpha=Math.min(1,this.t/40);
     wtxt('CHAPTER 2 COMPLETE',W/2,66,'#ffd060',40,'center');wtxt('The Rustworks',W/2,100,'#ffb080',26,'center');
@@ -2196,8 +2196,8 @@ async function runBattle(o){if(BT)return 'run';try{return await runBattleInner(o
 function battleSong(tr){if(!tr)return 'battle';if(tr.warden)return tr.title==='Deacon'?'choir':'boss';if(tr.title==='Hollow')return 'choir';return 'trainer';}
 async function runBattleInner(o){
   const wk=weatherKey();
-  const B={arena:arenaOf(),mapId:G.map,rain:rainNow(),wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
-    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!(o.trainer&&o.trainer.link),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
+  const B={boss:!!o.boss,ally:o.ally||null,arena:arenaOf(),mapId:G.map,rain:rainNow(),wild:o.wild||null,tr:o.trainer||null,ep:[],ei:0,pi:0,st:{p:{atk:0,def:0,spd:0},e:{atk:0,def:0,spd:0}},od:{p:0,e:0},odUsed:{p:false,e:false},
+    part:new Set(),anim:{},runs:0,bg:curMap().theme,wx:wk==='clearnight'?'night':wk==='clearstatic'?'static':(WMULT[wk]||wk==='night')?wk:(curMap().theme==='cave'?'cave':'snow'),eItems:o.trainer&&o.trainer.items?1:0,disp:{p:0,e:0},slide:1,intro:26,flash:0,shake:0,bolt:0,trainerShow:!!o.trainer,hideInfo:true,rally:{},eSwitched:{},heat:{p:0,e:0},over:{p:false,e:false},link:!!((o.trainer&&o.trainer.link)||o.ally),linkUsed:{p:false,e:false},scanned:false,sneak:o.sneak,ambush:o.ambush,first:o.sneak?'p':o.ambush?'e':null};
   if(!curMap().outdoor)B.wx='indoor';
   B.ep=B.wild?[B.wild]:B.tr.team.map(([id,lv])=>makeBot(id,lv));
   B.pi=G.party.findIndex(b=>b.hp>0);if(B.pi<0){await healAll();B.pi=0;}
@@ -2360,6 +2360,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     if(traitId(u)==='flicker'&&mv.t==='Flame'&&u.hp<stats(u).hp/3)m*=1.5;
     if((u.refined||[]).includes(mv.t))m*=1.1;
     if(traitId(u)==='kilnfly'&&mv.t==='Gale')m*=1.3;
+    if(traitId(u)==='squallkite'&&mv.t==='Gale')m*=1.3;if(traitId(u)==='cinderwisp'&&mv.t==='Spirit'&&['night','cave','static'].includes(BT.wx))m*=1.3;if(traitId(t)==='brinejaw'&&(mv.t==='Volt'||mv.t==='Gale'))m*=0.75;if(traitId(t)==='glacimite'&&mv.t==='Flame')m*=0.75;if(traitId(t)==='glacivore')m*=0.75;
     if(traitId(t)==='thornbit'&&ef>1)m*=0.75;
     const fullHP=t.hp>=stats(t).hp;if(traitId(t)==='pebblit'&&fullHP)m*=0.5;
     let dmg=Math.max(1,Math.floor((((2*u.lv/5+2)*mv.p*at/df)/50+2)*m));
@@ -2620,7 +2621,7 @@ function openWorldMap(){const towns=Object.keys(MAPS).filter(k=>MAPS[k].town&&G.
      if(towns.length){const t=MAPS[towns[this.i]];ctx.strokeStyle=TICK%20<10?'#ffe080':'#fff';ctx.lineWidth=2;ctx.strokeRect(ox+t.world.x*sc-2,oy+t.world.y*sc-2,t.grid[0].length*sc+4,t.grid.length*sc+4);}
      darkPanel(0,0,W,22);wtxt('CALDERRA — '+Math.floor(ex/tot*100)+'% explored',8,17,'#fff',20);
      darkPanel(0,H-24,W,24);wtxt(BT?'B: close':towns.length?'◀ ▶ town   A: warp to '+MAPS[towns[this.i]].name+'   B: close':'B: close',8,H-7,'#c0d0f0',18);
-     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ far south',310,276,'#ff9060',16);}});}
+     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ below Rimefall',310,276,'#ff9060',16);}});}
 
 // ---------- start menu ----------
 async function startMenu(){G.busy=true;
@@ -2643,7 +2644,7 @@ function cardW(){return{update(){if(press('a')||press('b'))popUI(this);},draw(){
   ctx.drawImage(charSprite('player','down',0),330,50,64,72);txt('NAME   '+G.name,60,100);txt('CREDITS '+G.money+' Cr',60,128);
   txt('LINKED '+Object.keys(G.caught).length+'   SEEN '+Object.keys(G.seen).length,60,156);txt('TIME   '+fmtTime(G.time),60,184);
   txt('PRIMES',60,220,'#606870');const PC=[TCOL.Stone,TCOL.Volt,TCOL.Iron,TCOL.Flame];for(let i=0;i<8;i++){const x=160+i*32;const has=i<4&&G.bag['prime'+(i+1)];ptri(ctx,[x,208,x+10,218,x,228,x-10,218],has?PC[i]:'#c8ccd8');}
-  txt(flag('ch2start')?'Chapter 2: The Rustworks':'Chapter 1: The Relay Road',60,238,'#a06020',16);
+  txt(flag('gameClear')?'Story complete':flag('ch3done')?'Chapter 4: Heart of Cinder':flag('ch2done')?'Chapter 3: The Drowned Coast':flag('ch2start')?'Chapter 2: The Rustworks':'Chapter 1: The Relay Road',60,238,'#a06020',16);
   const rep=G.rep||{w:0,c:0};const lean=rep.w>rep.c?'leaning Warden':rep.c>rep.w?'leaning Choir':'undecided';const k=G.kael||0;
   txt('Allegiance: '+lean+' ('+rep.w+'W / '+rep.c+'C)',60,256,'#2a5a8a',18);txt('Kael: '+(flag('kaelChoir')?'Choir':k>=2?'friend':k>=0?'rival':'bitter rival')+'   Thaw: '+thawCount()+'/10   Vault best: B'+(G.vaultBest||0),60,276,'#606870',16);}};}
 function fmtTime(t){const s=Math.floor(t/60);return Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');}
@@ -2704,7 +2705,7 @@ function titleW(){return{t:0,i:0,update(){this.t++;const opts=this.opts();if(rep
     const gl=Math.random()<0.04;if(gl){wtxt('SHARDFALL',W/2+3,80,'#ff3a5a',64,'center');wtxt('SHARDFALL',W/2-3,80,'#3affff',64,'center');}
     wtxt('SHARDFALL',W/2,80,'#e6f2ff',64,'center');wtxt('~ Ember Protocol ~',W/2,108,'#ff9a5a',24,'center');
     this.opts().forEach((o,i)=>{wtxt((i===this.i?'▶ ':'  ')+o,60,282+i*24,i===this.i?'#fff':'#7a8aa8',24);});
-    wtxt('Chapters 1–2',W-8,H-6,'#5a6a88',16,'right');wtxt('Press A',W/2,H-8,t%60<40?'#7a8aa8':'#3a4a68',16,'center');}};}
+    wtxt('Chapters 1–4',W-8,H-6,'#5a6a88',16,'right');wtxt('Press A',W/2,H-8,t%60<40?'#7a8aa8':'#3a4a68',16,'center');}};}
 async function nameEntry(){return new Promise(res=>{const ov=document.getElementById('nameov');const inp=document.getElementById('namein');ov.style.display='flex';inp.value='';setTimeout(()=>inp.focus(),50);
   const done=()=>{const v=(inp.value||'').trim().slice(0,10)||'Rook';ov.style.display='none';document.getElementById('nameok').onclick=null;inp.onkeydown=null;inp.blur();res(v);};
   document.getElementById('nameok').onclick=done;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();done();}};});}
@@ -2811,8 +2812,8 @@ function markExplored(){const m=curMap();const e=exploredArr(G.map);const w=m.gr
   for(let y=G.py-r;y<=G.py+r;y++)for(let x=G.px-r-1;x<=G.px+r+1;x++)if(x>=0&&y>=0&&x<w&&y<h)e[y*w+x]=1;}
 
 async function onStep(){G.stepLock=true;try{await onStepInner();}finally{G.stepLock=false;}}
-async function onStepInner(){markExplored();addPrint();{const h=T(G.px,G.py);if(h!=='V'&&![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>T(G.px+dx,G.py+dy)==='V'))G.ventSafe={map:G.map,x:G.px,y:G.py,dir:G.pdir};}const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
-  if(G.surf&&T(G.px,G.py)!=='~'){G.surf=null;resetFollower();}
+async function onStepInner(){markExplored();addPrint();if(typeof zoneStep==='function')zoneStep();{const h=T(G.px,G.py);if(h!=='V'&&![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>T(G.px+dx,G.py+dy)==='V'))G.ventSafe={map:G.map,x:G.px,y:G.py,dir:G.pdir};}const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
+  if(G.surf&&!'~≈'.includes(T(G.px,G.py))){G.surf=null;resetFollower();}
   const w=warpAt(G.px,G.py);if(w){if(w.req&&!flag(w.req)){G.busy=true;await say(w.locked||'It\'s locked.');await stepPlayer(OPP[G.pdir]);G.busy=false;return;}await doWarp(w);return;}
   const here=T(G.px,G.py);
   {const bd=beltDir(here);if(bd){const [dx,dy]=DIRS[bd];const nx=G.px+dx,ny=G.py+dy;if(!isBlocked(nx,ny,true)&&!crateAt(nx,ny)){startMove(nx,ny,true,true);Snd.sfx('push');return;}}}
@@ -2893,7 +2894,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
     if(k.length===2){ctx.drawImage(tileArt(th==='cave'?'^':'x',th,(x+y)%2,0),sx,sy,TS,TS);drawSpecial(k,sx,sy);}
     else{let tf=0;if(ch==='~'||ch==='M')tf=fr;else if(ch==='T')tf=Math.floor(TICK/48+x*0.37+y*0.21)%2;else if(ch==='z'||ch==='i'||ch==='E'||ch==='O'||ch==='a'||ch==='o')tf=Math.floor(TICK/20+x)%2;else if(BELT[ch])tf=Math.floor(TICK/6)%2;else if(ch==='L')tf=beltFlipped()?1:0;ctx.drawImage(tileArt(k,th,(x*7+y*3)%4===0?0:(x+y)%2+1,tf),sx,sy,TS,TS);}}
   if(m.decor)drawWorkshopDecor(cx,cy);
-  drawUnderFX(cx,cy);drawWorldReflections(cx,cy);drawSurfaceFX(cx,cy);drawShoreFoam(cx,cy);
+  drawUnderFX(cx,cy);drawWorldReflections(cx,cy);drawSurfaceFX(cx,cy);drawShoreFoam(cx,cy);if(typeof drawTideFX==='function')drawTideFX(cx,cy);
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){if(T(x,y)!=='V')continue;const sx=x*TS-cx,sy=y*TS-cy;
     if(ventActive(x,y)){const ph=ventPhase(x,y);for(let i=0;i<6;i++){const t=((ph*2+i*14)%60)/60;ctx.fillStyle='rgba(245,248,252,'+(0.75*(1-t))+')';ctx.beginPath();ctx.arc(sx+16+Math.sin(i*2+ph/6)*5,sy+16-t*44,6+t*10,0,7);ctx.fill();}}
     else if(ventWarn(x,y)){ctx.fillStyle='rgba(255,120,40,'+(0.3+0.3*Math.sin(TICK/2))+')';ctx.fillRect(sx+4,sy+4,24,24);}}
@@ -2912,6 +2913,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
       const p=0.5+0.5*Math.sin(TICK/7);ctx.fillStyle=op?'rgba(60,90,110,.9)':'rgba(64,224,240,'+(0.55+0.45*p)+')';ctx.fillRect(sx+10,sy+14,12,4);ctx.fillRect(sx+14,sy+10,4,12);
       if(!op&&TICK%9===0)OWP.push({x:o.x*TS+12+rnd(10),y:o.y*TS+6,vx:(Math.random()-0.5)*0.3,vy:-0.4,t:0,max:60,k:'breath'});
       if(op){ctx.strokeStyle='#101820';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+6,sy+8);ctx.lineTo(sx+14,sy+16);ctx.lineTo(sx+10,sy+24);ctx.stroke();}}
+    if(o.type==='titan')drawTitan(o,sx,sy);
     if(o.type==='pylon')drawPylon(o,sx,sy);
     if(o.type==='log')drawLogObj(o,sx,sy);
     if(o.type==='archive'){const p=0.6+0.4*Math.sin(TICK/8);ctx.fillStyle='#2a3242';ctx.fillRect(sx+6,sy+10,20,18);ctx.fillStyle='rgba(120,230,255,'+p+')';ctx.fillRect(sx+10,sy+4,12,14);ctx.fillStyle='#fff';ctx.fillRect(sx+14,sy+8,4,4);}
@@ -2925,7 +2927,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
   ents.sort((a,b)=>pos(a)[1]-pos(b)[1]);
   const bliz=weatherKey()==='blizzard';
   for(const e of ents){if(e.feral){drawFeral(e.feral,cx,cy);continue;}if(e.fol){drawFollower(cx,cy);continue;}const [ex,ey]=pos(e);const sx=ex-cx,sy=ey-cy;let fr2=0;
-    if(e.player&&G.surf){const b=G.surf;const bob=Math.sin(TICK/8)*2;ctx.strokeStyle='rgba(200,230,255,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx+16,sy+26,18+Math.sin(TICK/6)*2,6,0,0,7);ctx.stroke();ctx.drawImage(bspr(b),sx-4,sy+4+bob,40,40);}
+    if(e.player&&G.surf&&G.surf.skiff){drawSkiff(sx,sy);}else if(e.player&&G.surf){const b=G.surf;const bob=Math.sin(TICK/8)*2;ctx.strokeStyle='rgba(200,230,255,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx+16,sy+26,18+Math.sin(TICK/6)*2,6,0,0,7);ctx.stroke();ctx.drawImage(bspr(b),sx-4,sy+4+bob,40,40);}
     if(e.player&&G.glide){const gl=G.glide;const ox=(gl.sx+(gl.lx-gl.sx)*gl.p)*TS-cx,oy=(gl.sy+(gl.ly-gl.sy)*gl.p)*TS-cy-Math.sin(gl.p*Math.PI)*28;ctx.drawImage(charSprite('player',G.pdir,1),ox,oy-6,32,36);if(G.folShow)ctx.drawImage(bspr(G.folShow),ox-4,oy-30,40,40);continue;}
     if(!e.player&&bliz&&Math.hypot(ex-px,ey-py)>5*TS)continue;
     const mv=e.player?G.mv:e.mv;if(mv){fr2=mv.p<0.25||mv.p>=0.75?3:((e.player?G.stepN:(e.x+e.y))%2?1:2);}
@@ -2965,7 +2967,7 @@ function recoverFromError(e,where){console.error('Shardfall recovered from',wher
 addEventListener('unhandledrejection',ev=>{ev.preventDefault&&ev.preventDefault();recoverFromError(ev.reason,'script');});
 addEventListener('error',ev=>{if(G.started)recoverFromError(ev.error||ev.message,'loop');});
 // ---------- main loop ----------
-function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();tickTimers();if(G.started&&!UI.some(u=>u.isTitle))G.time++;
+function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();tickTimers();if(G.started&&!UI.some(u=>u.isTitle))G.time++;if(typeof tideTick==='function')tideTick();if(typeof escapeTick==='function')escapeTick();
   if(BT)battleTick();
   if(G.banner>0)G.banner--;if(G.fade>0&&!G.inWarp)G.fade=Math.max(0,G.fade-0.05);if(G.flashOW>0)G.flashOW--;
   if(UI.length){UI[UI.length-1].update();}
@@ -2979,6 +2981,7 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
   if(UI.length&&G.started&&!BT)updateMovers();
   clearPressed();}
 function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
+  if(G.started&&!BT&&typeof drawEscape==='function')drawEscape();
   for(const u of UI)u.draw();
   if(G.fade>0){ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}
   if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}
@@ -3014,6 +3017,424 @@ async function boot(){loadPrefs();setupTouch();setupFS();try{await Promise.race(
       G.busy=false;break;}}}
 window.G=G;
 boot();
+
+// generated by gen/g34.py
+const C3G={"route5": {"grid": ["TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TT.wwwwwww...NNNNN.....jjjjjjjj.TT", "T..wwwwwww..NNNNNJ.....jjjjjjjj..T", "T..wwwwwww..NNNNNN.....jjjjjjjj..T", "T......................jjjjjjjj..T", "=====================............T", "======================...........T", "T...................==.<<<<<<<<..T", "T...jjjjjjjjj.......==...........T", "T...jjjjjjjjj.......==============", "T...jjjjjjjjj........=============", "nT....n.....n.....n.....qqqqqqn.T.", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈"], "m": {"exitE0": [33, 10], "exitE1": [33, 11], "exitW0": [0, 6], "exitW1": [0, 7], "pylon": [30, 6], "log": [9, 8], "item1": [2, 11], "item2": [31, 3], "t1": [16, 8], "t2": [27, 10], "npc1": [6, 6]}}, "saltmarrow": {"grid": ["TTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TT........................TT", "T..UUUUUU.....NNNNNNNNNNN..T", "T..WWDWWW.....NNNNNNNNNNJ..T", "T....=........NNNNNNNNNNN..T", "T....=...l....NNNNNNNNNNN..T", "T....=........WWWWWDWWWWW..T", "T....=.............=.......T", "T....=.............=.......T", "T....=...........l.=.......T", "T===========================", "T===========================", "T..QQQQQ..s.=.......RRRRR..T", "T..WWDWW....=.......WWDWW.lT", "===..=......=.........=....T", "===..==================....T", "TT..........=.............TT", "~~~~~~~~~~~~b~~~~~~~~~~~~~~~", "~~~~~~~~~~~~bbb~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~", "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈", "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈"], "m": {"gym": [19, 6], "exitE0": [27, 10], "exitE1": [27, 11], "exitW0": [0, 14], "exitW1": [0, 15], "repair": [5, 3], "house1": [5, 13], "house2": [22, 13], "dock": [14, 18], "sign": [10, 12], "npc1": [8, 8], "npc2": [24, 9], "npc3": [16, 14], "kaelSpot": [13, 10]}}, "route6": {"grid": ["TTTTTTTTTTTTTT==TTTTTTTTTTTTTTTT", "T.............==...............T", "Tqqqq.........==...........www.T", "Tqqqq===========...........www.T", "Tqqqq=____________________.www.T", "Tqqqq=____________________.www.T", "T....=______...___________.....T", "T....=______...___________.....T", "T....=______________...___.....T", "T....=__..__________...___.....T", "T....=__..________________======", "T....=____________________======", "T....======================....T", "T..==..........................T", "~~.==~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~.==~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~.==~~~~~~~~~~~~~~~~~~~~~~~~~~~", "~~.==~~~~~~~~~~~~~~~~~~~~~~~~~~~", "≈≈.==≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈.K..≈≈≈≈≈≈≈≈", "≈≈.==≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈....≈≈≈≈≈≈≈≈", "≈≈≈==≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈....≈≈≈≈≈≈≈≈", "≈≈≈==≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈"], "m": {"exitE0": [31, 10], "exitE1": [31, 11], "exitN0": [14, 0], "exitN1": [15, 0], "exitS0": [3, 21], "exitS1": [4, 21], "southT0": [3, 16], "southT1": [4, 16], "cathedral": [21, 18], "wreck1": [13, 6], "wreck2": [21, 9], "wreck3": [8, 10], "t1": [18, 12], "t2": [28, 7], "npc1": [24, 13], "log": [2, 8], "alpha": [3, 3]}}, "galecrest": {"grid": ["TTTTTTTTTTTTTTTTTTTTTTTT", "T.......YYYYYYYY.......T", "T.......YYYYYYYY..RRRR.T", "T..l....YYYYYYYY..WDWW.T", "T.......WWWWDWWW.......T", "T...........=..........T", "T..<<<<<<<..=..........T", "T...........=..........T", "TCCCCC+CCCCCCCCCC+CCCCCT", "TCCCCC+CCCCCCCCCC+CCCCCT", "TCCCCC+CCCCCCCCCC+CCCCCT", "T......................T", "T.UUUUU......>>>>>>>>..T", "T.WWWDW................T", "T....=..............l..T", "T....=.................T", "TCCCCCCCCCC+CCCCCCCCCCCT", "TCCCCCCCCCC+CCCCCCCCCCCT", "T.........==...........T", "T.........==..s........T", "T.........==...........T", "T.........==...........T", "T.........==...........T", "TTTTTTTTTT==TTTTTTTTTTTT"], "m": {"exitS0": [10, 23], "exitS1": [11, 23], "gym": [12, 4], "house1": [19, 3], "repair": [5, 13], "sign": [14, 19], "npc1": [15, 14], "npc2": [4, 4], "npc3": [20, 20]}}, "gym5": {"grid": ["XXXXXXXXXXXXX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XXXXXXxXXXXXX", "XxxxxxxxxxxxX", "X___________X", "Xx____x____xX", "X___________X", "XXrXXXXXXXuXX", "X___________X", "X_____x_____X", "X___________X", "X___________X", "XSxxxxxxxxxxX", "XxxxxxxxxxxxX", "XXXXXXeXXXXXX"], "m": {"maren": [6, 2], "t1": [3, 3], "guide": [10, 14]}}, "gym6": {"grid": ["XXXXXXXXXXXXXXX", "XxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxX", "XXXXXXXXXXXXxXX", "XxxxxxxxxxxxxxX", "XX>>>>X>>>>>>xX", "XXxxxxXxxxxXXXX", "Xx<<<<<<<X<<<<X", "XxXXXxxxxxxxxXX", "XX>>>>>>X>>>>xX", "XxxxXXXxxxxXxxX", "Xx<<<<<<<<<<<<X", "XxxxxxXXXXxxxxX", "XX>>>>>>>>X>>xX", "XxxxxxxxxxxxxxX", "XXXXXXXeXXXXXXX"], "m": {"pell": [7, 2], "t1": [4, 3], "guide": [3, 15]}}, "cathedral": {"grid": ["XXXXXXXXXXXXXXXXXXXXX", "XxxxxxxMMMMMMMxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XXXXrXXXXXXXXXXXrXXXX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxSxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XXXrXXXXXXuXXXXXXXXXX", "XxxxxxXxxxxxxxXxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxSxxxXxxxxxxxXxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XxxxxxXxxxxxxxXxxxxxX", "XxxxxxxxxxxxxxxxxxxxX", "XXXXXXXXXXeXXXXXXXXXX"], "m": {"cantor": [10, 2], "deacon": [10, 8], "g1": [5, 15], "g2": [15, 10], "g3": [4, 4], "kaelC": [12, 14]}}, "route7": {"grid": ["TTTTTTTTTT==TTTTTTTTTT", "T.........==.........T", "T.jjjjjj..==.........T", "T.jjjjjj..==..wwwwww.T", "T.jjjjjj..==..wwwwww.T", "T.jjjjjj..==..wwwwww.T", "T.........==..wwwwww.T", "T.........==.........T", "T!!!!!!!!!!!!!!!!!!!!T", "T!!!!!!!!!!!!!V!!!!!!T", "T!!!V!!!!!!!!!!!!!!!!T", "T!!!!!!!!!!!!GGG!!!!!T", "T!!!!!!!V!!!!GGG!!!!!T", "T!!!!!!!!!!!!!!!!V!!!T", "T!!!!!!!!!!!V!!!!!!!!T", "T!!!!!V!!!!!!!!!!!!!!T", "T.........==.........T", "T.........==.........T", "T.qqqqqqq.==..yyyyyy.T", "T.qqqqqqq.==..yyyyyy.T", "T.qqqqqqq.==..yyyyyy.T", "T.qqqqqqq.==..yyyyyy.T", "T.........==..yyyyyy.T", "T.........==.........T", "T;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;ZZZ;;;T", "T;;;;GGG;;;;;;;ZZZ;;;T", "T;;;;GGG;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;T", "T.........==.........T", "T..wwwwww.==..dddddd.T", "T..wwwwww.==..dddddd.T", "T..wwwwww.==..dddddd.T", "T..wwwwww.==..dddddd.T", "T.........==.........T", "T.........==.........T", "TTTTTTTTTT==TTTTTTTTTT"], "m": {"exitN0": [10, 0], "exitN1": [11, 0], "exitS0": [10, 39], "exitS1": [11, 39], "t1": [6, 20], "t2": [16, 29], "log": [19, 22], "item1": [2, 14], "item2": [19, 30], "pylon": [3, 22], "alpha": [16, 20]}}, "rimefall": {"grid": ["TTTTTTTTTT==TTTTTTTTTTTT", "T.........==...........T", "T.........==.QQQQQQQQQ.T", "T.UUUUU...==.QQQQQQQQQ.T", "T.WWDWW...==.QQQQQQQQQ.T", "T...=.....==.WWWW=WWWW.T", "T...=.....==.....=.....T", "T...=.....==.....=.....T", "T...====l=========.....T", "T.........==...........T", "T.........==...l.......T", "T.........==s..........T", "T..RRRRR..==..-------..T", "T..WWDWW..==..-------..T", "T....=....==..---Z---..T", "T....=======..-------..T", "T.........==..-------..T", "Tddddddddd==dddddddddddT", "Tddddddddd==dddddddddddT", "TTTTTTTTTT==TTTTTTTTTTTT"], "m": {"exitN0": [10, 0], "exitN1": [11, 0], "exitS0": [10, 19], "exitS1": [11, 19], "gym": [17, 5], "repair": [4, 4], "house1": [5, 13], "sign": [12, 11], "npc1": [7, 10], "npc2": [19, 11], "kaelSpot": [11, 4]}}, "gym7": {"grid": ["XXXXXXXXXXXXXXX", "XxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxX", "XXXXXXXxXXXXXXX", "X---------Z---X", "X-----Z-------X", "X-----------Z-X", "X--Z----------X", "X------Z------X", "X----------Z--X", "X----Z--------X", "X-Z-----------X", "X--------Z--Z-X", "X-------------X", "XxxxxxxxxxxxxxX", "XXXXXXXeXXXXXXX"], "m": {"yoru": [7, 2], "t1": [4, 3], "guide": [11, 15]}}, "route8": {"grid": ["TTTTTTTTTTTT==TTTTTTTTTTTT", "T...........==...........T", "T...........==...........T", "T...........==...........T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T;;;;;;;;;;;;;;;;;;;;;;;;T", "T...........==...........T", "T...........==...........T", "T..UUU..UUU.==...UUU.....T", "T..UWU..UWU.==...UWU.....T", "T...........==...........T", "T.....*.....==...........T", "T...........==...........T", "T...........==...........T", "T.yyyyyyyyy.==..wwwwwwww.T", "T.yyyyyyyyy.==..wwwwwwww.T", "T.yyyyyyyyy.==..wwwwwwww.T", "T.yyyyyyyyy.==..wwwwwwww.T", "T...........==...........T", "T...........==.GGGGGGGGG.T", "T..#######..==.GGGGGGGGG.T", "T..#######..==.GGGGGGGGG.T", "T..WWWDWWW..==.GGGGKGGGG.T", "T.....=.....==.....=.....T", "T.....==============.....T", "TTTTTTTTTTTT==TTTTTTTTTTTT"], "m": {"exitN0": [12, 0], "exitN1": [13, 0], "spirit": [6, 26], "hfgate": [19, 26], "choir1": [10, 15], "choir2": [20, 15], "kaelSpot": [13, 17], "t1": [6, 7], "t2": [19, 20], "item1": [23, 2], "log": [2, 20]}}, "gym8": {"grid": ["XXXXXXXXXXXXX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XXXXXXgXXXXXX", "XxxxxxxxxxxxX", "XxMxxxxxxxMxX", "XxxxxxxxxxxxX", "XXXXXXgXXXXXX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XxMxxxxxxxMxX", "XxxxxxxxxxxxX", "XxxxxxxxxxxxX", "XXXXXXeXXXXXX"], "m": {"warden": [6, 2], "guide": [9, 12]}}, "hf1": {"grid": ["XXXXXXXXXXXXXXXXXXXX", "XxxxxxxxxxExxxxxxxxX", "XxxxxxxxxxxxxxVxxxxX", "XxxxxxxxVxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxX", "XXXXuXXXXXXXXXXrXXXX", "XxxxxxxxxxxxxxxxxxxX", "XxxxxVxxxxxxxxxxxSxX", "XxxxxxxxxxxxxVxxxxxX", "XxxxxxxxxxxxxxxxxxxX", "XXXXXXXXXrXXXXuXXXXX", "XxxxxxxxxxxxxxxxxxxX", "XxxxxxVxxxxxVxxxxxxX", "XxSxxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxxxxX", "XXXXXXXXXXeXXXXXXXXX"], "m": {"g1": [6, 8], "g2": [15, 3], "item1": [18, 13]}}, "hf2": {"grid": ["XXXXXXXXXXXXXXXXXXXX", "XxxxxxxxxxExxxxxxxxX", "XXXXXXXXXXXXXXXXXXxX", "XxxxxxxxxxxxxxxxxxxX", "Xx4444444444444444xX", "XxxxxxxxxxxxxxxxxxxX", "XxXXXXXXXXXXXXXXXXXX", "XxxxxxxxxxxxxxxxxxxX", "Xx6666666666666666xX", "XxxxxxxxxxxxxxxxLxxX", "XXXXXXXXXXXXXXXXXXxX", "XxxxxxxxxxxxxxxxxxxX", "Xx4444444444444444xX", "XxxxxxxxxxxxxxxxxxxX", "XxxLxxxxxxxxxxxxxxxX", "XXXXXXXXXXOXXXXXXXXX"], "m": {"g1": [9, 13], "g2": [8, 5], "item1": [1, 1]}}, "hfcore": {"grid": ["XXXXXXXXXXXXXXXXX", "XxxxxxxxxxxxxxxxX", "Xxxxxx00000xxxxxX", "XxMxxx00000xxxMxX", "Xxxxxx00J00xxxxxX", "XxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxX", "XxMxxxxxxxxxxxMxX", "XxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxX", "XxxxxxxxxxxxxxxxX", "XXXXXXXXOXXXXXXXX"], "m": {"titan": [8, 6], "ally": [6, 10]}}, "hfescape": {"grid": ["XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", "XxxxXxxxxxxxXxxxxxxxXxxxxxxxXxxxxxxX", "XxxxXxxxxxVxXxxxxxxxXxVxxxxxXxxxxxxX", "XxxxXxxxxxxxXxxxxxxxXxxxxxxxXxVxxxxX", "xxxxxxxxXxxxxxxxXxxxxxxxXxxxxxxxXxxx", "XxxxxxxxXxxxxxxxXxVxxxxxXxxxxxxxXxxX", "XxxxxxVxXxxxxxxxXxxxxxxxXxVxxxxxXxxX", "XxxxxxxxXxxxxxxxXxxxxxxxXxxxxxxxXxxX", "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"], "m": {"start": [34, 4], "end": [0, 4]}}};
+function C3(id,k){return C3G[id].m[k];}
+
+// ===================== CHAPTER 3–4 BOTS, TRAITS, KEY ITEMS =====================
+// ---- new bots ----
+frame('brinejaw','Brinejaw','Tide',[52,54,58,40],'beetle','#3a8ab8',[[1,'tackle'],[1,'waterjet'],[8,'reinforce'],[14,'bubbleshot'],[22,'tidalram']],{Iron:'hullbreaker',Volt:'stormkeel'},120,'A barnacle-armoured salvage drone that grinds through ship hulls. Its jaw never stops turning.');
+form('hullbreaker','Hullbreaker','brinejaw','Iron',[[0,'ironbash'],[30,'plating']],'Iron shard fitted. It drags whole wrecks off the seabed.');
+form('stormkeel','Stormkeel','brinejaw','Volt',[[0,'sparkarc'],[30,'thundercoil']],'Volt shard fitted. Lightning crawls along its keel.');
+frame('squallkite','Squallkite','Gale',[40,50,38,68],'bird','#b8d4e0',[[1,'gust'],[1,'tackle'],[9,'tailwind'],[15,'airslice'],[24,'boost']],{Volt:'tempestwing',Shade:'nightglider'},140,'A paper-thin wing drone that rides cliff updrafts for days without landing.');
+form('tempestwing','Tempestwing','squallkite','Volt',[[0,'sparkarc'],[30,'thundercoil']],'Volt shard fitted. It flies inside thunderheads on purpose.');
+form('nightglider','Nightglider','squallkite','Shade',[[0,'shadowclaw'],[30,'dreadglare']],'Shade shard fitted. Its wings drink light.');
+frame('cinderwisp','Cinderwisp','Spirit',[42,56,40,58],'lantern','#c8b0ff',[[1,'wisptouch'],[1,'tackle'],[10,'hexpulse'],[17,'soulpulse'],[26,'boost']],{Flame:'pyrewraith',Frost:'rimeghost'},90,'A drifting ember that the old Makers say carries a memory. Nobody knows whose.');
+form('pyrewraith','Pyrewraith','cinderwisp','Flame',[[0,'emberspit'],[32,'flamerush']],'Flame shard fitted. It burns without fuel.');
+form('rimeghost','Rimeghost','cinderwisp','Frost',[[0,'frostbite'],[32,'icelance']],'Frost shard fitted. Its touch leaves frost shaped like handprints.');
+frame('glacimite','Glacimite','Frost',[56,58,62,32],'golem','#9ac8e8',[[1,'tackle'],[1,'frostbite'],[11,'reinforce'],[18,'icelance'],[27,'rockslam']],{Stone:'avalanche',Brawl:'frostfist'},100,'A boulder of blue ice with a furnace heart. Mt. Cinder\'s miners swear they move at night.');
+form('avalanche','Avalanche','glacimite','Stone',[[0,'rockslam'],[32,'plating']],'Stone shard fitted. When it charges, the mountain comes with it.');
+form('frostfist','Frostfist','glacimite','Brawl',[[0,'jab'],[32,'ironbash']],'Brawl shard fitted. Its fists are glaciers.');
+frame('glacivore','Glacivore','Frost',[110,112,104,72],'golem','#4a7aa8',[[1,'icelance'],[1,'rockslam'],[1,'plating'],[1,'dreadglare'],[50,'thundercoil']],{},3,'The Makers\' war-titan, frozen inside the Heartforge for a thousand years. It remembers every order it was ever given.');
+BOTS.glacivore.types=['Frost','Iron'];
+for(const id of ['brinejaw','hullbreaker','stormkeel','squallkite','tempestwing','nightglider','cinderwisp','pyrewraith','rimeghost','glacimite','avalanche','frostfist','glacivore'])if(!DEX_ORDER.includes(id))DEX_ORDER.push(id);
+for(const [id,mv] of Object.entries({brinejaw:'tidalram',squallkite:'airslice',cinderwisp:'soulpulse',glacimite:'icelance'}))if(!MOVES[mv])console.warn('missing move',mv);
+Object.assign(FERAL_BEH,{brinejaw:'hunt',squallkite:'flee',cinderwisp:'wander',glacimite:'hunt'});
+Object.assign(TRAITS,{brinejaw:{n:'Ballast',d:'Takes 25% less damage from Volt and Gale moves.'},squallkite:{n:'Slipstream',d:'Gale moves hit 30% harder.'},cinderwisp:{n:'Afterglow',d:'Spirit moves hit 30% harder in the dark (night, caves, storms).'},glacimite:{n:'Permafrost',d:'Takes 25% less damage from Flame moves.'},glacivore:{n:'Titan Core',d:'Takes 25% less damage from everything.'}});
+// ---- key items ----
+Object.assign(ITEMS,{prime5:{n:'Tide Prime',d:'Prime Shard from Warden Maren. It sloshes, though it is solid.',cat:'key'},prime6:{n:'Gale Prime',d:'Prime Shard from Warden Pell-Ashe. Lighter than air.',cat:'key'},
+  prime7:{n:'Frost Prime',d:'Prime Shard from Warden Yoru. It never warms in your hand.',cat:'key'},prime8:{n:'Spirit Prime',d:'Prime Shard from the Spirit Warden. It hums an old Maker song.',cat:'key'},
+  skiff:{n:'Icebreaker Skiff',d:'A folding Maker boat. Use it on open water, even rough sea (face the water and press A).',cat:'key'}});
+
+// ===================== CHAPTER 3–4 SYSTEMS: tides, gusts, skiff, heat/cold, Accord interference, new bots =====================
+// ---- tiles ----
+BELT['>']='right';BELT['<']='left';BFLIP['>']='>';BFLIP['<']='<';
+Object.assign(MMCOL,{'_':'#8a8270','<':'#a8c0cc','>':'#a8c0cc','≈':'#1e3a5a','+':'#8a6a4a','!':'#7a4a3a',';':'#b8d8e8'});
+{const _ta=tileArt;tileArt=function(ch,th,v,fr){if(!'_<>≈+!;'.includes(ch)||th==='outw')return _ta(ch,th,v,fr);const key=ch+th+v+fr;if(TCACHE[key])return TCACHE[key];
+  const c=mkCanvas(32,32);const g=c.getContext('2d');g.scale(2,2);
+  if(ch==='_'){R(g,0,0,16,16,'#8a8270');seedSpeck(g,'#7a7262',10,v+2);seedSpeck(g,'#a8a08c',6,v+5);R(g,2,4,5,1,'#6e7a80');R(g,9,11,5,1,'#6e7a80');if(v===1){R(g,11,3,2,2,'#c8c0b0');}}
+  else if(ch==='<'||ch==='>'){grass(g,v);const o=fr?4:0;g.fillStyle='rgba(235,245,255,.75)';for(const y of [3,8,13]){const x0=((y*3+o+(ch==='>'?0:8))%16);R(g,x0,y,6,1,'rgba(235,245,255,.8)');R(g,(x0+9)%16,y+1,3,1,'rgba(235,245,255,.5)');}
+    const ax=ch==='>'?11:4;ptri(g,ch==='>'?[ax,5,ax+3,8,ax,11]:[ax+3,5,ax,8,ax+3,11],'rgba(255,255,255,.55)');}
+  else if(ch==='≈'){R(g,0,0,16,16,'#1e3a5a');const o=fr?3:0;R(g,(1+o)%16,3,6,1,'#3e6a90');R(g,(8+o)%16,8,7,1,'#4a7aa0');R(g,(3+o)%16,12,5,1,'#3e6a90');R(g,(12+o)%16,5,2,1,'#e0f0ff');R(g,(5+o)%16,10,2,1,'#e0f0ff');}
+  else if(ch==='+'){R(g,0,0,16,16,'#0c1220');R(g,2,0,12,16,'#6a4e36');for(let y=1;y<16;y+=3)R(g,2,y,12,1,'#4a3424');R(g,1,0,1,16,'#c8b090');R(g,14,0,1,16,'#c8b090');}
+  else if(ch==='!'){R(g,0,0,16,16,'#5a3a30');seedSpeck(g,'#7a4a36',10,v+2);seedSpeck(g,'#ff7a3a',fr?4:3,v+7);R(g,3,9,4,1,'#2a1a16');R(g,9,4,5,1,'#2a1a16');}
+  else if(ch===';'){R(g,0,0,16,16,'#c8e0ec');seedSpeck(g,'#a8c8dc',10,v+2);seedSpeck(g,'#ffffff',6,v+5);R(g,2,6,6,1,'#9ab8cc');R(g,8,12,6,1,'#9ab8cc');R(g,6,2,1,4,'#9ab8cc');}
+  TCACHE[key]=c;return c;};}
+{const _ts=tileSolid;tileSolid=function(ch){if(ch==='≈')return !(G.surf&&G.surf.skiff);if(ch==='_')return tideHigh();return _ts(ch);};}
+// ---- tides ----
+function tideCycle(){const m=curMap();return m&&m.tide?m.tide:0;}
+function tidePos(){const p=tideCycle();return p?((G.time%p)/p):0;}
+function tideHigh(){const p=tideCycle();if(!p)return false;const t=tidePos();return t>=0.55&&t<0.95;}
+function tideWarn(){const p=tideCycle();if(!p)return false;const t=tidePos();return t>=0.45&&t<0.55;}
+let tideSafe=null;
+async function swept(){if(G.scalding)return;G.scalding=true;G.busy=true;Snd.sfx('door');for(let i=0;i<=8;i++){G.fade=i/8;await wait(1);}
+  if(tideSafe&&tideSafe.map===G.map){G.px=tideSafe.x;G.py=tideSafe.y;}G.mv=null;resetFollower();for(let i=8;i>=0;i--){G.fade=i/8;await wait(1);}
+  G.errToast={t:120,msg:'The tide swept you back! Cross the flats when the water is out.'};G.busy=false;G.scalding=false;}
+function tideTick(){const m=curMap();if(!m||!m.tide||!G.started||BT||G.busy||UI.length)return;const ch=T(G.px,G.py);if(ch!=='_'){if(!G.mv)tideSafe={map:G.map,x:G.px,y:G.py};return;}if(tideHigh()&&!G.mv)swept();}
+function drawTideFX(cx,cy){const m=curMap();if(!m.tide)return;const hi=tideHigh(),warn=tideWarn();const t=tidePos();
+  const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS);let a=0;if(hi){a=Math.min(1,(t-0.55)/0.05)*Math.min(1,(0.95-t)/0.05);}else if(warn)a=(t-0.45)/0.1*0.35;
+  if(a>0)for(let y=y0;y<=y0+Math.ceil(H/TS)+1;y++)for(let x=x0;x<=x0+Math.ceil(W/TS)+1;x++){if(T(x,y)!=='_')continue;const sx=x*TS-cx,sy=y*TS-cy;ctx.fillStyle='rgba(46,96,140,'+(0.85*a)+')';ctx.fillRect(sx,sy,TS,TS);
+    ctx.fillStyle='rgba(200,230,255,'+(0.3*a)+')';ctx.fillRect(sx+((TICK*0.4+x*7)%28),sy+8+(y%3)*6,6,2);}
+  // gauge
+  const gx=8,gy=m.world?56:8;panel(gx,gy,92,30);txt('TIDE',gx+12,gy+21,'#303840',16);ctx.fillStyle='#3a4250';ctx.fillRect(gx+48,gy+10,36,10);ctx.fillStyle=hi?'#3a7ab8':warn?'#e0a040':'#8a8270';
+  const lvl=hi?1:warn?(t-0.45)/0.1:t<0.45?0:1-(t-0.95)/0.05;ctx.fillRect(gx+48,gy+10,36*Math.max(0.08,Math.min(1,lvl)),10);}
+// ---- skiff ----
+{const _fs=fieldSkill;fieldSkill=async function(ch,x,y){if((ch==='≈'||ch==='~')&&!G.surf&&G.bag.skiff){if((await ask('Launch the Icebreaker Skiff?'))!==0)return true;const b=lead()||G.party[0];G.surf={skiff:1,id:b.id,lv:b.lv,uid:b.uid};Snd.sfx('door');await stepPlayer(G.pdir);return true;}
+  if(ch==='≈'&&!G.surf){await say('The sea is too rough for a bot to swim. You\'d need a proper boat.');return true;}return _fs(ch,x,y);};}
+function drawSkiff(sx,sy){const bob=Math.sin(TICK/8)*1.5;ctx.fillStyle='rgba(200,230,255,.5)';ctx.beginPath();ctx.ellipse(sx+16,sy+28,20+Math.sin(TICK/6)*2,6,0,0,7);ctx.fill();
+  ctx.fillStyle='#4a3424';ctx.beginPath();ctx.moveTo(sx-2,sy+18+bob);ctx.lineTo(sx+34,sy+18+bob);ctx.lineTo(sx+28,sy+30+bob);ctx.lineTo(sx+4,sy+30+bob);ctx.fill();ctx.fillStyle='#c8b090';ctx.fillRect(sx-1,sy+18+bob,36,3);ctx.fillStyle='#e04a3a';ctx.fillRect(sx+2,sy+24+bob,28,2);}
+// ---- heat / cold zones ----
+let zoneSteps=0;
+function zoneStep(){const ch=T(G.px,G.py);if(ch!=='!'&&ch!==';')return;const b=lead();if(!b)return;const ty=allTypes(b);const heat=ch==='!';
+  const immune=heat?(ty.includes('Flame')||ty.includes('Tide')||b.mod==='coolfin'):(ty.includes('Flame')||ty.includes('Frost')||b.mod==='platekit');if(immune)return;
+  zoneSteps++;let hit=false;for(const p of G.party){if(p.hp>1){const d=Math.max(1,Math.floor(stats(p).hp/40));p.hp=Math.max(1,p.hp-d);hit=true;}}
+  if(hit&&zoneSteps%6===1)G.errToast={t:110,msg:heat?'The heat is wearing your bots down. A Flame or Tide lead (or a Coolant Fin) shrugs it off.':'The cold is cracking your bots\' plating. A Flame or Frost lead (or a Plating Kit) shrugs it off.'};}
+// ---- Accord interference (Heartforge maps) ----
+{const _da=doAction;doAction=async function(side,a){if(side==='p'&&curMap().accord&&a&&a.type==='move'&&Math.random()<0.15){const u=cur('p');Snd.sfx('glitch');BT.shake=8;
+    await bsay('The Accord seizes '+BOTS[u.id].name+'! Its visor flickers red... it won\'t obey this turn.');return;}return _da(side,a);};}
+// ---- allies in battle: Kael (or others) fight beside you ----
+{const _po=partnerOf;partnerOf=function(side){const B=BT;if(B&&side==='p'&&B.ally&&B.ally.hp>0)return B.ally;return _po(side);};}
+
+THEMES.nave={floor:'#2e2640',fl2:'#262036',wall:'#43305a',wl2:'#2a1c3a'};
+
+// ===================== CHAPTER 3: THE DROWNED COAST =====================
+function WP3(id,k,to,tx,ty,dir,extra){const p=C3(id,k);return Object.assign({x:p[0],y:p[1],to,tx,ty},dir?{dir}:{},extra||{});}
+function below3(id,k){const p=C3(id,k);return [p[0],p[1]+1];}
+const at3=(id,k)=>({x:C3(id,k)[0],y:C3(id,k)[1]});
+Object.assign(LOOKS,{maren:{skin:'#c88a5a',hair:'#1a4a6a',top:'#2a6a8a',bot:'#1a2a3a',acc:'#60d0f0'},pellashe:{skin:'#f0d0b0',hair:'#e8e8f0',top:'#a8c8d8',bot:'#4a5a6a',coat:1,acc:'#ffffff'},
+  yoru:{skin:'#f4dcc8',hair:'#202838',top:'#d8e8f4',bot:'#3a4a5a',robe:1,acc:'#80c0ff'},cantor:{skin:'#e8c8a8',hair:'#6a3a9a',top:'#3a2a4a',bot:'#2a1a3a',robe:1,acc:'#c060ff'},
+  spiritw:{skin:'#c8d0e0',hair:'#8a96a8',top:'#5a6676',bot:'#3a4250',robe:1,mask:1,acc:'#a0f0ff'},sailor:{skin:'#d8a880',hair:'#5a3a20',top:'#e8e8f0',bot:'#2a3a5a',beanie:'#c03030',pom:'#ffffff'}});
+Object.assign(QUESTS,{coast:{n:'The Drowned Coast',where:'Saltwind Shore → Saltmarrow → Galecrest',steps:{active:'Follow the coast west of Kilnhaven. Two Wardens hold the Tide and Gale Primes.',cathedral:'The Choir is gathering in the drowned Cathedral, south of the Drowned Reach. You\'ll need a boat.',done:'You faced the Cantor.'}},
+  kaelbot:{n:'Kael\'s Old Frame',where:'Drowned Reach',steps:{active:'A battered bot frame with Kael\'s tag is stuck on the Drowned Reach flats.',found:'You have Kael\'s old frame. Kael is somewhere on the coast.',done:'Kael has his first bot back.'}}});
+Object.assign(LOGS,{log5:'MAKER LOG 311: "The fleet is lost. We beached the Ark at Saltmarrow and sealed the Tide Prime inside its hull. The sea will keep it honest."',
+  log6:'MAKER LOG 340: "Ilian says the Accord is a leash. I say it is a seatbelt. We are both tired. We are both right."',
+  log7:'MAKER LOG 402: "If the Heartforge ever falls below a fifth of its strength, the titan stirs. Do not let it fall. Do not let it fall."',
+  log8:'MAKER LOG 999: "To whoever holds all eight: the Accord can be rewritten. The key is in the archive. Choose better than we did."'});
+
+// ---------- Kilnhaven west gate ----------
+(function(){const m=MAPS.kilnhaven;m.grid=m.grid.map((r,y)=>(y===15||y===16)?'==='+r.slice(3):r);
+  m.warps.push({x:0,y:15,to:'route5',tx:32,ty:10},{x:0,y:16,to:'route5',tx:32,ty:11});
+  m.triggers=(m.triggers||[]).concat([{x:1,y:15,run:coastGate},{x:1,y:16,run:coastGate}]);})();
+async function coastGate(){if(flag('ch2done'))return;G.busy=true;await say('Sea-fog rolls off the coast road. A Kilnhaven ranger waves you back: "Not until Sora says the vents are safe."');await stepPlayer('right');G.busy=false;}
+
+// ---------- Saltwind Shore ----------
+MAPS.route5={name:'Saltwind Shore',theme:'out',music:'route',outdoor:1,weather:'snow',world:{x:112,y:62},grid:C3G.route5.grid,
+ enc:{tiles:'jwq',count:9,list:[['brinejaw',24,27,40]],by:{j:[['brinejaw',24,27,40],['scrapmite',24,26,30],['cogwyrm',25,27,30]],w:[['squallkite',24,27,45],['dripcell',24,26,30],['cinderwisp',25,27,25]],q:[['frostling',25,27,50],['brinejaw',24,26,50]]}},
+ alpha:{id:'brinejaw',lv:31,at:[27,4]},
+ warps:[WP3('route5','exitE0','kilnhaven',1,15),WP3('route5','exitE1','kilnhaven',1,16),WP3('route5','exitW0','saltmarrow',26,10),WP3('route5','exitW1','saltmarrow',26,11)],
+ objs:[{type:'pylon',id:'p5',...at3('route5','pylon'),thaws:['route5'],run:pylonRun},{type:'log',log:'log5',...at3('route5','log'),run:readLog},
+  {type:'item',id:'r5a',...at3('route5','item1'),item:'patch2',qty:2},{type:'item',id:'r5b',...at3('route5','item2'),item:'rshard_Gale'}],
+ npcs:[{id:'r5t1',...at3('route5','t1'),dir:'down',look:'sailor',range:4,trainer:{name:'Corra',title:'Wrecker',team:[['brinejaw',26],['scrapmite',26],['cogwyrm',27]],money:1300,pre:'Everything on this beach is salvage, and so is your bot!',post:'Fine, fine. Take the beach.'}},
+  {id:'r5t2',...at3('route5','t2'),dir:'left',look:'scout',range:4,trainer:{name:'Wren',title:'Kite Flyer',team:[['squallkite',27],['boltbun',27]],money:1300,pre:'Feel that wind? My kites live for it!',post:'Grounded...'}},
+  {id:'r5n',...at3('route5','npc1'),dir:'down',look:'old',text:'Those gusts on the dunes push you clean off your feet. Go with them, not against them.'}]};
+
+// ---------- Saltmarrow ----------
+MAPS.saltmarrow={name:'Saltmarrow',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:84,y:58},town:1,heal:{map:'repair_s',x:6,y:4},grid:C3G.saltmarrow.grid,
+ warps:[WP3('saltmarrow','gym','gym5',6,15),WP3('saltmarrow','repair','repair_s',6,4),WP3('saltmarrow','house1','house_s1',4,4),WP3('saltmarrow','house2','house_s2',5,4),
+  WP3('saltmarrow','exitE0','route5',1,6),WP3('saltmarrow','exitE1','route5',1,7),WP3('saltmarrow','exitW0','route6',30,10),WP3('saltmarrow','exitW1','route6',30,11)],
+ signs:{[C3('saltmarrow','sign').join(',')]:'SALTMARROW — Built in the shadow of the Ark. Warden Maren keeps the Tide Prime in its hull.'},
+ triggers:[{x:20,y:10,run:saltKael},{x:20,y:11,run:saltKael}],
+ npcs:[{id:'sm1',...at3('saltmarrow','npc1'),dir:'down',look:'sailor',text:'The Ark came ashore before the town did. We just built around it. Maren says it still remembers how to float.'},
+  {id:'sm2',...at3('saltmarrow','npc2'),dir:'left',look:'woman',text:'The Drowned Reach west of here only shows its paths at low tide. Watch the water, not the clock.'},
+  {id:'sm3',...at3('saltmarrow','npc3'),dir:'up',look:'kid',wander:1,text:'Choir boats go out to the drowned Cathedral every night. Mum says don\'t look at the lights.'},
+  {id:'smDock',...at3('saltmarrow','dock'),dir:'up',look:'sailor',cond:()=>!G.bag.skiff,text:'Only a Maker skiff can cross the rough water out past the Reach. Maren keeps one in the Ark.'}]};
+async function saltKael(){if(flag('saltKael'))return;setFlag('saltKael');G.busy=true;const k=spawnNear({id:'kaelS',look:'kael'},2);
+ if(flag('kaelChoir')){await say('Two masked figures hurry past toward the docks.');await say('...Deacon Kael wants the Cathedral sealed before the Cantor\'s sermon. Move.',{speaker:'Choir Grunt'});await say('Deacon Kael. They really made him a Deacon.');}
+ else if((G.kael||0)>=2){G.npcs.push(k);await say(N()+'! Over here. I said I\'d meet you on the coast, didn\'t I?',{speaker:'Kael'});
+   await say('The Choir is holed up in a drowned Maker cathedral out past the Reach. I\'m not letting you walk in there alone.',{speaker:'Kael'});
+   await say('Get your Primes from Maren and the Gale Warden. When you sail for the Cathedral, I\'ll be on the island. Deal?',{speaker:'Kael'});setFlag('kaelAlly');
+   await walkNPC(k,OPP[k.dir],3);G.npcs.splice(G.npcs.indexOf(k),1);}
+ else{await say('On the noticeboard by the gate, a scrawled note: "LOST: one battered bot frame, red tag, last seen on the Drowned Reach. Reward. - K"');setQ('kaelbot','active');Snd.sfx('ok');await say('New quest: KAEL\'S OLD FRAME.');}
+ if(!qstate('coast'))setQ('coast','active');G.busy=false;}
+MAPS.repair_s=repairMap('Saltmarrow Repair Station',{map:'saltmarrow',x:below3('saltmarrow','repair')[0],y:below3('saltmarrow','repair')[1]},['patch2','debug','spike2','rebootcell','coolfin','platekit','nanites']);
+MAPS.house_s1=room('Saltmarrow',['XXXXXXXXXX','X&&x*x99xX','XxxxxxxxxX','XtxxxxxhxX','XxxxxxxxxX','XXXXeXXXXX'],{map:'saltmarrow',x:below3('saltmarrow','house1')[0],y:below3('saltmarrow','house1')[1]},
+ [{id:'hs1',x:3,y:2,dir:'down',look:'old',text:'My grandfather swore the Ark sang at night when he was a boy. It stopped the year the Cantor vanished from the archives.'}]);
+MAPS.house_s2=room('Saltmarrow',['XXXXXXXXXXX','XMxx9xxx&vX','XxxxxxxxxxX','XhxxxtxxxxX','XxxxxxxxxxX','XXXXXeXXXXX'],{map:'saltmarrow',x:below3('saltmarrow','house2')[0],y:below3('saltmarrow','house2')[1]},
+ [{id:'hs2',x:6,y:2,dir:'left',look:'woman',text:'My son joined the Choir last winter. He writes that they\'re "freeing the bots". He never says from what.'}],[{type:'item',id:'hs2i',x:8,y:3,item:'shard_Tide'}]);
+
+// ---------- Tide hall (Warden Maren) ----------
+MAPS.gym5={name:'Ark of Saltmarrow',theme:'gym2',music:'gym',tide:300,grid:C3G.gym5.grid,
+ warps:[{x:6,y:16,to:'saltmarrow',tx:below3('saltmarrow','gym')[0],ty:below3('saltmarrow','gym')[1],dir:'down'}],
+ npcs:[{id:'g5guide',...at3('gym5','guide'),dir:'left',look:'sailor',text:'The Ark floods on a timer. Watch the TIDE gauge, wait on the dry spots, and dash when the water drains.'},
+  {id:'g5t1',...at3('gym5','t1'),dir:'down',look:'sailor',range:3,trainer:{name:'Bosun Tam',title:'Ark Crew',team:[['brinejaw',29],['dripcell',29]],money:1500,pre:'You made it through the bilge? Then you can make it through me!',post:'Soaked.'}},
+  {id:'maren',...at3('gym5','maren'),dir:'down',look:'maren',script:marenTalk}]};
+async function marenTalk(){if(flag('badge5')){await say('The tide always comes back. So will you, I think.',{speaker:'Maren'});return;}G.busy=true;
+ await say('Four Primes, carried all the way to the edge of the sea. I\'m Maren, Warden of the Ark.',{speaker:'Maren'});
+ await say('The Choir sends a boat for my Prime every week. Every week I send it back empty. Show me you\'re not just another boat.',{speaker:'Maren'});
+ const r=await runBattle({trainer:{name:'Maren',title:'Warden',look:'maren',warden:1,team:[['dripcell',30],['brinejaw',31],['stormkeel',32]],money:3200,items:1}});
+ if(r==='win'){setFlag('badge5');addItem('prime5',1);addItem('shard_Tide',1);addItem('skiff',1);Snd.jingle('victory',curMap().music);
+  await say('Like a wave breaking on the hull. Take it.',{speaker:'Maren'});await say(N()+' received the TIDE PRIME, a Tide Shard and the ICEBREAKER SKIFF!');
+  await say('The skiff folds into your pack. Face open water, even the rough stuff, and press A to launch.',{speaker:'Maren'});
+  const c=await ask('Maren asks: "The Choir says the Primes should be destroyed. Would you sink yours, if it freed every bot?"',['Maybe. If it\'s true.','No. They keep the Heartforge alive.']);G.rep=G.rep||{w:0,c:0};
+  if(c===0){G.rep.c++;await say('Then go ask the Cantor yourself. Out past the Reach.',{speaker:'Maren'});}else{G.rep.w++;await say('Good. Keep it close.',{speaker:'Maren'});}
+  await thawRegions(['saltmarrow','route5'],'The Tide Prime pulls at the sea. The ice in Saltmarrow harbour cracks and floats away...');
+  await say('Pell-Ashe holds the Gale Prime in Galecrest, north of the Reach. Cross the flats at low tide.',{speaker:'Maren'});}
+ G.busy=false;}
+
+// ---------- Drowned Reach ----------
+MAPS.route6={name:'Drowned Reach',theme:'out',music:'route',outdoor:1,weather:'blizzard',tide:900,world:{x:52,y:62},grid:C3G.route6.grid,
+ enc:{tiles:'qw',count:7,list:[['brinejaw',27,30,50]],by:{q:[['frostling',27,30,40],['brinejaw',27,29,35],['cinderwisp',28,30,25]],w:[['squallkite',27,30,50],['gloomlamp',28,30,25],['dripcell',27,29,25]]}},
+ alpha:{id:'squallkite',lv:33,at:C3('route6','alpha')},
+ warps:[WP3('route6','exitE0','saltmarrow',1,14),WP3('route6','exitE1','saltmarrow',1,15),WP3('route6','exitN0','galecrest',10,22),WP3('route6','exitN1','galecrest',11,22),
+  WP3('route6','cathedral','cathedral',10,18,'up',{req:'badge6',locked:'A wall of Choir static seals the doors. Something stronger than you, like the Gale Prime\'s wind, could blow it apart.'}),WP3('route6','exitS0','route7',10,1),WP3('route6','exitS1','route7',11,1)],
+ triggers:[{...at3('route6','southT0'),run:causewayGate},{...at3('route6','southT1'),run:causewayGate}],
+ objs:[{type:'item',id:'w1',...at3('route6','wreck1'),item:'rshard_Tide'},{type:'item',id:'w2',...at3('route6','wreck2'),item:'nanites'},
+  {type:'lostbot',...at3('route6','wreck3'),cond:()=>qstate('kaelbot')==='active',run:async()=>{setQ('kaelbot','found');Snd.chirp(G.rival||'flicker');await say('Half-buried in the mud: a battered frame with a red tag. KAEL. Its core is cold, but it\'s intact.');await say('Quest updated: find Kael.');}},
+  {type:'log',log:'log6',...at3('route6','log'),run:readLog}],
+ npcs:[{id:'r6t1',...at3('route6','t1'),dir:'up',look:'sailor',range:4,trainer:{name:'Hollis',title:'Flats Runner',team:[['brinejaw',29],['squallkite',29],['dripcell',30]],money:1450,pre:'Low tide\'s my racetrack. Out of my lane!',post:'Tide\'s turning. So did that fight.'}},
+  {id:'r6t2',...at3('route6','t2'),dir:'left',look:'grunt',range:4,trainer:{name:'Choir Grunt',title:'Hollow',team:[['cinderwisp',30],['gloomlamp',30]],money:1400,pre:'The Cantor speaks tonight. You\'re not invited.',post:'You\'ll hear it anyway.'}},
+  {id:'r6n',...at3('route6','npc1'),dir:'down',look:'old',text:'The wrecks out on the flats are full of Maker cargo. Only at low tide, mind. The sea takes everything back.'}]};
+async function causewayGate(){if(flag('ch3done'))return;G.busy=true;await say('The old causeway south is half underwater and buzzing with Choir static. It leads toward Mt. Cinder.');await stepPlayer('up');G.busy=false;}
+
+// ---------- Galecrest ----------
+MAPS.galecrest={name:'Galecrest',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:56,y:38},town:1,heal:{map:'repair_g',x:6,y:4},grid:C3G.galecrest.grid,
+ warps:[WP3('galecrest','gym','gym6',7,15),WP3('galecrest','repair','repair_g',6,4),WP3('galecrest','house1','house_g1',4,4),WP3('galecrest','exitS0','route6',14,1),WP3('galecrest','exitS1','route6',15,1)],
+ signs:{[C3('galecrest','sign').join(',')]:'GALECREST — Hold the rails. Warden Pell-Ashe flies above the chasm.'},
+ npcs:[{id:'gc1',...at3('galecrest','npc1'),dir:'left',look:'lineman',text:'The rope bridges have held for two hundred winters. The gusts are newer. Mind them.'},
+  {id:'gc2',...at3('galecrest','npc2'),dir:'down',look:'kid',script:galeKid},
+  {id:'gc3',...at3('galecrest','npc3'),dir:'up',look:'woman',text:'Pell-Ashe hasn\'t lost a match since the cables went up. He says the wind tells him your moves.'}]};
+async function galeKid(){if(qstate('kaelbot')==='found'){G.busy=true;await say('A red-haired guy came through asking about a lost frame! He went up to the cliffs to sulk.',{speaker:'Kid'});
+   const k=spawnNear({id:'kaelG',look:'kael'},1);G.npcs.push(k);await say('...You found it. You actually went out on the flats for my junk frame.',{speaker:'Kael'});
+   await say('That was my first bot. Before the capsule, before any of this. ...Thanks. I mean it.',{speaker:'Kael'});setQ('kaelbot','done');G.kael=(G.kael||0)+2;setFlag('kaelAlly');addItem('rebootcell',2);Snd.sfx('item');
+   await say('Kael gives you 2 Reboot Cells. "I\'ll see you at the Cathedral. Don\'t argue."');await walkNPC(k,OPP[k.dir],3);G.npcs.splice(G.npcs.indexOf(k),1);G.busy=false;return;}
+ await say('The wind up here can carry a whole bot! I saw a Squallkite sleep in the air once.',{speaker:'Kid'});}
+MAPS.repair_g=repairMap('Galecrest Repair Station',{map:'galecrest',x:below3('galecrest','repair')[0],y:below3('galecrest','repair')[1]},['patch2','debug','spike2','rebootcell','overclock','nanites']);
+MAPS.house_g1=room('Galecrest',['XXXXXXXXXX','X@xx9xxhvX','XxxxxxxxxX','XxtxxxxxxX','XxxxxxxxxX','XXXXeXXXXX'],{map:'galecrest',x:below3('galecrest','house1')[0],y:below3('galecrest','house1')[1]},
+ [{id:'hg1',x:5,y:2,dir:'left',look:'tinker',text:'From up here you can see the Cathedral lights at night. Purple. Like the Choir\'s masks. Like the Cantor\'s eyes, they say.'}]);
+MAPS.gym6={name:'Galecrest Aerie',theme:'gym2',music:'gym',grid:C3G.gym6.grid,
+ warps:[{x:7,y:16,to:'galecrest',tx:below3('galecrest','gym')[0],ty:below3('galecrest','gym')[1],dir:'down'}],
+ npcs:[{id:'g6guide',...at3('gym6','guide'),dir:'up',look:'lineman',text:'Every vent row blows you to its end. Pick where you jump in, and where the wind will drop you. Dead ends are real!'},
+  {id:'g6t1',...at3('gym6','t1'),dir:'down',look:'scout',range:3,trainer:{name:'Skye',title:'Cable Runner',team:[['squallkite',33],['boltbun',33]],money:1600,pre:'You rode the gusts all the way up? Show-off!',post:'Blown away.'}},
+  {id:'pellashe',...at3('gym6','pell'),dir:'down',look:'pellashe',script:pellTalk}]};
+async function pellTalk(){if(flag('badge6')){await say('The wind carries news. All of it is about you lately.',{speaker:'Pell-Ashe'});return;}G.busy=true;
+ await say('Ah. The one the capsule chose. I am Pell-Ashe. The wind told me you were coming three days ago.',{speaker:'Pell-Ashe'});
+ await say('It also told me the Cantor is waiting for you. I\'d like to know if you\'re ready for him.',{speaker:'Pell-Ashe'});
+ const r=await runBattle({trainer:{name:'Pell-Ashe',title:'Warden',look:'pellashe',warden:1,link:1,team:[['squallkite',33],['skyrivet',34],['tempestwing',35],['thundrone',35]],money:3500,items:1}});
+ if(r==='win'){setFlag('badge6');addItem('prime6',1);addItem('shard_Gale',1);Snd.jingle('victory',curMap().music);await say('A clean wind. Take it.',{speaker:'Pell-Ashe'});await say(N()+' received the GALE PRIME and a Gale Shard!');
+  const c=await ask('Pell-Ashe asks: "When the Cantor offers you the truth, will you listen?"',['I\'ll listen.','I\'ve heard enough from the Choir.']);G.rep=G.rep||{w:0,c:0};
+  if(c===0){G.rep.c++;await say('Good. Listening is not agreeing.',{speaker:'Pell-Ashe'});}else{G.rep.w++;await say('Then listen to your bots instead.',{speaker:'Pell-Ashe'});}
+  await thawRegions(['galecrest','route6'],'The Gale Prime tugs at the clouds. A warm wind rolls down the cliffs and over the Reach...');
+  setQ('coast','cathedral');await say('The Gale Prime can blow apart the Choir\'s seal on the drowned Cathedral. Take your skiff out past the Reach.',{speaker:'Pell-Ashe'});
+  await say(N()+', it\'s Vesna. The Choir is gathering in the drowned Cathedral. Whatever he tells you in there... I\'m sorry I didn\'t tell you first.',{speaker:'Vesna (Navi-band)'});}
+ G.busy=false;}
+
+// ---------- The Choir Cathedral ----------
+MAPS.cathedral={name:'Drowned Cathedral',theme:'nave',music:'cave',grid:C3G.cathedral.grid,
+ warps:[{x:10,y:19,to:'route6',tx:21,ty:19,dir:'down'}],
+ npcs:[{id:'cg1',...at3('cathedral','g1'),dir:'right',look:'grunt',range:4,trainer:{name:'Choir Grunt',title:'Hollow',team:[['cinderwisp',33],['gloomlamp',33],['rotcap',34]],money:1600,pre:'The sermon has begun. Kneel or leave.',post:'...The song goes on without me.'}},
+  {id:'cg2',...at3('cathedral','g2'),dir:'left',look:'grunt',range:4,trainer:{name:'Choir Grunt',title:'Hollow',team:[['nightglider',34],['phantide',34]],money:1650,pre:'Red gates, blue gates. Only the faithful know the order!',post:'Fine. Step on the plate by the east wall.'}},
+  {id:'cg3',...at3('cathedral','g3'),dir:'down',look:'grunt',range:3,trainer:{name:'Choir Grunt',title:'Hollow',team:[['wispire',35],['frostling',35]],money:1700,pre:'The Cantor will not be interrupted!',post:'He knew you\'d come anyway.'}},
+  {id:'cdeacon',...at3('cathedral','deacon'),dir:'down',look:'deacon',range:3,cond:()=>!flag('cDeacon'),script:cathedralDeacon},
+  {id:'ckael',...at3('cathedral','kaelC'),dir:'up',look:'kael',cond:()=>flag('kaelAlly')&&!flag('kaelJoined'),script:async()=>{G.busy=true;await say('Told you I\'d be here. Their Deacon is right up ahead. When we reach the Cantor, my bot fights next to yours.',{speaker:'Kael'});setFlag('kaelJoined');await say('KAEL joined you! His bot will fight beside yours against the Cantor.');G.busy=false;}},
+  {id:'cantor',...at3('cathedral','cantor'),dir:'down',look:'cantor',cond:()=>!flag('ch3done'),script:cantorScene}]};
+async function cathedralDeacon(n){G.busy=true;
+ if(flag('kaelChoir')){await say('...Of course it\'s you.',{speaker:'Deacon Kael'});await say('The Cantor showed me the logs. The Accord, the leash, all of it. Vesna lied to both of us.',{speaker:'Deacon Kael'});
+   await say('I\'m not letting you hand all eight Primes to her. Not without a fight.',{speaker:'Deacon Kael'});
+   const r=await runBattle({trainer:{name:'Kael',title:'Deacon',look:'kael',link:1,team:[[rivalForm(),36],['nightglider',34],['cogwyrm',35],['rotcap',35]],money:3000}});
+   if(r==='win'){await say('...Still not enough. Why is it never enough?',{speaker:'Kael'});const c=await ask('What do you tell Kael?',['You don\'t have to prove anything to them.','You chose this.']);
+     if(c===0){G.kael=1;clearFlag('kaelChoir');await say('...I\'ll think about it. Go. He\'s waiting for you.',{speaker:'Kael'});}else{await say('Yeah. I did.',{speaker:'Kael'});}setFlag('cDeacon');n.hidden=true;}}
+ else{await say('The little spark, all grown up. Mirelle sends her regards. I\'m the one who guards the Cantor\'s door now.',{speaker:'Deacon Ostrel'});
+   const r=await runBattle({trainer:{name:'Ostrel',title:'Deacon',look:'deacon',warden:1,link:1,team:[['wispire',35],['ampjelly',35],['cinderwisp',36]],money:2800}});
+   if(r==='win'){await say('Go on, then. Hear the truth from the source.',{speaker:'Deacon Ostrel'});setFlag('cDeacon');n.hidden=true;}}
+ G.busy=false;}
+function clearFlag(f){if(G.flags)delete G.flags[f];}
+async function cantorScene(){G.busy=true;
+ await say('A tall figure in violet stands beneath the drowned Maker monitors. He lowers his mask.',{speaker:''});
+ await say('Hello, '+N()+'. I\'ve been watching you since the night the capsule fell. I am the Cantor. My name, before all this, was Ilian Orla.',{speaker:'The Cantor'});
+ await say('Yes. Orla. Vesna is my sister. We kept the Maker archive together, until I read the Accord logs and she asked me to forget them.',{speaker:'Ilian'});
+ if(flag('archiveVesna'))await say('You gave her the archive. Then she\'s read it too, and she still hasn\'t told you. Ask yourself why.',{speaker:'Ilian'});
+ else if(flag('archiveChoir')){await say('You gave us the archive. So you deserve this: one log the Choir never shows its own members.',{speaker:'Ilian'});await say(LOGS.log7);G.logs=G.logs||{};G.logs.log7=1;}
+ else if(flag('archiveSelf'))await say('And you kept the archive for yourself. Clever. Every Deacon on the coast is looking for you. So is my sister.',{speaker:'Ilian'});
+ await say('If the Heartforge falls below a fifth of its strength, the war-titan under Mt. Cinder wakes. The Accord was never about safety. It was a leash for Glacivore, and every bot wears the same collar.',{speaker:'Ilian'});
+ await say('I meant to cut the leash and kill the titan in its sleep. For that I need the Primes. Yours, specifically.',{speaker:'Ilian'});
+ const ally=flag('kaelJoined')?makeBot(rivalForm(),38):null;if(ally){ally.nick='Kael\'s '+BOTS[ally.id].name;await say('Kael steps up beside you. "Two against one, Orla. Your move."');}
+ const r=await runBattle({ally,trainer:{name:'Cantor',title:'The',look:'cantor',warden:1,link:1,team:[['wispire',37],['nightglider',38],['phantide',38],['rimeghost',39],['pyrewraith',40]],money:5000,items:2}});
+ if(r!=='win'){G.busy=false;return;}
+ await say('...Well sung.',{speaker:'Ilian'});
+ await say('But you misunderstand. I never needed to beat you. I only needed you here.',{speaker:'Ilian'});
+ Snd.sfx('glitch');G.shake=40;await say('Far away, two Warden halls go dark. Brasston. Voltmere. The Choir has taken the Stone and Volt Primes while you were busy.');
+ await say('The Heartforge is at twenty percent. The titan is stirring. Now we race, little spark: the Choir to the summit to end it, you and my sister to save it.',{speaker:'Ilian'});
+ await say('Meet me on Mt. Cinder. Bring all eight. One of us will be right.',{speaker:'Ilian'});
+ setFlag('ch3done');setQ('coast','done');Snd.music('title',true);
+ await say('Every bot in the Cathedral flickers. Your own lead bot\'s visor glitches red for half a second... then steadies.');
+ if(flag('kaelJoined'))await say('That was the Accord. Again. We\'re going up that mountain, '+N()+'. Together.',{speaker:'Kael'});
+ await say(N()+'... I should have told you myself. Ilian is right about the titan. He\'s wrong about what to do. The causeway south of the Reach leads to Mt. Cinder. I\'ll meet you there.',{speaker:'Vesna (Navi-band)'});
+ await pushUI({t:0,update(){this.t++;if(this.t>60&&(press('a')||press('start')))popUI(this);},draw(){ctx.fillStyle='#06080e';ctx.fillRect(0,0,W,H);ctx.globalAlpha=Math.min(1,this.t/40);
+   wtxt('CHAPTER 3 COMPLETE',W/2,66,'#80d0ff',40,'center');wtxt('The Drowned Coast',W/2,100,'#a0c8ff',26,'center');
+   wtxt('Time: '+fmtTime(G.time)+'    Linked bots: '+Object.keys(G.caught).length+'    Prime Shards: '+[1,2,3,4,5,6,7,8].filter(i=>G.bag['prime'+i]).length+'/8',W/2,148,'#e0d0c0',20,'center');
+   G.party.slice(0,6).forEach((b,i)=>ctx.drawImage(bspr(b),W/2-150+i*50,162,48,48));wtxt('Next: Chapter 4, Heart of Cinder',W/2,250,'#ff9a5a',22,'center');if(this.t>60)wtxt('Press A',W/2,290,'#7a8aa8',18,'center');ctx.globalAlpha=1;}});
+ Snd.music(curMap().music);await say('CHAPTER 4: HEART OF CINDER. The causeway south of the Drowned Reach is open.');G.busy=false;}
+
+// ===================== CHAPTER 4: HEART OF CINDER =====================
+const at4=at3;
+Object.assign(QUESTS,{cinder:{n:'Heart of Cinder',where:'Cinder Ascent → Rimefall → Summit',steps:{active:'Climb Mt. Cinder. Two Wardens remain: Yoru in Rimefall and the Spirit Warden at the summit.',heart:'All eight Primes. Enter the Heartforge at the summit before the titan wakes.',done:'You faced Glacivore.'}}});
+// ---------- Cinder Ascent ----------
+MAPS.route7={name:'Cinder Ascent',theme:'out',music:'route',outdoor:1,weather:'blizzard',world:{x:45,y:84},grid:C3G.route7.grid,
+ enc:{tiles:'jwqyd',count:10,list:[['glacimite',33,36,40]],by:{j:[['glacimite',33,36,35],['cogwyrm',34,36,35],['kilnfly',33,35,30]],w:[['cinderwisp',33,36,45],['squallkite',34,36,30],['gloomlamp',34,36,25]],
+   q:[['frostling',34,36,45],['glacimite',33,35,35],['cinderwisp',34,36,20]],y:[['boltbun',34,36,40],['squallkite',34,36,30],['cinderwisp',35,36,30]],d:[['glacimite',34,36,60],['frostling',34,36,40]]}},
+ alpha:{id:'glacimite',lv:39,at:C3('route7','alpha')},
+ warps:[WP3('route7','exitN0','route6',3,20),WP3('route7','exitN1','route6',4,20),WP3('route7','exitS0','rimefall',10,1),WP3('route7','exitS1','rimefall',11,1)],
+ triggers:[{x:10,y:2,run:cinderIntro},{x:11,y:2,run:cinderIntro}],
+ objs:[{type:'pylon',id:'p7',...at4('route7','pylon'),thaws:['route7'],run:pylonRun},{type:'log',log:'log7',...at4('route7','log'),run:readLog},
+  {type:'item',id:'r7a',...at4('route7','item1'),item:'coolfin'},{type:'item',id:'r7b',...at4('route7','item2'),item:'platekit'}],
+ npcs:[{id:'r7t1',...at4('route7','t1'),dir:'right',look:'hiker',range:4,trainer:{name:'Bram',title:'Ash Climber',team:[['glacimite',36],['kilnfly',36],['pebblit',37]],money:1800,pre:'Nobody climbs Cinder without passing the old climbers first!',post:'Go on up. Mind the heat bands.'}},
+  {id:'r7t2',...at4('route7','t2'),dir:'left',look:'grunt',range:4,trainer:{name:'Choir Zealot',title:'Hollow',team:[['rimeghost',37],['nightglider',37],['cinderwisp',38]],money:1900,pre:'The summit is ours. The titan sleeps forever tonight!',post:'Then hurry. We\'re already ahead of you.'}}]};
+async function cinderIntro(){if(flag('cinderIntro'))return;setFlag('cinderIntro');G.busy=true;setQ('cinder','active');
+ await say('The air turns from freezing to scorching and back again as you climb. Mt. Cinder breathes in bands.');
+ await say('Heat bands burn bots without heat shielding, and the frost bands crack plating. A Flame or Tide lead handles the heat; a Flame or Frost lead handles the cold. Coolant Fins and Plating Kits work too.',{speaker:'Vesna (Navi-band)'});
+ G.busy=false;}
+// ---------- Rimefall ----------
+MAPS.rimefall={name:'Rimefall',theme:'out',music:'town',outdoor:1,weather:'snow',world:{x:45,y:124},town:1,heal:{map:'repair_r',x:6,y:4},grid:C3G.rimefall.grid,
+ warps:[WP3('rimefall','gym','gym7',7,15),WP3('rimefall','repair','repair_r',6,4),WP3('rimefall','house1','house_r1',4,4),WP3('rimefall','exitN0','route7',10,38),WP3('rimefall','exitN1','route7',11,38),
+  WP3('rimefall','exitS0','route8',12,1),WP3('rimefall','exitS1','route8',13,1)],
+ signs:{[C3('rimefall','sign').join(',')]:'RIMEFALL MONASTERY — "Be still. The ice remembers." Warden Yoru.'},
+ triggers:[{x:10,y:2,run:rimeReunion},{x:11,y:2,run:rimeReunion}],
+ npcs:[{id:'rf1',...at4('rimefall','npc1'),dir:'right',look:'old',text:'The monks here have watched the Heartforge glow for six hundred years. Tonight it\'s the colour of a dying coal.'},
+  {id:'rf2',...at4('rimefall','npc2'),dir:'left',look:'yoru',text:'Yoru\'s hall is all ice. Slide, stop, think. The rocks are your friends.'},
+  {id:'rfVesna',x:12,y:6,dir:'left',look:'vesna',cond:()=>flag('rimeReunion'),script:async()=>{await say(flag('badge7')?'One more Prime. The Spirit Warden is at the summit, past the Choir camp.':'Yoru first. Then the summit. I\'ll keep the station link open.',{speaker:'Vesna'});
+    if(G.party.some(b=>b.hp<stats(b).hp)){await healAll();await say('Vesna patches your bots with her field kit.');}}}]};
+async function rimeReunion(){if(flag('rimeReunion'))return;setFlag('rimeReunion');G.busy=true;
+ await say(N()+'! Up here.',{speaker:'Vesna'});
+ await say('I owe you the truth, so here it is. The Accord is a leash, and I knew. I kept it because without it, Glacivore wakes. I chose a collar over a war.',{speaker:'Vesna'});
+ await say('Ilian chose the opposite. He wants the titan dead and every bot free, even if the Heartforge dies with it and Calderra freezes.',{speaker:'Vesna'});
+ if(flag('archiveSelf'))await say('And you still have the archive. There\'s a third door in that archive, '+N()+'. A way to rewrite the Accord. I never had the nerve to try it.',{speaker:'Vesna'});
+ if((G.kael||0)>=1&&!flag('kaelChoir')){await say('Kael jogs up the path behind you, out of breath. "Told you I\'d keep up."');setFlag('kaelAlly');setFlag('kaelJoined');}
+ const c=await ask('Vesna asks: "Will you help me save the Heartforge?"',['I\'ll decide at the summit.','Yes. We save it.','No. Ilian might be right.']);G.rep=G.rep||{w:0,c:0};
+ if(c===1)G.rep.w++;else if(c===2)G.rep.c++;
+ await say('Fair. Yoru is waiting in the monastery hall. Then the summit.',{speaker:'Vesna'});G.busy=false;}
+MAPS.repair_r=repairMap('Rimefall Repair Station',{map:'rimefall',x:below3('rimefall','repair')[0],y:below3('rimefall','repair')[1]},['patch2','debug','spike2','rebootcell','overclock','nanites','coolfin','platekit']);
+MAPS.house_r1=room('Rimefall',['XXXXXXXXXX','X9x*xx9hvX','XxxxxxxxxX','XxxtxxxxxX','XxxxxxxxxX','XXXXeXXXXX'],{map:'rimefall',x:below3('rimefall','house1')[0],y:below3('rimefall','house1')[1]},
+ [{id:'hr1',x:6,y:3,dir:'left',look:'yoru',text:'We keep a vigil for the titan. Not to worship it. To make sure someone is awake when it is.'}],[{type:'item',id:'hr1i',x:2,y:4,item:'rshard_Frost'}]);
+MAPS.gym7={name:'Rimefall Ice Hall',theme:'lab',music:'gym',grid:C3G.gym7.grid,
+ warps:[{x:7,y:16,to:'rimefall',tx:below3('rimefall','gym')[0],ty:below3('rimefall','gym')[1],dir:'down'}],
+ npcs:[{id:'g7guide',...at4('gym7','guide'),dir:'left',look:'yoru',text:'Once you start sliding you won\'t stop until a rock, a wall, or solid floor stops you. Plan four moves ahead.'},
+  {id:'g7t1',...at4('gym7','t1'),dir:'down',look:'yoru',range:3,trainer:{name:'Brother Ren',title:'Ice Monk',team:[['frostling',40],['hailguard',41]],money:2000,pre:'Stillness is strength.',post:'...And motion, apparently.'}},
+  {id:'yoru',...at4('gym7','yoru'),dir:'down',look:'yoru',script:yoruTalk}]};
+async function yoruTalk(){if(flag('badge7')){await say('The ice remembers your footsteps now.',{speaker:'Yoru'});return;}G.busy=true;
+ await say('Seven Primes in one pack. The mountain can feel it. I am Yoru, Warden of Rimefall.',{speaker:'Yoru'});
+ await say('My order has guarded the titan\'s sleep for six centuries. Prove you can stay calm when it wakes.',{speaker:'Yoru'});
+ const r=await runBattle({trainer:{name:'Yoru',title:'Warden',look:'yoru',warden:1,link:1,team:[['rimeshade',42],['hailguard',43],['glacimite',43],['rimewyrm',44]],money:4200,items:2}});
+ if(r==='win'){setFlag('badge7');addItem('prime7',1);addItem('shard_Frost',1);Snd.jingle('victory',curMap().music);await say('Still as ice. Take it.',{speaker:'Yoru'});await say(N()+' received the FROST PRIME and a Frost Shard!');
+  const c=await ask('Yoru asks: "If the titan wakes, do we chain it again, or end it?"',['Chain it. Calderra needs the Heartforge.','End it. No more leashes.']);G.rep=G.rep||{w:0,c:0};
+  if(c===0){G.rep.w++;await say('The careful answer.',{speaker:'Yoru'});}else{G.rep.c++;await say('The brave answer. I hope it is also the right one.',{speaker:'Yoru'});}
+  await thawRegions(['rimefall','route7'],'The Frost Prime, of all things, warms in your hand. The ice in Rimefall\'s courtyard steams and melts...');
+  await say('The Spirit Warden waits at the summit, south past the Choir camp. It has not spoken to a human in three hundred years.',{speaker:'Yoru'});}
+ G.busy=false;}
+// ---------- Summit Trail + Choir camp ----------
+const choirFriendly=()=>{const r=G.rep||{w:0,c:0};return r.c>r.w||flag('archiveChoir');};
+MAPS.route8={name:'Summit Trail',theme:'out',music:'route',outdoor:1,weather:'blizzard',world:{x:43,y:144},grid:C3G.route8.grid,
+ enc:{tiles:'yw',count:8,list:[['cinderwisp',37,40,40]],by:{y:[['cinderwisp',38,40,40],['glacimite',37,40,30],['squallkite',37,39,30]],w:[['frostling',37,40,40],['cinderwisp',38,40,35],['brinejaw',37,39,25]]}},
+ warps:[WP3('route8','exitN0','rimefall',10,18),WP3('route8','exitN1','rimefall',11,18),WP3('route8','spirit','gym8',6,13),WP3('route8','hfgate','hf1',10,14,'up',{req:'badge8',locked:'A vault door of black Maker steel, eight sockets in a ring. Seven glow. One is dark.'})],
+ objs:[{type:'item',id:'r8a',...at4('route8','item1'),item:'nanites'},{type:'log',log:'log8',...at4('route8','log'),run:readLog}],
+ npcs:[{id:'camp1',...at4('route8','choir1'),dir:'down',look:'grunt',cond:()=>choirFriendly(),script:async()=>{await say('You\'re the one who listened. Sit by the fire a moment.',{speaker:'Choir Medic'});await healAll();await say('Your bots are warm again. The Cantor is already inside the summit.',{speaker:'Choir Medic'});}},
+  {id:'camp1t',...at4('route8','choir1'),dir:'down',look:'grunt',range:4,cond:()=>!choirFriendly(),trainer:{name:'Choir Zealot',title:'Hollow',team:[['pyrewraith',40],['nightglider',40]],money:2100,pre:'A Warden pet, this close to the titan? Turn around!',post:'...Go. It won\'t matter.'}},
+  {id:'camp2',...at4('route8','choir2'),dir:'down',look:'grunt',range:4,cond:()=>!choirFriendly(),trainer:{name:'Choir Zealot',title:'Hollow',team:[['rimeghost',40],['phantide',40],['wispire',41]],money:2200,pre:'The Cantor said you\'d try to stop us!',post:'He also said you\'d win.'}},
+  {id:'camp3',...at4('route8','choir2'),dir:'down',look:'grunt',cond:()=>choirFriendly(),text:'The Deacons say the Cantor wants to kill the titan in its sleep. Some of us just want the bots to be free. Is that the same thing?'},
+  {id:'r8t1',...at4('route8','t1'),dir:'down',look:'hiker',range:4,trainer:{name:'Ida',title:'Summit Guide',team:[['glacimite',39],['squallkite',39],['frostfist',40]],money:2100,pre:'Altitude makes fighters honest. Let\'s see yours!',post:'Honest and strong.'}},
+  {id:'r8t2',...at4('route8','t2'),dir:'left',look:'scout',range:4,trainer:{name:'Nils',title:'Storm Watcher',team:[['tempestwing',40],['boltbun',39],['cinderwisp',40]],money:2100,pre:'The static up here is wild tonight. So am I!',post:'Grounded again.'}}]};
+// ---------- Spirit hall ----------
+MAPS.gym8={name:'Spirit Shrine',theme:'gym2',music:'gym',gate:'gate8',grid:C3G.gym8.grid,
+ warps:[{x:6,y:14,to:'route8',tx:below3('route8','spirit')[0],ty:below3('route8','spirit')[1],dir:'down'}],
+ tileScripts:{'2,11':()=>shrineTerminal(0),'10,11':()=>shrineTerminal(1),'2,6':()=>shrineTerminal(2),'10,6':()=>shrineTerminal(3)},
+ npcs:[{id:'g8guide',...at4('gym8','guide'),dir:'left',look:'spiritw',text:'The Warden only opens its doors to those who remember. Repeat the four old songs on the terminals.'},
+  {id:'spiritw',...at4('gym8','warden'),dir:'down',look:'spiritw',script:spiritTalk}]};
+async function shrineTerminal(i){G.shrine=G.shrine||[0,0,0,0];if(G.shrine[i]){await say('The terminal hums the song you already sang.');return;}
+ if(i>=2&&!flag('gate8a')){await say('This terminal is dark. The songs below must be sung first.');return;}
+ await say('A Maker terminal. A faint song plays: repeat it.');const seq=Array.from({length:4+i},()=>pick(['up','right','down','left']));const ok=await pushUI(memoryW(seq));
+ if(!ok){Snd.sfx('wrong');await say('The song breaks off. Try again.');return;}G.shrine[i]=1;Snd.sfx('item');
+ if(G.shrine[0]&&G.shrine[1]&&!flag('gate8a')){setFlag('gate8a');setFlag('gate8');await say('Both lower songs ring out together. The gates grind open.');}
+ else if(G.shrine[2]&&G.shrine[3]&&!flag('gate8b')){setFlag('gate8b');await say('The shrine sings all four songs at once. Something at the top of the hall wakes up.');}
+ else await say('The terminal remembers. Another song is still missing.');}
+async function spiritTalk(){if(flag('badge8')){await say('...GO. THE TITAN IS LISTENING.',{speaker:'Spirit Warden'});return;}
+ if(!flag('gate8b')){await say('...',{speaker:'Spirit Warden'});await say('The old Maker bot does not move. The two upper terminals are still silent.');return;}G.busy=true;
+ await say('...SEVEN... PRIMES. ... I HAVE WAITED... THREE HUNDRED YEARS... FOR THE EIGHTH HAND.',{speaker:'Spirit Warden'});
+ await say('MY MAKERS SAID: GIVE IT ONLY TO ONE WHO CAN LOSE. SHOW ME.',{speaker:'Spirit Warden'});
+ const r=await runBattle({trainer:{name:'Spirit Warden',title:'Maker',look:'spiritw',warden:1,link:1,team:[['cinderwisp',46],['wispire',46],['rimeghost',47],['pyrewraith',48]],money:5000,items:2}});
+ if(r==='win'){setFlag('badge8');addItem('prime8',1);addItem('shard_Spirit',1);Snd.jingle('victory',curMap().music);await say('...YES. TAKE IT. FINISH WHAT THEY STARTED.',{speaker:'Spirit Warden'});
+  await say(N()+' received the SPIRIT PRIME! All eight Primes are together for the first time in a thousand years.');setQ('cinder','heart');
+  await thawRegions(['route8'],'The eight Primes hum in harmony. Snow slides off the summit in sheets...');
+  await say('The black door beside the shrine. The Heartforge. Ilian is already inside, and so is the Choir. Go, '+N()+'. I\'m right behind you.',{speaker:'Vesna (Navi-band)'});}
+ G.busy=false;}
+// ---------- The Heartforge ----------
+MAPS.hf1={name:'Heartforge: Outer Ring',theme:'factory',music:'cave',accord:1,grid:C3G.hf1.grid.map((r,y)=>y===5?r.replace('u','r'):r),
+ warps:[{x:10,y:15,to:'route8',tx:below3('route8','hfgate')[0],ty:below3('route8','hfgate')[1],dir:'down'},{x:10,y:1,to:'hf2',tx:10,ty:14,dir:'up'}],
+ objs:[{type:'item',id:'hf1i',...at4('hf1','item1'),item:'nanites'}],
+ npcs:[{id:'hf1g1',...at4('hf1','g1'),dir:'down',look:'grunt',range:4,trainer:{name:'Choir Zealot',title:'Hollow',team:[['nightglider',42],['pyrewraith',42],['rimeghost',43]],money:2400,pre:'Feel that? The Accord is screaming in here. Your bots will betray you!',post:'They... didn\'t?'}},
+  {id:'hf1g2',...at4('hf1','g2'),dir:'left',look:'grunt',range:4,trainer:{name:'Choir Zealot',title:'Hollow',team:[['tempestwing',43],['stormkeel',43]],money:2400,pre:'One more step and the titan hears you!',post:'It heard that.'}}]};
+MAPS.hf2={name:'Heartforge: Conveyor Spine',theme:'factory',music:'cave',accord:1,leverFlip:1,grid:C3G.hf2.grid,
+ warps:[{x:10,y:15,to:'hf1',tx:10,ty:2,dir:'down'},{x:10,y:1,to:'hfcore',tx:8,ty:12,dir:'up'}],
+ tileScripts:{'3,14':toggleLever,'16,9':toggleLever},objs:[{type:'item',id:'hf2i',...at4('hf2','item1'),item:'rshard_Spirit'}],
+ npcs:[{id:'hf2g1',...at4('hf2','g1'),dir:'up',look:'deacon',range:3,trainer:{name:'Mirelle',title:'Deacon',team:[['rotcap',43],['wispire',44],['nightglider',44]],money:3000,pre:'The little spark. The last verse is tonight, and you have a front-row seat.',post:'...Then sing it well.'}},
+  {id:'hf2g2',...at4('hf2','g2'),dir:'down',look:'grunt',range:3,trainer:{name:'Choir Zealot',title:'Hollow',team:[['avalanche',44],['rimeghost',44]],money:2500,pre:'The belts lead to the core. You won\'t ride them!',post:'...Ride them, then.'}}]};
+MAPS.hfcore={name:'The Heartforge',theme:'factory',music:'boss',accord:1,grid:C3G.hfcore.grid,
+ warps:[{x:8,y:13,to:'hf2',tx:9,ty:1,dir:'down'}],
+ objs:[{type:'titan',...at4('hfcore','titan'),run:titanObj}],npcs:[]};
+async function titanObj(){if(!flag('gameClear')){await finale();return;}
+ if(G.caught&&G.caught.glacivore){await say('Glacivore\'s empty cradle. The Heartforge glows steady and warm around it.');return;}
+ if((await ask('Glacivore stirs in the ruins of its cradle, watching you. Challenge it?'))!==0)return;
+ const w=makeBot('glacivore',60);await runBattle({wild:w});}
+if(typeof BOTS!=='undefined'&&BOTS.glacivore)BOTS.glacivore.cr=8;
+function drawTitan(o,sx,sy){const awake=flag('gameClear');const sz=awake?72:96;const sp=botSprite('glacivore');ctx.save();ctx.globalAlpha=awake?0.9:1;ctx.drawImage(sp,sx+16-sz/2,sy+20-sz,sz,sz);
+ if(!awake){ctx.fillStyle='rgba(160,210,255,.35)';ctx.fillRect(sx+16-sz/2,sy+20-sz,sz,sz);}ctx.restore();}
+async function finale(){G.busy=true;
+ await say('The Heartforge chamber. At its centre, sealed in a column of blue ice, a war-titan the size of a house: GLACIVORE.');
+ const il={id:'ilian',x:4,y:8,dir:'right',look:'cantor'},ve={id:'vesnaF',x:12,y:8,dir:'left',look:'vesna'};G.npcs.push(il,ve);
+ await say('You came. Good. Put the Primes in the ring, little spark, and I\'ll stop its heart while it sleeps.',{speaker:'Ilian'});
+ await say('If you stop the Heartforge, Ilian, the whole peninsula freezes. Every town. Every bot that isn\'t free yet dies cold.',{speaker:'Vesna'});
+ await say('Better cold and free than warm and owned.',{speaker:'Ilian'});
+ if(flag('kaelJoined')){const k={id:'kaelF',x:8,y:11,dir:'up',look:'kael'};G.npcs.push(k);await say('Can you two stop arguing for ONE minute? Look at the ice.',{speaker:'Kael'});}
+ Snd.sfx('thunder');G.shake=60;await say('The ice column cracks. The Heartforge flickers... fifteen percent... ten...');
+ await say('GLACIVORE WAKES.',{speaker:''});Snd.sfx('glitch');
+ // phase 1
+ let r=await runBattle({wild:makeBot('glacivore',50),boss:1,noBlackout:0});if(r!=='win'){G.npcs=G.npcs.filter(n=>!['ilian','vesnaF','kaelF'].includes(n.id));G.busy=false;return;}
+ await say('The titan staggers, shakes off the hit, and rises taller.');await healAll();
+ await say('Fine. We do this together. Just this once, sister.',{speaker:'Ilian'});
+ const ally=flag('kaelJoined')?makeBot(rivalForm(),52):makeBot('wispire',50);await say((flag('kaelJoined')?'Kael':'Ilian')+'\'s bot leaps in beside yours!');
+ r=await runBattle({wild:makeBot('glacivore',52),boss:1,ally});if(r!=='win'){G.npcs=G.npcs.filter(n=>!['ilian','vesnaF','kaelF'].includes(n.id));G.busy=false;return;}
+ await say('Vesna slams a coolant spike into the Heartforge\'s rim. "That\'s all the time I can buy! Finish it!"');await healAll();
+ r=await runBattle({wild:makeBot('glacivore',55),boss:1});if(r!=='win'){G.npcs=G.npcs.filter(n=>!['ilian','vesnaF','kaelF'].includes(n.id));G.busy=false;return;}
+ await say('Glacivore sinks to one knee, its eyes flickering between red and blue. It\'s waiting. For an order.');
+ await say('All eight Primes burn in your pack. The Heartforge ring is in front of you. Whatever you do now, every bot in Calderra will feel it.');
+ const rp=G.rep||{w:0,c:0};const opts=[],ids=[];
+ if(rp.w>=rp.c||rp.w>=3){opts.push('RESTORE: reforge the Heartforge, keep the Accord');ids.push('restore');}
+ if(rp.c>rp.w||rp.c>=3){opts.push('SILENCE: shut it down, free every bot');ids.push('silence');}
+ if(flag('archiveSelf')&&(G.kael||0)>=2){opts.push('REWRITE: use the archive to remove the Accord');ids.push('rewrite');}
+ if(!opts.length){opts.push('RESTORE: reforge the Heartforge, keep the Accord','SILENCE: shut it down, free every bot');ids.push('restore','silence');}
+ const c=await ask('What do you do with the eight Primes?',opts);const end=ids[Math.max(0,c)];G.ending=end;setFlag('end_'+end);
+ if(end==='restore'){await say('You seat the eight Primes in the ring. The Heartforge roars back to full strength, and blue light floods the chamber.');await say('Glacivore\'s eyes go dark. It lies down, and the ice closes over it again. Every bot in Calderra sighs back into the Accord.');
+   await say('...You chose the leash. I hope you\'re a kinder hand than ours were.',{speaker:'Ilian'});await say('Thank you. I\'ll spend the rest of my life making sure it\'s never misused.',{speaker:'Vesna'});}
+ else if(end==='silence'){await say('You pull the Primes from the ring one by one. With each one, the Heartforge dims.');await say('Glacivore watches the light die... then turns, and walks out through the cracked wall into the snow. Free.');
+   await say('Every bot in Calderra stops, blinks, and for the first time, chooses what to do next.',{speaker:''});await say('...Thank you. Now we learn to live with what we freed.',{speaker:'Ilian'});await say('It\'ll be a long winter. We\'ll get through it. Together this time.',{speaker:'Vesna'});}
+ else{await say('You slot the archive core into the Heartforge\'s heart and seat the eight Primes around it.');await say('The Maker log scrolls past: ACCORD — REWRITE. CONTROL: NONE. POWER: SHARED.');
+   await say('The Heartforge stays warm. The leash dissolves. Glacivore stands, looks at you, and bows its enormous head before walking into the mountain\'s dark.');
+   await say('...Both of us were wrong. And you found the third door.',{speaker:'Ilian'});await say('You did what we were too scared to do.',{speaker:'Vesna'});if(flag('kaelJoined'))await say('Told you we\'d do it together.',{speaker:'Kael'});}
+ Snd.sfx('thunder');G.shake=80;await say('The chamber shakes. The Heartforge is rebuilding itself, and the old tunnels are collapsing! RUN!');
+ G.npcs=G.npcs.filter(n=>!['ilian','vesnaF','kaelF'].includes(n.id));
+ G.escape={t:60*60};loadMap('hfescape',34,4,'left');G.busy=false;}
+if(typeof doAction==='function'){const _da2=doAction;doAction=async function(side,a){if(side==='p'&&BT&&BT.boss&&a&&(a.type==='run'||a.type==='spike')){await bsay(a.type==='run'?'There\'s nowhere to run!':'The titan\'s core rejects the Link Spike!');return;}return _da2(side,a);};}
+// ---------- collapsing escape ----------
+MAPS.hfescape={name:'Collapsing Tunnel',theme:'cave',music:'boss',outdoor:1,dungeon:1,grid:C3G.hfescape.grid,
+ warps:[{x:0,y:4,to:'route8',tx:below3('route8','hfgate')[0],ty:below3('route8','hfgate')[1],dir:'down'}],npcs:[],objs:[]};
+function escapeTick(){if(!G.escape||G.map!=='hfescape'||G.busy||UI.length||BT)return;G.escape.t--;if(TICK%30===0)G.shake=4;
+ if(G.escape.t<=0){G.escape.t=60*60;(async()=>{G.busy=true;Snd.sfx('thunder');await say('The ceiling comes down! You scramble back to the start of the tunnel.');G.px=34;G.py=4;G.mv=null;resetFollower();G.busy=false;})();}}
+function drawEscape(){if(!G.escape||G.map!=='hfescape')return;const s=Math.ceil(G.escape.t/60);panel(W/2-60,8,120,34);txt('ESCAPE '+s+'s',W/2,32,s<=10?'#c03030':'#303840',22,'center');
+ if(TICK%7===0)OWP.push({x:(G.px+(Math.random()*12-6))*TS,y:(G.py-5)*TS,vx:0,vy:3,t:0,max:40,k:'spark',col:'#8a7a6a'});}
+if(typeof loadMap==='function'){const _lm=loadMap;loadMap=function(id,x,y,dir){const was=G.map;_lm(id,x,y,dir);if(was==='hfescape'&&id==='route8'&&G.escape){G.escape=null;setTimeout(()=>{if(!flag('gameClear'))epilogue();},50);}};}
+async function epilogue(){G.busy=true;setFlag('gameClear');setQ('cinder','done');const end=G.ending||'restore';
+ await thawRegions(Object.keys(MAPS).filter(k=>MAPS[k].world),'Warm air pours down the mountain. All across Calderra, the snow begins to melt...');
+ const lines={restore:['The Heartforge burns steady again.','Vesna rebuilt the Wardens as guardians of the Accord, not owners of it.','Ilian disbanded the Choir. Some say he sits by the Heartforge every night, listening.'],
+  silence:['The Heartforge sleeps. Winter lasted another year, and Calderra survived it.','The bots, free for the first time, chose to stay. Most of them.','Glacivore was seen on the coast at dawn, watching the sea.'],
+  rewrite:['The Heartforge burns, but it answers to no one.','Vesna and Ilian keep the archive together again, in a workshop in Ashgrove.','Glacivore sleeps under Mt. Cinder by choice. Sometimes, on clear nights, it hums.']}[end];
+ lines.push(flag('kaelJoined')?'Kael opened a salvage shop in Brasston. The sign says KAEL & '+N().toUpperCase()+'. You never agreed to that.':'Kael left Calderra on a fishing boat. He sends postcards. They are mostly insults.');
+ lines.push('And you went home to Ashgrove, to the workshop, where a capsule once fell from the sky.');
+ const credits=['SHARDFALL: EMBER PROTOCOL','','Story, world and bots','designed with Claude','for '+G.name,'','Thanks for playing.'];
+ await pushUI({t:0,update(){this.t++;if(this.t>(lines.length*150+credits.length*40+200)&&(press('a')||press('start')))popUI(this);},draw(){ctx.fillStyle='#05070c';ctx.fillRect(0,0,W,H);
+   const t=this.t;wtxt({restore:'ENDING: RESTORE',silence:'ENDING: SILENCE',rewrite:'ENDING: REWRITE'}[end],W/2,40,'#ffd060',28,'center');
+   lines.forEach((l,i)=>{const a=Math.max(0,Math.min(1,(t-i*150)/60));if(a>0){ctx.globalAlpha=a;wrap(l,420).forEach((ln,j)=>wtxt(ln,W/2,80+i*36+j*18,'#e0e8f0',18,'center'));ctx.globalAlpha=1;}});
+   const ct=t-lines.length*150;if(ct>0){ctx.fillStyle='rgba(5,7,12,'+Math.min(1,ct/60)+')';ctx.fillRect(0,0,W,H);credits.forEach((c,i)=>wtxt(c,W/2,H-ct*0.6+i*30,i===0?'#80e0ff':'#c8d0e0',i===0?28:20,'center'));
+     if(ct>credits.length*40+200){wtxt('THE END',W/2,H/2,'#ffd060',40,'center');wtxt('Press A',W/2,H/2+40,'#7a8aa8',18,'center');}}}});
+ await say('Postgame: Glacivore waits in the Heartforge, and this time you can link with it. The Maker Vault goes as deep as you dare. Your save keeps everything.');G.busy=false;autosave();}
 
 
 </script></body></html>
