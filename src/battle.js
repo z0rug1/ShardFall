@@ -96,7 +96,7 @@ async function runBattleInner(o){
   BFX.length=0;
   const wasBusy=G.busy;G.busy=true;Snd.music(battleSong(B.tr),true);
   for(let i=0;i<3;i++){G.flashOW=8;await wait(10);}
-  BT=B;B.disp.p=cur('p').hp;B.disp.e=cur('e').hp;
+  BT=B;if(typeof onBattleStart==='function')onBattleStart(B);B.disp.p=cur('p').hp;B.disp.e=cur('e').hp;
   while(B.intro>0){B.intro--;await wait(1);}
   while(B.slide>0){B.slide=Math.max(0,B.slide-0.05*bspd());await wait(1);}
   if(B.wild){seen(B.wild.id);B.hideInfo=false;Snd.chirp(BOTS[B.wild.id].frame);await bsay('A feral '+BOTS[B.wild.id].name+' appeared!');
@@ -226,16 +226,16 @@ async function doAction(side,a){const B=BT;const u=cur(side);
   if(a.type==='eswitch'){const old=BOTS[u.id].name;await bsay(B.tr.name+' withdrew '+old+'!');B.anim.eHide=true;await bwait(10);const t=B.ep[B.ei];B.ep[B.ei]=B.ep[a.to];B.ep[a.to]=t;B.anim.eHide=false;await deployE();return;}
   if(u.st){const k=u.st.k;
     if(k==='sleep'){u.st.t--;if(u.st.t<=0){u.st=null;await bsay(bname(side)+' rebooted from sleep mode!');}else{await bsay(bname(side)+' is in sleep mode.');return;}}
-    else if(k==='freeze'){if(Math.random()<0.25){u.st=null;await bsay(bname(side)+' thawed out!');}else{await bsay(bname(side)+' is frozen solid!');return;}}
-    else if(k==='shock'){if(Math.random()<0.25){burst(BPOS[side][0],BPOS[side][1],'#fff6a0',10,2,2);await bsay(bname(side)+' is shocked! It can\'t move!');return;}}
+    else if(k==='freeze'){if(Math.random()<0.25){u.st=null;await bsay(bname(side)+'\'s joints thawed out!');}else{await bsay(bname(side)+'\'s joints are frozen solid!');return;}}
+    else if(k==='shock'){if(Math.random()<0.25){burst(BPOS[side][0],BPOS[side][1],'#fff6a0',10,2,2);await bsay(bname(side)+'\'s circuits shorted! It can\'t move!');return;}}
     else if(k==='glitch'){u.st.t--;if(u.st.t<=0){u.st=null;await bsay(bname(side)+'\'s systems stabilized!');}
       else{await bsay(bname(side)+' is glitching!');if(Math.random()<0.33){const dmg=Math.max(1,Math.floor(((2*u.lv/5+2)*40*stats(u).atk/stats(u).def)/50+2));u.hp=Math.max(0,u.hp-dmg);B.anim[side==='p'?'hitP':'hitE']=18;dmgNumber(side,'-'+dmg);Snd.sfx('hit');await bsay('It hit itself in the confusion!');await syncHP();return;}}}}
   const tside=side==='p'?'e':'p';const t=cur(tside);
   if(a.type==='vent'){B.heat[side]=traitId(u)==='frostling'?0:a.forced?25:Math.max(0,B.heat[side]-55);B.over[side]=false;bfxAdd({max:30,draw(tt){const [x,y]=BPOS[side];ctx.fillStyle='rgba(220,240,255,'+(1-tt)+')';for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(x-40+i*12,y-tt*50-i%3*8,6+tt*6,0,7);ctx.fill();}}});Snd.sfx('push');
     await bsay(bname(side)+(a.forced?' is overheated and has to vent!':' vents its heat.'));return;}
   let mv,name,mid=null;
-  if(a.type==='link'){const pt=partnerOf(side);const lt=linkType(u,pt);if(!pt||!lt){await bsay('The link failed!');return;}B.linkUsed[side]=true;mv={n:'Link Strike',t:lt,p:130,a:0};name=mv.n;
-    await bsay(bname(side)+' and '+BOTS[pt.id].name+' sync their '+lt+' shards!');B.anim[side==='p'?'lungeP':'lungeE']=1;await moveFx(lt,side,tside);}
+  if(a.type==='link'){const pt=partnerOf(side);const lt=linkType(u,pt);if(!pt||!lt){await bsay('The link failed!');return;}B.linkUsed[side]=true;const cb=(typeof comboOf==='function'&&!allTypes(u).some(t=>t!=='Core'&&allTypes(pt).includes(t)))?comboOf(u,pt):null;mv={n:cb?cb.n:'Link Strike',t:lt,p:cb?145:130,a:0};name=mv.n;
+    await bsay(bname(side)+' and '+BOTS[pt.id].name+(cb?' unleash '+cb.n.toUpperCase()+'!':' sync their '+lt+' shards!'));B.anim[side==='p'?'lungeP':'lungeE']=1;await moveFx(lt,side,tside);}
   else if(a.type==='od'){B.odUsed[side]=true;B.od[side]=0;const ty=odType(u,t);mv={n:OD_NAMES[ty],t:ty,p:110,a:0};name=mv.n;
     await bsay(bname(side)+' is in OVERDRIVE!');await odCinematic(side,ty);}
   else{mid=a.mid||(u.moves[a.mi]||u.moves[0]).id;const base=MOVES[mid];mv=Object.assign({},base,{t:moveType(u,mid)});name=mv.n;}
@@ -252,7 +252,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     if(traitId(u)==='flicker'&&mv.t==='Flame'&&u.hp<stats(u).hp/3)m*=1.5;
     if((u.refined||[]).includes(mv.t))m*=1.1;
     if(traitId(u)==='kilnfly'&&mv.t==='Gale')m*=1.3;
-    if(traitId(u)==='squallkite'&&mv.t==='Gale')m*=1.3;if(traitId(u)==='cinderwisp'&&mv.t==='Spirit'&&['night','cave','static'].includes(BT.wx))m*=1.3;if(traitId(t)==='brinejaw'&&(mv.t==='Volt'||mv.t==='Gale'))m*=0.75;if(traitId(t)==='glacimite'&&mv.t==='Flame')m*=0.75;if(traitId(t)==='glacivore')m*=0.75;
+    if(traitId(u)==='squallkite'&&mv.t==='Gale')m*=1.3;if(traitId(u)==='cinderwisp'&&mv.t==='Spirit'&&['night','cave','static'].includes(BT.wx))m*=1.3;if(traitId(t)==='brinejaw'&&(mv.t==='Volt'||mv.t==='Gale'))m*=0.75;if(traitId(t)==='glacimite'&&mv.t==='Flame')m*=0.75;if(traitId(t)==='glacivore')m*=0.75;if(BT.boss&&tside==='e'&&BT.plates>0)m*=0.5;if(BT.style==='tide'&&side==='e'&&BT.turnN%3===0&&mv.t==='Tide')m*=1.5;
     if(traitId(t)==='thornbit'&&ef>1)m*=0.75;
     const fullHP=t.hp>=stats(t).hp;if(traitId(t)==='pebblit'&&fullHP)m*=0.5;
     let dmg=Math.max(1,Math.floor((((2*u.lv/5+2)*mv.p*at/df)/50+2)*m));
@@ -262,7 +262,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
     const gainU=(resonant(u)?1.25:1)*partOD(u),gainT=(resonant(t)?1.25:1)*partOD(t);
     B.od[side]=Math.min(100,B.od[side]+dmg/stats(t).hp*55*gainU);if(!B.odUsed[tside])B.od[tside]=Math.min(100,B.od[tside]+dmg/stats(t).hp*75*gainT);
     await syncHP();
-    if(crit)await bsay('A critical hit!');if(ef>1)await bsay('It\'s super effective!');else if(ef<1)await bsay('It\'s not very effective...');
+    if(crit)await bsay('A critical hit!');if(ef>1)await bsay('It\'s super effective!');else if(ef<1)await bsay('It\'s not very effective...');if(B.boss&&tside==='e'&&B.plates>0&&(crit||ef>1)){B.plates--;Snd.sfx('crit');burst(BPOS.e[0],BPOS.e[1],'#c8e0ff',20,4,3,30);await bsay('An armour plate shatters! '+(B.plates?B.plates+' left.':'Its core is exposed!'));}
     if(traitId(t)==='pebblit'&&fullHP)await bsay(bname(tside)+'\'s Bulwark softened the blow!');
     if(e.drain&&u.hp>0){const h=Math.max(1,Math.floor(dmg*e.drain));u.hp=Math.min(stats(u).hp,u.hp+h);dmgNumber(side,'+'+h,'#60f090');await syncHP();await bsay(bname(side)+' drained energy!');}
     if(u.mod==='overclock'&&u.hp>0){const rc=Math.max(1,Math.floor(dmg*0.1));u.hp=Math.max(0,u.hp-rc);dmgNumber(side,'-'+rc,'#ffa040');await syncHP();await bsay(bname(side)+' took recoil from its Overclock Chip!');}
@@ -275,7 +275,7 @@ async function doAction(side,a){const B=BT;const u=cur(side);
   if(e.st){if(e.c<100&&Math.random()*100>=e.c){}else if(t.st){if(!mv.p)await bsay('But it failed!');}
     else if((e.st==='burn'&&BOTS[t.id].types.includes('Flame'))||(e.st==='freeze'&&BOTS[t.id].types.includes('Frost'))||(e.st==='shock'&&BOTS[t.id].types.includes('Volt'))){if(!mv.p)await bsay('It doesn\'t affect '+bname(tside)+'...');}
     else{if(!mv.p)await moveFx(mv.t,side,tside,false);t.st={k:e.st,t:e.st==='sleep'?2+rnd(3):e.st==='glitch'?2+rnd(3):0};
-      const msg={burn:' was burned!',freeze:' was frozen solid!',shock:' was shocked! It may be unable to move!',corrode:' started corroding!',sleep:' went into sleep mode!',glitch:' started glitching!'}[e.st];await bsay(bname(tside)+msg);}}
+      const msg={burn:'\'s plating started melting!',freeze:'\'s joints froze solid!',shock:' short-circuited! It may lock up!',corrode:' started corroding!',sleep:' dropped into standby mode!',glitch:' started glitching!'}[e.st];await bsay(bname(tside)+msg);}}
   if(e.stat&&!(e.c&&Math.random()*100>=e.c)){const sd=e.self?side:tside;const stg=B.st[sd];const list=[e.stat];if(e.stat2)list.push(e.stat2);
     arrows(sd,e.s>0?'#60e0ff':'#ff6080',e.s>0);await bwait(14);
     for(const s of list){const bf=stg[s];stg[s]=clamp(stg[s]+e.s,-6,6);const nm={atk:'ATK',def:'DEF',spd:'SPD'}[s];
@@ -304,7 +304,7 @@ async function resolveFaints(){const B=BT;
   return null;}
 
 async function giveXP(e){const B=BT;const gain=Math.floor(BOTS[e.id].exp*e.lv/6*(B.tr?1.5:1));
-  const parts=G.party.filter(b=>b.hp>0&&B.part.has(b.uid));const share=Math.max(1,Math.floor(gain/Math.max(1,parts.length)));
+  const parts=G.party.filter(b=>b.hp>0&&B.part.has(b.uid));const share=Math.max(1,Math.floor(gain*(typeof xpCatchUp==='function'?xpCatchUp():1)*(G.bag.prime9?1.1:1)/Math.max(1,parts.length)));
   for(const b of parts){await bsay(BOTS[b.id].name+' gained '+share+' XP!');await addXP(b,share,true);}
   const rest=G.party.filter(b=>b.hp>0&&!B.part.has(b.uid));if(rest.length){const s=Math.max(1,Math.floor(gain*0.3));for(const b of rest)await addXP(b,s,false);await bsay('The rest of the team got '+s+' XP via Link Share.');}}
 async function addXP(b,n,loud){b.xp+=n;

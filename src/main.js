@@ -169,6 +169,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
       if(!op&&TICK%9===0)OWP.push({x:o.x*TS+12+rnd(10),y:o.y*TS+6,vx:(Math.random()-0.5)*0.3,vy:-0.4,t:0,max:60,k:'breath'});
       if(op){ctx.strokeStyle='#101820';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+6,sy+8);ctx.lineTo(sx+14,sy+16);ctx.lineTo(sx+10,sy+24);ctx.stroke();}}
     if(o.type==='titan')drawTitan(o,sx,sy);
+    if(o.type==='oldframe'){ctx.globalAlpha=0.85;ctx.drawImage(botSprite('gearpup'),sx-2,sy-6,36,36);ctx.globalAlpha=1;if(TICK%60<30)wtxt('!',sx+26,sy-4,'#ffe080',16);}
     if(o.type==='pylon')drawPylon(o,sx,sy);
     if(o.type==='log')drawLogObj(o,sx,sy);
     if(o.type==='archive'){const p=0.6+0.4*Math.sin(TICK/8);ctx.fillStyle='#2a3242';ctx.fillRect(sx+6,sy+10,20,18);ctx.fillStyle='rgba(120,230,255,'+p+')';ctx.fillRect(sx+10,sy+4,12,14);ctx.fillStyle='#fff';ctx.fillRect(sx+14,sy+8,4,4);}

@@ -52,6 +52,33 @@ The coast road west of Kilnhaven opens after Chapter 2.
 - **Postgame**: link with Glacivore.
 - **New bots**: Brinejaw, Squallkite, Cinderwisp and Glacimite lines (12 bots) plus Glacivore, each line with its own trait.
 
+## Systems added after the story
+- **Quest tracker**: a yellow arrow by the minimap points toward your next goal, even several maps away.
+- **Field abilities**: Volt bots power sealed Maker doors, Stone bots shove boulders, and Shade bots see hidden paths at night. Four secret places use them: the Brasston mine forge, the sunken Mirrorlake lab, the Galecrest sky ruin and the Moonlit Grotto.
+- **Bot jobs**: stored bots mine scrap, scout for shards or guard caravans while you travel (workshop console).
+- **Paint booth**: fully researching a species unlocks an alternate finish, plus a research note in its Bestiary entry.
+- **Weather and ferals**: rain powers Tide moves, night brings out Shade and Spirit ferals, rain brings out water types, and shy ferals run from hunter-type leads.
+- **Battles**:
+  - Each Warden has a fighting style (Maren's high tide, Pell-Ashe switching bots, Yoru's blizzard, the Spirit Warden's Accord hum).
+  - Link combos for 10 type pairs (Steam Burst, Railgun, Eclipse…).
+  - Status effects renamed for robots: melting, frozen joints, short circuit, corrosion, standby, hacked.
+  - Boss armour plates you break with crits and super-effective hits.
+- **Balance**: catch-up XP when you fall behind the next Warden, and an optional Hard Mode.
+- **Story**:
+  - More Kael scenes, plus his first bot, Rook, which you can keep.
+  - Juno's caravan story, Tobin and Bit, and a quest to find a Choir member's son.
+  - 6 more Maker Logs written from the Makers' side.
+  - NPCs that react to the ending you chose.
+- **Postgame**: rematch all 8 Wardens at Lv 60+, Maker gear from Vault floor 25 on, and a ninth Prime on floor 50.
+- **Polish**:
+  - First-time tips for each mechanic.
+  - Your follower bot comments on places and weather.
+  - Regional music, unique character looks and livelier battle sprites.
+  - Camera zooms in key scenes.
+  - Lightning shadows and cracking ice.
+  - Fast battle text, and storage sorting and filtering.
+  - Healing at a cradle starts your next battle with 25% Overdrive.
+
 ## Visuals
 - Soft cast shadows from trees, buildings, cliffs and wrecks. Shadow under walls and cliffs, and shadows that stretch away from street lamps.
 - Water that gets darker with depth, has foam along the shore, shimmers, and reflects lamps and anyone standing at the edge. Ice that glints, with spray when you stop sliding.
