@@ -12,7 +12,7 @@ function shaftSpr(){if(SPR.shaft)return SPR.shaft;const c=mkCanvas(64,8);const g
 // ---- one snapshot of the frame so far (half resolution) instead of drawing the canvas onto itself many times ----
 let SNAP=null,sgx=null;
 function snapFrame(){const w=Math.ceil(cv.width/2),h=Math.ceil(cv.height/2);if(!SNAP||SNAP.width!==w||SNAP.height!==h){SNAP=mkCanvas(w,h);sgx=SNAP.getContext('2d');}sgx.imageSmoothingEnabled=false;sgx.drawImage(cv,0,0,w,h);return SNAP;}
-const SK=()=>RS/2;// logical -> snapshot pixels
+let SK=()=>RS/2;// logical -> snapshot pixels
 // ---- lighting: half-res light map + sprite stamps (no per-frame gradients) ----
 let LMAP=null,lmg=null;
 drawLighting=function(cx,cy,px,py){const wx=curWeather();if(!wx.dark)return;if(!LMAP){LMAP=mkCanvas(240,160);lmg=LMAP.getContext('2d');}const g=lmg;
@@ -54,7 +54,7 @@ drawWorldReflections=function(cx,cy){if(!hq())return;const m=curMap();const shin
 // ---- heat haze from a snapshot ----
 drawHeatHaze=function(cx,cy){if(!hq())return;const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS);const hot=[];
   for(let y=y0;y<=y0+Math.ceil(H/TS)+1;y++)for(let x=x0;x<=x0+Math.ceil(W/TS)+1;x++){const ch=T(x,y);if((ch==='V'&&ventActive(x,y))||ch==='*'||(ch==='J'&&curMap().outdoor))hot.push([x,y]);}
-  if(!hot.length)return;const S=snapFrame(),k=SK();for(const [x,y] of hot){const sx=x*TS-cx,sy=y*TS-cy-40;for(let i=0;i<8;i++){const yy=sy+i*6;if(yy<0||yy+6>H||sx<0||sx+TS>W)continue;const off=Math.sin(TICK/4+i*1.3+x)*(1.6-i*0.15);ctx.drawImage(S,sx*k,yy*k,TS*k,6*k,sx+off,yy,TS,6);}}};
+  if(!hot.length)return;const S=snapFrame(3),k=SK();for(const [x,y] of hot){const sx=x*TS-cx,sy=y*TS-cy-40;for(let i=0;i<8;i++){const yy=sy+i*6;if(yy<0||yy+6>H||sx<0||sx+TS>W)continue;const off=Math.sin(TICK/4+i*1.3+x)*(1.6-i*0.15);ctx.drawImage(S,sx*k,yy*k,TS*k,6*k,sx+off,yy,TS,6);}}};
 // ---- rain: batched strokes, sprite drops, snapshot refraction ----
 rainFrame=function(intensity,wind,ground){const target=Math.floor((hq()?150:60)*intensity);while(RAIN.length<target){const z=Math.random();RAIN.push({x:Math.random()*(W+80)-40,y:Math.random()*-H,z,gy:ground(z)});}
   if(RAIN.length>target)RAIN.length=target;const ang=0.18+wind*0.12;const P=[new Path2D(),new Path2D(),new Path2D()];
@@ -66,7 +66,7 @@ rainFrame=function(intensity,wind,ground){const target=Math.floor((hq()?150:60)*
   ctx.strokeStyle='rgba(210,230,250,.3)';ctx.lineWidth=1;ctx.stroke(sp);
   if(hq()&&Math.random()<intensity*0.06&&LENS.length<12)LENS.push({x:20+Math.random()*(W-40),y:10+Math.random()*(H-60),r:4+Math.random()*9,t:0,life:90+Math.random()*160,vy:0,slide:Math.random()<0.45,trail:[]});
   drawLens();};
-drawLens=function(){if(!LENS.length)return;const S=snapFrame(),k=SK();const rd=rimDrop();
+drawLens=function(){if(!LENS.length)return;const S=snapFrame(10),k=SK();const rd=rimDrop();
   for(let i=LENS.length-1;i>=0;i--){const L=LENS[i];L.t++;if(L.t>L.life||L.y>H+20){LENS.splice(i,1);continue;}
     if(L.slide&&L.t>30){L.vy=Math.min(2.2,L.vy+0.04);L.y+=L.vy;L.x+=Math.sin(L.t/9)*0.25;if(L.t%6===0&&L.trail.length<8)L.trail.push({x:L.x,y:L.y-L.r*0.6,r:L.r*0.32,t:0});}
     const pop=Math.min(1,L.t/5),fade=Math.min(1,(L.life-L.t)/30);const r=L.r*(pop<1?0.6+0.6*pop:1);

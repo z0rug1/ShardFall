@@ -59,9 +59,10 @@ evoScene=function(from,to,gl){Snd.music('evo',true);const col=TCOL[BOTS[to].type
  return _od(side,type);};}
 // ---------- 7 + 6 + 8: underwater shadows, monitor scanlines, interior windows ----------
 let FISH={map:null,list:[]};
+function fishOK(px,py){for(const [dx,dy] of [[-17,-8],[17,-8],[-17,8],[17,8],[0,0]]){if(T(Math.floor((px+dx)/TS),Math.floor((py+dy)/TS))!=='~')return false;}return true;}
 {const _sf2=drawSurfaceFX;drawSurfaceFX=function(cx,cy){_sf2(cx,cy);const m=curMap();
-  if(hq()){if(FISH.map!==G.map){FISH.map=G.map;FISH.list=[];const wt=[];m.grid.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]==='~')wt.push([x,y]);});for(let i=0;i<Math.min(4,Math.floor(wt.length/12));i++){const [x,y]=pick(wt);FISH.list.push({x:x*TS+16,y:y*TS+16,a:Math.random()*6.28,s:0.3+Math.random()*0.4});}}
-   for(const f of FISH.list){f.a+=(Math.random()-0.5)*0.15;const nx=f.x+Math.cos(f.a)*f.s,ny=f.y+Math.sin(f.a)*f.s;if(T(Math.floor(nx/TS),Math.floor(ny/TS))==='~'){f.x=nx;f.y=ny;}else f.a+=Math.PI;
+  if(hq()){if(FISH.map!==G.map){FISH.map=G.map;FISH.list=[];const wt=[];m.grid.forEach((r,y)=>{for(let x=0;x<r.length;x++)if(r[x]==='~'&&fishOK(x*TS+16,y*TS+16))wt.push([x,y]);});for(let i=0;i<Math.min(4,Math.floor(wt.length/6));i++){const [x,y]=pick(wt);FISH.list.push({x:x*TS+16,y:y*TS+16,a:Math.random()*6.28,s:0.3+Math.random()*0.4});}}
+   for(const f of FISH.list){f.a+=(Math.random()-0.5)*0.12;const nx=f.x+Math.cos(f.a)*f.s,ny=f.y+Math.sin(f.a)*f.s;if(fishOK(nx,ny)){f.x=nx;f.y=ny;}else f.a+=Math.PI*(0.6+Math.random()*0.8);
     const sx=f.x-cx,sy=f.y-cy;if(sx<-30||sy<-30||sx>W+30||sy>H+30)continue;ctx.save();ctx.translate(sx,sy);ctx.rotate(f.a);ctx.fillStyle='rgba(8,20,40,.35)';ctx.beginPath();ctx.ellipse(0,0,11,5,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-9,0);ctx.lineTo(-16,-5+Math.sin(TICK/5)*2);ctx.lineTo(-16,5+Math.sin(TICK/5)*2);ctx.fill();ctx.restore();}}
   const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS);for(let y=y0;y<=y0+Math.ceil(H/TS)+1;y++)for(let x=x0;x<=x0+Math.ceil(W/TS)+1;x++){const ch=T(x,y);const sx=x*TS-cx,sy=y*TS-cy;
    if(ch==='M'){const k=(TICK*0.6+x*13)%22;ctx.fillStyle='rgba(180,255,240,.22)';ctx.fillRect(sx+5,sy+3+k*0.5,22,1);if((TICK+x*7)%90<3){ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(sx+4,sy+2,24,14);}}

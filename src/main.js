@@ -145,9 +145,11 @@ function tileKey(ch,x,y){const m=curMap();if(BELT[ch]&&beltFlipped())return BFLI
   if(ch==='g')return flag(m.gate)?'x':'gC';if(ch==='r')return G.sw===0?'rU':'rD';if(ch==='u')return G.sw===1?'uU':'uD';if(ch==='S')return 'S'+G.sw;return ch;}
 function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map)?'outw':m.theme;const {cx,cy,px,py}=camera();ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   const x0=Math.floor(cx/TS),y0=Math.floor(cy/TS);const fr=Math.floor(TICK/40)%2;
+  if(!(typeof drawGround==='function'&&drawGround(cx,cy,th,fr))){
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){const ch=T(x,y);if(ch==null)continue;const sx=x*TS-cx,sy=y*TS-cy;const k=tileKey(ch,x,y);
     if(k.length===2){ctx.drawImage(tileArt(th==='cave'?'^':'x',th,(x+y)%2,0),sx,sy,TS,TS);drawSpecial(k,sx,sy);}
     else{let tf=0;if(ch==='~'||ch==='M')tf=fr;else if(ch==='T')tf=Math.floor(TICK/48+x*0.37+y*0.21)%2;else if(ch==='z'||ch==='i'||ch==='E'||ch==='O'||ch==='a'||ch==='o')tf=Math.floor(TICK/20+x)%2;else if(BELT[ch])tf=Math.floor(TICK/6)%2;else if(ch==='L')tf=beltFlipped()?1:0;ctx.drawImage(tileArt(k,th,(x*7+y*3)%4===0?0:(x+y)%2+1,tf),sx,sy,TS,TS);}}
+  }
   if(m.decor)drawWorkshopDecor(cx,cy);
   drawUnderFX(cx,cy);drawWorldReflections(cx,cy);drawSurfaceFX(cx,cy);drawShoreFoam(cx,cy);if(typeof drawTideFX==='function')drawTideFX(cx,cy);
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){if(T(x,y)!=='V')continue;const sx=x*TS-cx,sy=y*TS-cy;
