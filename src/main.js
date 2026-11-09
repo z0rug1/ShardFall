@@ -17,7 +17,7 @@ function loadMap(id,x,y,dir){const m=MAPS[id];G.map=id;G.px=x;G.py=y;if(dir)G.pd
   G.cond=null;if(m.conduits){const c=m.conduits;G.cond={cells:c.cells.map(([cx,cy,t])=>({x:cx,y:cy,t,r:rnd(4)})),lit:new Set()};
     if(flag(m.gate)){applyCondSolution();}else{let tries=0;while(condTrace().ok&&tries++<20)G.cond.cells.forEach(cc=>cc.r=rnd(4));}condTrace();}
   if(id==='cave'||id==='vault')G.sw=0;
-  buildTileOv();G.surf=null;G.glide=null;resetFollower();spawnFerals();
+  G.ventSafe={map:id,x,y,dir:dir||'down'};  buildTileOv();G.surf=null;G.glide=null;resetFollower();spawnFerals();
   if(m.town)G.visited[id]=1;if(m.world)G.lastOut={map:id,x,y};
   G.banner=m.name!==G.lastBanner?150:0;G.lastBanner=m.name;
   Snd.music(m.music);markExplored();collectLights();OWP.length=0;
@@ -41,8 +41,8 @@ function beltDir(ch){if(!BELT[ch])return null;return BELT[beltFlipped()?BFLIP[ch
 function ventPhase(x,y){return ((TICK+(x*29+y*47))%140);}
 function ventActive(x,y){return ventPhase(x,y)<55;}
 function ventWarn(x,y){return ventPhase(x,y)>=118;}
-async function scald(){if(G.scalding)return;G.scalding=true;G.busy=true;Snd.sfx('od');burstOW(G.px,G.py,'#ffffff');const r=curMap().ventReset;
-  for(let i=0;i<=8;i++){G.fade=i/8;await wait(1);}if(r){G.px=r[0];G.py=r[1];G.pdir='up';resetFollower();}G.mv=null;for(let i=8;i>=0;i--){G.fade=i/8;await wait(1);}
+async function scald(){if(G.scalding)return;G.scalding=true;G.busy=true;Snd.sfx('od');burstOW(G.px,G.py,'#ffffff');const vs=G.ventSafe&&G.ventSafe.map===G.map?G.ventSafe:null;const r=vs?[vs.x,vs.y]:curMap().ventReset;
+  for(let i=0;i<=8;i++){G.fade=i/8;await wait(1);}if(r){G.px=r[0];G.py=r[1];G.pdir=vs?vs.dir:'up';resetFollower();}G.mv=null;for(let i=8;i>=0;i--){G.fade=i/8;await wait(1);}
   G.errToast={t:120,msg:'Scalded by steam! Watch for the orange glow, then run.'};G.busy=false;G.scalding=false;}
 function slideCrate(c){for(let k=0;k<30;k++){const d=beltDir(T(c.x,c.y));if(!d)return;const [dx,dy]=DIRS[d];const nx=c.x+dx,ny=c.y+dy;
   if(isBlocked(nx,ny)||crateAt(nx,ny)||(G.px===nx&&G.py===ny)||T(nx,ny)==='e')return;c.x=nx;c.y=ny;}}
@@ -67,7 +67,7 @@ function markExplored(){const m=curMap();const e=exploredArr(G.map);const w=m.gr
   for(let y=G.py-r;y<=G.py+r;y++)for(let x=G.px-r-1;x<=G.px+r+1;x++)if(x>=0&&y>=0&&x<w&&y<h)e[y*w+x]=1;}
 
 async function onStep(){G.stepLock=true;try{await onStepInner();}finally{G.stepLock=false;}}
-async function onStepInner(){markExplored();addPrint();const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
+async function onStepInner(){markExplored();addPrint();{const h=T(G.px,G.py);if(h!=='V'&&![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>T(G.px+dx,G.py+dy)==='V'))G.ventSafe={map:G.map,x:G.px,y:G.py,dir:G.pdir};}const m=curMap();if(m.world)G.lastOut={map:G.map,x:G.px,y:G.py};
   if(G.surf&&T(G.px,G.py)!=='~'){G.surf=null;resetFollower();}
   const w=warpAt(G.px,G.py);if(w){if(w.req&&!flag(w.req)){G.busy=true;await say(w.locked||'It\'s locked.');await stepPlayer(OPP[G.pdir]);G.busy=false;return;}await doWarp(w);return;}
   const here=T(G.px,G.py);
