@@ -16,7 +16,7 @@ function pick(a){return a[rnd(a.length)];}
 
 // ---------- input ----------
 const held={},pressed={},repT={};
-const KEYMAP={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',KeyZ:'a',Space:'a',KeyJ:'a',KeyX:'b',Escape:'b',Backspace:'b',KeyK:'b',ShiftLeft:'b',ShiftRight:'b',Enter:'start',KeyM:'map'};
+const KEYMAP={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',KeyZ:'a',Space:'a',KeyJ:'a',KeyX:'b',Escape:'b',Backspace:'b',KeyK:'b',ShiftLeft:'b',ShiftRight:'b',Enter:'start',KeyM:'map',KeyQ:'item'};
 addEventListener('keydown',e=>{if(document.activeElement&&document.activeElement.tagName==='INPUT')return;const k=KEYMAP[e.code];if(!k)return;e.preventDefault();if(!held[k]){pressed[k]=1;repT[k]=0;}held[k]=1;Snd.unlock();});
 addEventListener('keyup',e=>{const k=KEYMAP[e.code];if(k)held[k]=0;});
 addEventListener('blur',()=>{for(const k in held)held[k]=0;});
@@ -162,12 +162,13 @@ function tickTimers(){for(let i=timers.length-1;i>=0;i--){if(--timers[i].t<=0){c
 // dialog
 let TEXTSPEED=2;
 function say(text,opt={}){const pages=[];const lines=wrap(text,436);for(let i=0;i<lines.length;i+=2)pages.push(lines.slice(i,i+2));
-  const w={pages,pi:0,ch:0,auto:opt.auto,t:0,speaker:opt.speaker,
-   update(){const pg=this.pages[this.pi];const total=pg.join('').length;
+  G.seenTxt=G.seenTxt||new Set();const seenB=G.seenTxt.has(text);G.seenTxt.add(text);
+  const w={pages,pi:0,ch:0,auto:opt.auto,t:0,speaker:opt.speaker,seenB,
+   update(){if(this.seenB&&held.a){this.ha=(this.ha||0)+1;if(this.ha>18){popUI(this);return;}}else this.ha=0;const pg=this.pages[this.pi];const total=pg.join('').length;
      if(this.ch<total){this.ch+=TEXTSPEED===3?99:TEXTSPEED;if(press('a')||press('b'))this.ch=total;return;}
      this.t++;
      if(press('a')||press('b')||(this.auto&&this.t>this.auto)){this.t=0;if(this.pi<this.pages.length-1){this.pi++;this.ch=0;Snd.sfx('blip');}else{popUI(this);}}},
-   draw(){panel(4,232,472,84);let left=this.ch;const pg=this.pages[this.pi];
+   draw(){if(typeof drawPortrait==='function')drawPortrait(this.speaker,this.pages[this.pi].join(' '));panel(4,232,472,84);let left=this.ch;const pg=this.pages[this.pi];
      if(this.speaker){ctx.font='18px '+FONT;const sw=measure(this.speaker,18)+16;panel(10,212,sw,28,'#283048');txt(this.speaker,18,232,'#ffe080',18,'left',null);}
      pg.forEach((l,i)=>{const s=l.slice(0,Math.max(0,left));left-=l.length;txt(s,22,264+i*28);});
      if(this.ch>=pg.join('').length&&!this.auto&&TICK%40<26){ctx.fillStyle='#e04040';ptri(ctx,[448,290,460,290,454,298],'#e04040');}}};

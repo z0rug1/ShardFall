@@ -79,6 +79,15 @@ The coast road west of Kilnhaven opens after Chapter 2.
   - Fast battle text, and storage sorting and filtering.
   - Healing at a cradle starts your next battle with 25% Overdrive.
 
+## Presentation and quality of life
+- Every bot has its own silhouette: evolved forms grow armour that matches their shard (flame crests, fins, wings, horns, halos, fists…), and each base frame gets a signature part.
+- Attack trails by type, a full evolution scene, close-up portraits for Overdrive, a circular wipe between maps, and portraits with expressions next to dialogue.
+- Fish shadows under the water, scrolling monitors, steam blown by the wind, taller indoor furniture, and windows that show the weather outside.
+- World map icons for Wardens (filled once beaten), caravans, secret areas you've found, and your goal.
+- Auto-save checkpoint before every Warden and boss, with a retry if you lose.
+- Quick item on Q or the ITEM button. A preview of the trainer's team before each fight. Type effectiveness shown for any bot you've seen. Use several healing items in a row.
+- Walk speed option, double-tap B to toggle running, a "Recently met" Bestiary list, hold A to skip dialogue you've already read, RESET ROOM in puzzle rooms, and save slots that show stars, bots linked and steps walked.
+
 ## Visuals
 - Soft cast shadows from trees, buildings, cliffs and wrecks. Shadow under walls and cliffs, and shadows that stretch away from street lamps.
 - Water that gets darker with depth, has foam along the shore, shimmers, and reflects lamps and anyone standing at the edge. Ice that glints, with spray when you stop sliding.

@@ -60,7 +60,7 @@ function openBag(inBattle){return pushUI({c:0,i:0,update(){const items=this.item
    panel(8,242,464,74);const it=items[this.i];if(it){wrap(ITEMS[it].d,430,20).slice(0,2).forEach((l,i)=>txt(l,24,270+i*24,'#303840',20));}
    }});}
 async function bagUse(it){const d=ITEMS[it];
-  if(d.cat==='med'){const t=await openParty({mode:'item',item:it});if(t==null||t<0)return;const b=G.party[t];if(!canUse(it,b)){await say('It won\'t have any effect.');return;}useItemOn(it,b);Snd.sfx('item');await say(BOTS[b.id].name+' was patched up.');}
+  if(d.cat==='med'){while(G.bag[it]>0){const t=await openParty({mode:'item',item:it});if(t==null||t<0)return;const b=G.party[t];if(!canUse(it,b)){await say('It won\'t have any effect.');continue;}useItemOn(it,b);Snd.sfx('item');await say(BOTS[b.id].name+' was patched up.'+(G.bag[it]>0?' ('+G.bag[it]+' left)':''));if(!G.bag[it]||!G.party.some(x=>canUse(it,x)))return;}}
   else if(d.cat==='spike')await say('Use Link Spikes in battle against feral bots.');
   else if(d.cat==='shard')await say('Fit shards from BOTS → Sockets once a bot reaches Lv 16. Refine 3 of a kind at any Repair Caravan Forge.');
   else if(d.cat==='mod')await say('Equip modules from BOTS → pick a bot → Module.');
@@ -132,11 +132,11 @@ function openWorldMap(){const towns=Object.keys(MAPS).filter(k=>MAPS[k].town&&G.
      if(towns.length){const t=MAPS[towns[this.i]];ctx.strokeStyle=TICK%20<10?'#ffe080':'#fff';ctx.lineWidth=2;ctx.strokeRect(ox+t.world.x*sc-2,oy+t.world.y*sc-2,t.grid[0].length*sc+4,t.grid.length*sc+4);}
      darkPanel(0,0,W,22);wtxt('CALDERRA — '+Math.floor(ex/tot*100)+'% explored',8,17,'#fff',20);
      darkPanel(0,H-24,W,24);wtxt(BT?'B: close':towns.length?'◀ ▶ town   A: warp to '+MAPS[towns[this.i]].name+'   B: close':'B: close',8,H-7,'#c0d0f0',18);
-     darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ below Rimefall',310,276,'#ff9060',16);}});}
+     if(typeof drawMapIcons==='function')drawMapIcons(sc,ox,oy);darkPanel(300,252,176,36);wtxt('Mt. Cinder ▲ below Rimefall',310,276,'#ff9060',16);}});}
 
 // ---------- start menu ----------
 async function startMenu(){G.busy=true;
-  while(true){const opts=['BOTS','BAG','PATCH ALL','BESTIARY','QUESTS','MAP','TYPES','CARD','SAVE','LOAD','OPTIONS','CLOSE'];
+  while(true){const opts=['BOTS','BAG','PATCH ALL','BESTIARY','QUESTS','MAP','TYPES','CARD','SAVE','LOAD',...(typeof isPuzzleRoom==='function'&&isPuzzleRoom()?['RESET ROOM']:[]),'OPTIONS','CLOSE'];
     const i=await choose(opts,{x:356,y:4});const k=opts[i];
     if(k==='BOTS'){if(!G.party.length){await say('You don\'t have any bots yet.');continue;}await openParty({});}
     else if(k==='BAG')await openBag(false);
@@ -148,6 +148,7 @@ async function startMenu(){G.busy=true;
     else if(k==='CARD')await pushUI(cardW());
     else if(k==='SAVE'){await saveMenu();}
     else if(k==='LOAD'){if(await loadMenu())break;}
+    else if(k==='RESET ROOM'){if(await resetRoom())break;}
     else if(k==='OPTIONS'){const r=await optionsMenu();if(r==='loaded')break;}
     else break;}
   G.busy=false;}
@@ -162,14 +163,14 @@ function fmtTime(t){const s=Math.floor(t/60);return Math.floor(s/3600)+':'+Strin
 async function optionsMenu(){let def=0;while(true){const skins=Object.keys(G.skins||{classic:1});
   const opts=['Text speed: '+['','Slow','Normal','Fast'][TEXTSPEED],'Battle speed: '+(G.bspeed||1)+'x','Battle animations: '+(G.skipFx?'Short':'Full'),'Running: '+(G.alwaysRun?'Always (B walks)':'Hold B'),
     'Music & sound: '+(Snd.on?'On':'Off'),'Minimap: '+(G.minimap?'On':'Off'),'Band skin: '+(G.skin||'classic'),'Phone buttons: '+(G.bigBtn?'Big':'Normal'),'Button opacity: '+Math.round((G.padOp||1)*100)+'%',
-    'Button layout: '+(G.lefty?'Left-handed':'Right-handed'),'Vibration: '+(G.haptic?'On':'Off'),'Visual effects: '+(G.fxq===0?'Low (faster)':G.fxq===1?'High':'Auto'+(G.autoLow?' (Low now)':'')),'Difficulty: '+(G.hard?'Hard':'Normal'),'Battle text: '+(G.fastText?'Fast':'Normal'),'Export save code','Import save code','Back'];
+    'Button layout: '+(G.lefty?'Left-handed':'Right-handed'),'Vibration: '+(G.haptic?'On':'Off'),'Visual effects: '+(G.fxq===0?'Low (faster)':G.fxq===1?'High':'Auto'+(G.autoLow?' (Low now)':'')),'Difficulty: '+(G.hard?'Hard':'Normal'),'Battle text: '+(G.fastText?'Fast':'Normal'),'Walk speed: '+(G.fastWalk?'Fast':'Normal'),'Export save code','Import save code','Back'];
   const i=await choose(opts,{x:150,y:2,def});def=Math.max(0,i);
   if(i===0)TEXTSPEED=TEXTSPEED%3+1;else if(i===1)G.bspeed=(G.bspeed||1)===1?2:1;else if(i===2)G.skipFx=!G.skipFx;else if(i===3)G.alwaysRun=!G.alwaysRun;
   else if(i===4)Snd.toggle();else if(i===5)G.minimap=!G.minimap;else if(i===6){const k=skins.indexOf(G.skin||'classic');G.skin=skins[(k+1)%skins.length];if(skins.length<2)await say('More skins unlock as you fill the Bestiary.');}
   else if(i===7)G.bigBtn=!G.bigBtn;else if(i===8){const v=[1,0.75,0.5,0.3];G.padOp=v[(v.indexOf(G.padOp||1)+1)%v.length];}else if(i===9)G.lefty=!G.lefty;else if(i===10)G.haptic=!G.haptic;else if(i===11){G.fxq=G.fxq===1?0:G.fxq===0?2:1;G.autoLow=0;}
-  else if(i===12){G.hard=!G.hard;if(G.hard)await say('HARD MODE: Wardens and trainers bring stronger teams and extra items, and there\'s no catch-up XP.');}else if(i===13)G.fastText=!G.fastText;
-  else if(i===14){if(!G.started){await say('Start or load a game first.');continue;}await saveCodeOverlay('export');}
-  else if(i===15){const d=await saveCodeOverlay('import');if(d){loadSave(d);savePrefs();applyPadPrefs();await say('Save code loaded!');return 'loaded';}}
+  else if(i===12){G.hard=!G.hard;if(G.hard)await say('HARD MODE: Wardens and trainers bring stronger teams and extra items, and there\'s no catch-up XP.');}else if(i===13)G.fastText=!G.fastText;else if(i===14)G.fastWalk=!G.fastWalk;
+  else if(i===15){if(!G.started){await say('Start or load a game first.');continue;}await saveCodeOverlay('export');}
+  else if(i===16){const d=await saveCodeOverlay('import');if(d){loadSave(d);savePrefs();applyPadPrefs();await say('Save code loaded!');return 'loaded';}}
   else{savePrefs();applyPadPrefs();return;}
   savePrefs();applyPadPrefs();}}
 
@@ -177,20 +178,20 @@ async function optionsMenu(){let def=0;while(true){const skins=Object.keys(G.ski
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}
 function serialize(){const ex={};for(const k in G.explored)ex[k]=Array.from(G.explored[k]).join('');
-  return JSON.stringify({v:1,layout:2,name:G.name,map:G.map,px:G.px,py:G.py,pdir:G.pdir,party:G.party,storage:G.storage,bag:G.bag,money:G.money,flags:G.flags,seen:G.seen,caught:G.caught,explored:ex,time:G.time,lastHeal:G.lastHeal,visited:G.visited,starter:G.starter,rival:G.rival,minimap:G.minimap,ts:TEXTSPEED,lastOut:G.lastOut,quests:G.quests||{},skins:G.skins||{classic:1},glitchCaught:G.glitchCaught||0,thaw:G.thaw||{},rep:G.rep,kael:G.kael||0,scan:G.scan||{},ws:G.ws,display:G.display,vault:G.vault,vaultRuns:G.vaultRuns||[],vaultBest:G.vaultBest||0,logs:G.logs||{},jobs:G.jobs||[],hard:!!G.hard,fastText:!!G.fastText,shrine:G.shrine||null,ending:G.ending||null,tuned:!!G.tuned,rigNext:G.rigNext||0});}
+  return JSON.stringify({v:1,layout:2,name:G.name,map:G.map,px:G.px,py:G.py,pdir:G.pdir,party:G.party,storage:G.storage,bag:G.bag,money:G.money,flags:G.flags,seen:G.seen,caught:G.caught,explored:ex,time:G.time,lastHeal:G.lastHeal,visited:G.visited,starter:G.starter,rival:G.rival,minimap:G.minimap,ts:TEXTSPEED,lastOut:G.lastOut,quests:G.quests||{},skins:G.skins||{classic:1},glitchCaught:G.glitchCaught||0,thaw:G.thaw||{},rep:G.rep,kael:G.kael||0,scan:G.scan||{},ws:G.ws,display:G.display,vault:G.vault,vaultRuns:G.vaultRuns||[],vaultBest:G.vaultBest||0,logs:G.logs||{},recent:G.recent||[],steps:G.steps||0,fastWalk:!!G.fastWalk,quick:G.quick||null,jobs:G.jobs||[],hard:!!G.hard,fastText:!!G.fastText,shrine:G.shrine||null,ending:G.ending||null,tuned:!!G.tuned,rigNext:G.rigNext||0});}
 function slotInfo(i){const s=lsGet('shardfall_slot'+i)||lsGet('wildbound_slot'+i);if(!s)return null;try{return JSON.parse(s);}catch(e){return null;}}
 async function loadMenu(){let auto=null;try{auto=JSON.parse(lsGet('shardfall_auto')||'null');}catch(e){}
-  const slots=[];if(auto)slots.push(['Autosave: '+auto.name+' · '+(MAPS[auto.map]?MAPS[auto.map].name:'?')+' · '+fmtTime(auto.time),auto]);
-  [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'?')+' · '+fmtTime(s.time):'— empty —'),s]);});
+  const slots=[];if(auto)slots.push(['Autosave: '+slotLabel(auto),auto]);
+  [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?slotLabel(s):'— empty —'),s]);});
   const i=await choose(slots.map(x=>x[0]).concat(['Cancel']),{x:30,y:40});const d=i>=0&&i<slots.length?slots[i][1]:null;if(!d){if(i>=0&&i<slots.length)await say('That slot is empty.');return false;}
   if((await ask('Load this save? Progress since your last save will be lost.',['Load','Cancel']))!==0)return false;
   G.fade=1;loadSave(d);Snd.sfx('ok');await say('Save loaded!');return true;}
-async function saveMenu(){const opts=[0,1,2].map(i=>{const s=slotInfo(i);return 'Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'')+' · '+fmtTime(s.time):'— empty —');});opts.push('Cancel');
+async function saveMenu(){const opts=[0,1,2].map(i=>{const s=slotInfo(i);return 'Slot '+(i+1)+': '+(s?slotLabel(s):'— empty —');});opts.push('Cancel');
   const i=await choose(opts,{x:40,y:40});if(i<0||i>2)return;if(slotInfo(i)){const c=await ask('Overwrite slot '+(i+1)+'?');if(c!==0)return;}
   if(lsSet('shardfall_slot'+i,serialize())){Snd.sfx('item');await say('Game saved to slot '+(i+1)+'!');}else await say('Saving isn\'t available in this browser.');}
 const LAYOUT2=['ashgrove','route1','brasston','route2','voltmere','house_a','house_a2','house_b1','house_b2','house_v1','house_v2','repair_b','repair_v','repair_f','repair_k','lab','workshop'];
 function loadSave(d){G.name=d.name;G.party=d.party;G.storage=d.storage||[];G.bag=d.bag;G.money=d.money;G.flags=d.flags;G.seen=d.seen;G.caught=d.caught;G.time=d.time||0;G.lastHeal=d.lastHeal;G.visited=d.visited||{};G.starter=d.starter;G.rival=d.rival;G.minimap=d.minimap!==false;TEXTSPEED=d.ts||TEXTSPEED;G.lastOut=d.lastOut;G.quests=d.quests||{};G.skins=d.skins||{classic:1};G.glitchCaught=d.glitchCaught||0;BT=null;UI.length=0;G.busy=false;
-  G.thaw=d.thaw||{};G.rep=d.rep||{w:0,c:0};G.kael=d.kael||0;G.scan=d.scan||{};G.ws=d.ws;G.display=d.display;G.vault=d.vault||null;G.vaultRuns=d.vaultRuns||[];G.vaultBest=d.vaultBest||0;G.logs=d.logs||{};G.jobs=d.jobs||[];G.hard=!!d.hard;G.fastText=!!d.fastText;G.shrine=d.shrine||null;G.ending=d.ending||null;G.tuned=!!d.tuned;G.rigNext=d.rigNext||0;
+  G.thaw=d.thaw||{};G.rep=d.rep||{w:0,c:0};G.kael=d.kael||0;G.scan=d.scan||{};G.ws=d.ws;G.display=d.display;G.vault=d.vault||null;G.vaultRuns=d.vaultRuns||[];G.vaultBest=d.vaultBest||0;G.logs=d.logs||{};G.recent=d.recent||[];G.steps=d.steps||0;G.fastWalk=!!d.fastWalk;G.quick=d.quick||null;G.jobs=d.jobs||[];G.hard=!!d.hard;G.fastText=!!d.fastText;G.shrine=d.shrine||null;G.ending=d.ending||null;G.tuned=!!d.tuned;G.rigNext=d.rigNext||0;
   if(G.flags.badge1){G.thaw.brasston=1;G.thaw.route1=1;}if(G.flags.badge2){G.thaw.voltmere=1;G.thaw.route2=1;G.thaw.ashgrove=1;}if(G.flags.kael1)G.flags.workshop=1;
   if(d.map==='vault'){if(G.vault)MAPS.vault=genVault(G.vault.floor,G.vault.seed);else{d.map='workshop';d.px=6;d.py=8;}}
   G.explored={};for(const k in d.explored){if(!MAPS[k])continue;const a=exploredArr(k);const s=d.explored[k];for(let i=0;i<a.length&&i<s.length;i++)a[i]=s[i]==='1'?1:0;}

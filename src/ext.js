@@ -233,5 +233,5 @@ openStorage=async function(){G.busy=true;await say('Booted up the storage termin
 {const _wc=workshopConsole;workshopConsole=async function(){const i=await ask('WORKSHOP',['Upgrades & decor','Bot jobs','Paint booth','Log off']);if(i===0)return _wc();if(i===1)return jobsMenu();if(i===2)return paintBooth();};MAPS.workshop.tileScripts['1,1']=()=>workshopConsole();}
 
 // ---------- draw/update hooks ----------
-{const _dr=draw;draw=function(){_dr();if(BT){drawPlates();}else if(G.started&&!UI.some(u=>u.isTitle)){const c=camera();drawBotTalk(c.cx,c.cy);drawTracker();}drawTip();};}
+{const _dr=draw;draw=function(){_dr();if(BT){drawPlates();}else if(G.started&&!UI.length){const c=camera();drawBotTalk(c.cx,c.cy);drawTracker();}drawTip();};}
 {const _up=update;update=function(){_up();botTalkTick();};}

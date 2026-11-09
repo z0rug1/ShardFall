@@ -11,7 +11,7 @@ function linkType(a,c){if(!a||!c)return null;const s=allTypes(a).filter(t=>allTy
 const HEATW={blizzard:0.75,static:1.1,night:0.9,clear:1,clearnight:0.9,clearstatic:1.1};
 function heatCost(b,mid){const m=MOVES[mid];const t=moveType(b,mid);if(t==='Frost')return 0;let h=m.p?Math.round(m.p/4)+4:8;if(t==='Flame')h*=1.4;if(t==='Tide')h*=0.8;h*=(HEATW[BT&&BT.wx]||1)*partHeat(b);return Math.round(h);}
 function knownMoves(b){return b.moves.map(m=>m.id).concat(partMoves(b));}
-function researched(id){return (G.scan&&G.scan[id]||0)>=1||G.caught[id];}
+function researched(id){return (G.scan&&G.scan[id]||0)>=1||G.caught[id]||(G.seen&&G.seen[id]);}
 function bname(side){const b=cur(side);return (side==='e'?(BT.wild?'The feral ':'Foe '):'')+BOTS[b.id].name;}
 function typeBadges(types,x,y,small){let cx=x;for(const t of types){ctx.font=(small?16:19)+'px '+FONT;const w=Math.max(small?44:58,ctx.measureText(t.toUpperCase()).width+12);ctx.fillStyle=TCOL[t];rr(cx,y,w,small?16:20,4);ctx.fill();ctx.fillStyle='rgba(0,0,0,.25)';rr(cx,y+(small?11:14),w,small?5:6,3);ctx.fill();txt(t.toUpperCase(),cx+w/2,y+(small?13:16),'#fff',small?16:19,'center','rgba(0,0,0,.5)');cx+=w+4;}}
 function hpBar(x,y,w,cur_,max){const r=clamp(cur_/max,0,1);R(ctx,x,y,w,8,'#30343c');R(ctx,x+1,y+1,w-2,6,'#585c64');ctx.fillStyle=r>0.5?'#48d058':r>0.2?'#f0c030':'#e84040';ctx.fillRect(x+1,y+1,Math.round((w-2)*r),6);ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(x+1,y+1,Math.round((w-2)*r),2);}

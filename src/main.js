@@ -57,7 +57,7 @@ function startMove(nx,ny,forced,belt){const ox=G.px,oy=G.py;G.mv={fx:G.px,fy:G.p
 function stepPlayer(dir){return new Promise(res=>{if(!tryMove(dir,true)){res();return;}G.mv.res=res;});}
 function walkNPC(n,dir,steps){return new Promise(async res=>{for(let i=0;i<steps;i++){n.dir=dir;const [dx,dy]=DIRS[dir];const nx=n.x+dx,ny=n.y+dy;
     if(tileSolid(T(nx,ny))||(G.px===nx&&G.py===ny))break;await new Promise(r=>{n.mv={fx:n.x,fy:n.y,tx:nx,ty:ny,p:0,res:r};});}res();});}
-function updateMovers(){const running=G.alwaysRun?!held.b:held.b;const spd=running&&!G.busy?1/8:1/16;
+function updateMovers(){const running=G.alwaysRun?!held.b:held.b;const spd=(running&&!G.busy?1/8:1/16)*(G.fastWalk?1.5:1);
   if(G.mv){G.mv.p+=G.mv.belt==='slide'?1/5:G.mv.belt?1/7:G.mv.forced?1/14:(T(G.mv.tx,G.mv.ty)==='d'?spd*0.45:spd);if(G.mv.p>=1){const r=G.mv.res,f=G.mv.forced,bl=G.mv.belt;G.mv=null;if(r)r();if(!f||bl)onStep();}}
   for(const n of G.npcs){if(n.mv){n.mv.p+=1/14;if(n.mv.p>=1){n.x=n.mv.tx;n.y=n.mv.ty;const r=n.mv.res;n.mv=null;if(r)r();}}
     else if(n.wander&&!G.busy&&!UI.length&&npcVisible(n)){if(--n.wt<=0){n.wt=90+rnd(150);const d=pick(Object.keys(DIRS));const [dx,dy]=DIRS[d];const nx=n.x+dx,ny=n.y+dy;n.dir=d;
@@ -151,7 +151,7 @@ function drawOverworld(){const m=curMap();const th=m.theme==='out'&&thawed(G.map
   if(m.decor)drawWorkshopDecor(cx,cy);
   drawUnderFX(cx,cy);drawWorldReflections(cx,cy);drawSurfaceFX(cx,cy);drawShoreFoam(cx,cy);if(typeof drawTideFX==='function')drawTideFX(cx,cy);
   for(let y=y0;y<=y0+H/TS+1;y++)for(let x=x0;x<=x0+W/TS+1;x++){if(T(x,y)!=='V')continue;const sx=x*TS-cx,sy=y*TS-cy;
-    if(ventActive(x,y)){const ph=ventPhase(x,y);for(let i=0;i<6;i++){const t=((ph*2+i*14)%60)/60;ctx.fillStyle='rgba(245,248,252,'+(0.75*(1-t))+')';ctx.beginPath();ctx.arc(sx+16+Math.sin(i*2+ph/6)*5,sy+16-t*44,6+t*10,0,7);ctx.fill();}}
+    if(ventActive(x,y)){const ph=ventPhase(x,y);for(let i=0;i<6;i++){const t=((ph*2+i*14)%60)/60;ctx.fillStyle='rgba(245,248,252,'+(0.75*(1-t))+')';ctx.beginPath();ctx.arc(sx+16+Math.sin(i*2+ph/6)*5+t*((curWeather().wind||0)*24+6),sy+16-t*44,6+t*10,0,7);ctx.fill();}}
     else if(ventWarn(x,y)){ctx.fillStyle='rgba(255,120,40,'+(0.3+0.3*Math.sin(TICK/2))+')';ctx.fillRect(sx+4,sy+4,24,24);}}
   // conduits
   if(G.cond){const mc=m.conduits;for(const c of G.cond.cells){const sx=c.x*TS-cx,sy=c.y*TS-cy;const lit=G.cond.lit.has(c);ctx.fillStyle='#2a3240';ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
@@ -239,7 +239,7 @@ function update(){if(FS.need&&!FS.ok){clearPressed();return;}TICK++;tickInput();
 function draw(){ctx.setTransform(RS,0,0,RS,0,0);ctx.imageSmoothingEnabled=false;if(BT)drawBattle();else if(G.started)drawOverworld();else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);}
   if(G.started&&!BT&&typeof drawEscape==='function')drawEscape();
   for(const u of UI)u.draw();
-  if(G.fade>0){ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}
+  if(G.fade>0){if(G.inWarp&&!BT&&G.started){const c=camera();const px=c.px-c.cx+16,py=c.py-c.cy+12;const R_=Math.hypot(W,H)*(1-G.fade);ctx.fillStyle='#000';ctx.beginPath();ctx.rect(0,0,W,H);ctx.moveTo(px+Math.max(0,R_),py);ctx.arc(px,py,Math.max(0,R_),0,Math.PI*2,true);ctx.fill('evenodd');}else{ctx.fillStyle='rgba(0,0,0,'+G.fade+')';ctx.fillRect(0,0,W,H);}}
   if(G.flashOW>0){ctx.fillStyle='rgba(255,255,255,'+(G.flashOW/8)+')';ctx.fillRect(0,0,W,H);}
   if(G.errToast&&G.errToast.t>0){G.errToast.t--;darkPanel(8,H-40,W-16,32);wtxt(G.errToast.msg,16,H-18,'#ffb0a0',16);}}
 let last=performance.now(),acc=0;
@@ -262,8 +262,8 @@ async function boot(){loadPrefs();setupTouch();setupFS();try{await Promise.race(
   requestAnimationFrame(loopFrame);
   while(true){Snd.music('title');const t=titleW();t.isTitle=1;const r=await pushUI(t);
     if(r==='Continue'){let auto=null;try{auto=JSON.parse(lsGet('shardfall_auto')||'null');}catch(e){}
-      const slots=[];if(auto)slots.push(['Autosave: '+auto.name+' · '+(MAPS[auto.map]?MAPS[auto.map].name:'?')+' · '+fmtTime(auto.time),auto]);
-      [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?s.name+' · '+(MAPS[s.map]?MAPS[s.map].name:'?')+' · '+fmtTime(s.time):'— empty —'),s]);});
+      const slots=[];if(auto)slots.push(['Autosave: '+slotLabel(auto),auto]);
+      [0,1,2].forEach(i=>{const s=slotInfo(i);slots.push(['Slot '+(i+1)+': '+(s?slotLabel(s):'— empty —'),s]);});
       const i=await choose(slots.map(x=>x[0]).concat(['Back']),{x:30,y:50});const s=i>=0&&i<slots.length?slots[i][1]:null;if(!s)continue;G.started=true;loadSave(s);G.fade=1;break;}
     else{await pushUI(storyW(['Calderra. A peninsula of ash and ice, built on the bones of the Makers.','The Makers vanished. Their machines did not: shardbots, robots that run on elemental crystals called shards.','Every shardbot drinks from one source, the HEARTFORGE, buried under Mt. Cinder.','Lately it stutters. Bots go feral. Winter forgets to end.','You are a salvager. You fix what the Makers left behind.','What is your name?']));
       G.name=await nameEntry();
